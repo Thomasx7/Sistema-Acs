@@ -1,0 +1,116 @@
+.cards {
+    padding: 24px 0;
+}
+
+.cards .card-top {
+    margin-bottom: 24px;
+}
+
+.cards .card-top h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--azul-secundario);
+}
+
+.cards .card-top p {
+    margin-top: 4px;
+    font-size: 0.93rem;
+    color: var(--azul-terciario);
+}
+
+.cards .card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Cabem quantos cards couberem na linha (mínimo 220px cada) */
+    gap: 20px;
+}
+
+.cards .card-quiz {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 230px;
+    padding: 24px 20px 18px;
+    overflow: hidden;
+    border: 1px solid rgba(9, 52, 171, 0.1);
+    border-radius: 16px;
+    background: var(--branco);
+    box-shadow: 0 4px 14px rgba(5, 35, 115, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Faixa de cor no topo do card */
+.cards .card-quiz::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--cor-card);
+}
+
+.cards .card-quiz:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(5, 35, 115, 0.12);
+}
+
+.cards .card-quiz h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cor-card);
+}
+
+.cards .card-quiz p {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #4a5578;
+}
+
+.cards .card-quiz-botao {
+    align-self: flex-end;
+    margin-top: auto;
+    /* empurra o botão para o fim do card */
+    padding: 9px 18px;
+    border-radius: 10px;
+    background: var(--cor-card);
+    color: var(--branco);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: filter 0.2s ease;
+}
+
+.cards .card-quiz-botao:hover {
+    filter: brightness(0.88);
+}
+
+.cards .card-quiz-botao:focus-visible {
+    outline: 2px solid var(--cor-card);
+    outline-offset: 3px;
+}
+
+
+.cards .card-lgpd {
+    --cor-card: var(--cor-lgpd);
+}
+
+.cards .card-letramento {
+    --cor-card: var(--cor-letramento);
+}
+
+.cards .card-seguranca {
+    --cor-card: var(--cor-seguranca);
+}
+
+.cards .card-saude {
+    --cor-card: var(--cor-saude);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .cards .card-quiz,
+    .cards .card-quiz-botao {
+        transition: none;
+    }
+}

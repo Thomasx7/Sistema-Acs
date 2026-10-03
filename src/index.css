@@ -1,9 +1,33 @@
 :root {
   --azul: #052373;
   --azul-secundario: #0934AB;
+  --azul-terciario: rgba(5, 35, 115, 0.7);
   --branco: #FFFFFF;
   --branco-gelo: #E0ECFF;
+
+  --cor-lgpd: #6C4FE0;        /* violeta */
+  --cor-letramento: #0A8579;  /* verde-água */
+  --cor-seguranca: #B45F06;   /* âmbar escuro */
+  --cor-saude: #D6336C;       /* rosa */
+
+  /* Superfícies e texto */
+  --fundo: #F3F6FC;          /* fundo da área principal */
+  --superficie: #FFFFFF;     /* cards, menus */
+  --borda: #E3E9F5;
+  --texto: #1E2A55;
+  --texto-suave: #66719A;
+
+  /* Azul de apoio (gradientes) */
+  --azul-claro: #3A66F0;
+
+  /* Sombras */
+  --sombra-card: 0 1px 3px rgba(5, 35, 115, 0.05), 0 10px 30px rgba(5, 35, 115, 0.07);
+  --sombra-card-hover: 0 2px 6px rgba(5, 35, 115, 0.06), 0 18px 40px rgba(5, 35, 115, 0.12);
+
+
 }
+
+
 
 *{
   margin: 0; 

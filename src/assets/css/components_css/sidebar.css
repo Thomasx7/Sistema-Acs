@@ -91,6 +91,7 @@
     gap: 14px;
     height: 46px;
     padding: 0 14px;
+    border: 1px solid transparent;
     border-radius: 10px;
     background: transparent;
     color: rgba(224, 236, 255, 0.8);
@@ -98,7 +99,7 @@
     font-weight: 500;
     text-decoration: none;
     white-space: nowrap;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .sidebar nav a img {
@@ -110,12 +111,14 @@
 
 .sidebar nav a:hover {
     background: rgba(224, 236, 255, 0.1);
+    border-color: rgba(224, 236, 255, 0.25);
     color: var(--branco);
 }
 
 /* Página atual */
 .sidebar nav a.active {
     background: var(--azul-secundario);
+    border-color: rgba(224, 236, 255, 0.55);
     color: var(--branco);
     font-weight: 600;
     box-shadow: 0 6px 16px rgba(9, 52, 171, 0.45);

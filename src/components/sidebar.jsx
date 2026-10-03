@@ -33,10 +33,11 @@ function Sidebar() {
                 <ul>
                 <li>
                     <NavLink
-                    to="/"
+                    to="/painel"
                     end
                     className={({ isActive }) => (isActive ? "active" : "")}
                     >
+                    
                     <img src={homeIcon} alt="" />
                     <span>Início</span>
                     </NavLink>
@@ -44,7 +45,7 @@ function Sidebar() {
 
                 <li>
                     <NavLink
-                    to="/quiz"
+                    to="quiz"
                     className={({ isActive }) => (isActive ? "active" : "")}
                     >
                     <img src={quizIcon} alt="" />
@@ -54,7 +55,7 @@ function Sidebar() {
 
                 <li>
                     <NavLink
-                    to="/biblioteca"
+                    to="biblioteca"
                     className={({ isActive }) => (isActive ? "active" : "")}
                     >
                     <img src={bibliotecaIcon} alt="" />
@@ -64,7 +65,7 @@ function Sidebar() {
 
                 <li>
                     <NavLink
-                    to="/progresso"
+                    to="progresso"
                     className={({ isActive }) => (isActive ? "active" : "")}
                     >
                     <img src={progressoIcon} alt="" />
