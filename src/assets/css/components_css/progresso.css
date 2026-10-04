@@ -1,0 +1,81 @@
+.progresso {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.progresso .progresso-top h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--azul);
+}
+
+.progresso .progresso-top p {
+    margin-top: 4px;
+    font-size: 0.93rem;
+    color: var(--texto-suave);
+}
+
+.progresso .progresso-resumo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.progresso .resumo-card {
+    padding: 18px 20px;
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+    background: var(--superficie);
+    box-shadow: var(--sombra-card);
+}
+
+/* Bolinha de cor antes do rótulo */
+.progresso .resumo-card span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--texto-suave);
+}
+
+.progresso .resumo-card span::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ponto);
+}
+
+.progresso .resumo-card strong {
+    display: block;
+    margin-top: 8px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--azul);
+}
+
+.progresso .resumo-card small {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+}
+
+.progresso .resumo-geral {
+    --ponto: var(--azul-secundario);
+}
+
+.progresso .resumo-ok {
+    --ponto: #1f9d55;
+}
+
+.progresso .resumo-andamento {
+    --ponto: #b45f06;
+}
+
+.progresso .resumo-novo {
+    --ponto: #9aa5c4;
+}

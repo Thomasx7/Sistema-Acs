@@ -1,3 +1,4 @@
+
 .historico {
     container-type: inline-size;
     padding: 24px;
@@ -6,8 +7,6 @@
     background: var(--superficie);
     box-shadow: var(--sombra-card);
 }
-
-/*  Topo  */
 
 .historico .historico-top {
     margin-bottom: 20px;
@@ -24,8 +23,6 @@
     font-size: 0.9rem;
     color: var(--texto-suave);
 }
-
-/*  Lista  */
 
 .historico .historico-lista {
     display: flex;
@@ -55,6 +52,7 @@
     box-shadow: 0 6px 16px color-mix(in srgb, var(--cor-card) 12%, transparent);
 }
 
+/* Linha (versão larga: tudo em uma fileira) */
 @container (min-width: 700px) {
     .historico .historico-item {
         grid-template-columns: 44px minmax(0, 1.4fr) minmax(140px, 1fr) auto auto;
@@ -62,7 +60,6 @@
     }
 }
 
-/*  Partes da linha  */
 .historico .historico-icone {
     grid-area: icone;
     display: grid;
@@ -173,7 +170,7 @@
     outline-offset: 3px;
 }
 
-/* - Estado vazio */
+/* ---------- Estado vazio ---------- */
 
 .historico .historico-vazio {
     padding: 28px 20px;
@@ -185,7 +182,8 @@
     text-align: center;
 }
 
-/* Cor de cada quiz (valores no :root do index.css)  */
+/* ---------- Cor de cada quiz (valores no :root do index.css) ---------- */
+
 .historico .card-lgpd {
     --cor-card: var(--cor-lgpd);
 }
@@ -209,4 +207,10 @@
     .historico .historico-botao {
         transition: none;
     }
+}
+
+/* Selo "Não iniciado" (usado na página Progresso) */
+.historico .status-novo {
+    background: #e8edf8;
+    color: var(--texto-suave);
 }

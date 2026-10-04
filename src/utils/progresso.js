@@ -1,4 +1,4 @@
-// Guarda o andamento dos quizzes no navegador (localStorage).
+// TODO Guarda o andamento dos quizzes no navegador (localStorage).
 const CHAVE = "acs-historico-quiz";
 
 // Devolve a lista: [{ id, status, progresso, atualizadoEm }]
