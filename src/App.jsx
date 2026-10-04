@@ -2,11 +2,11 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Auth/login";
 
-import PainelLayout from "./layouts/PainelLayout"; 
-import Home from "./pages/Home/home";             
-import Quiz from "./pages/Home/quiz";     
+import PainelLayout from "./layouts/PainelLayout";
+import Home from "./pages/Home/home";
+import Quiz from "./pages/Home/quiz";
 import Biblioteca from "./pages/Home/biblioteca";
-import Progresso from "./pages/Home/progresso";        
+import Progresso from "./pages/Home/progresso";
 
 function App() {
   return (
@@ -15,19 +15,17 @@ function App() {
       {/* Auth */}
       <Route path="/login" element={<Login />} />
 
-
-      {/* Rota Pai */}
-      <Route path="/painel" element={<PainelLayout />}>
-      
+      {/* Rota Pai: painel na raiz */}
+      <Route path="/" element={<PainelLayout />}>
         <Route index element={<Home />} />
+        <Route path="quiz" element={<Quiz />} />
         <Route path="quiz/:id" element={<Quiz />} />
         <Route path="biblioteca" element={<Biblioteca />} />
         <Route path="progresso" element={<Progresso />} />
-        
-      </Route> 
+      </Route>
 
-      
-      <Route path="*" element={<Navigate to="/painel" />} />
+      {/* Qualquer endereço desconhecido volta para o início */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

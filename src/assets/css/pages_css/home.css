@@ -1,7 +1,13 @@
+
+.home-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
 .boas-vindas {
     position: relative;
     overflow: hidden;
-    margin-bottom: 32px;
     padding: 32px 36px;
     border-radius: 20px;
     background: linear-gradient(120deg, var(--azul) 0%, var(--azul-secundario) 55%, var(--azul-claro) 100%);
@@ -16,22 +22,11 @@
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.08);
 }
+
 .boas-vindas::before { width: 220px; height: 220px; top: -80px; right: -40px; }
 .boas-vindas::after  { width: 140px; height: 140px; bottom: -60px; right: 150px; background: rgba(255, 255, 255, 0.06); }
 
 .boas-vindas > * { position: relative; z-index: 1; }
 
 .boas-vindas h1 { font-size: 1.8rem; font-weight: 600; color: var(--branco); }
-.boas-vindas p  { margin-top: 6px; max-width: 52ch; color: rgba(224, 236, 255, 0.88); }
-
-p{
-    margin-top: 2px;
-    font-size: 0.93rem;
-    color: var(--azul-terciario);
-}
-
-.fundo{
-    background-color: #dce7f7;
-    padding: 20px;
-    border-radius: 16px;
-}
+.boas-vindas p  { margin-top: 6px; max-width: 52ch; font-size: 0.95rem; color: rgba(224, 236, 255, 0.88); }

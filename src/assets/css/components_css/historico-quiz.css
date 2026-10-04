@@ -1,0 +1,212 @@
+.historico {
+    container-type: inline-size;
+    padding: 24px;
+    border: 1px solid var(--borda);
+    border-radius: 18px;
+    background: var(--superficie);
+    box-shadow: var(--sombra-card);
+}
+
+/*  Topo  */
+
+.historico .historico-top {
+    margin-bottom: 20px;
+}
+
+.historico .historico-top h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--azul);
+}
+
+.historico .historico-top p {
+    margin-top: 4px;
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+}
+
+/*  Lista  */
+
+.historico .historico-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    list-style: none;
+}
+
+.historico .historico-item {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-areas:
+        "icone info status"
+        "barra barra barra"
+        "botao botao botao";
+    align-items: center;
+    gap: 12px 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+    background: var(--fundo);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.historico .historico-item:hover {
+    border-color: color-mix(in srgb, var(--cor-card) 40%, var(--borda));
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--cor-card) 12%, transparent);
+}
+
+@container (min-width: 700px) {
+    .historico .historico-item {
+        grid-template-columns: 44px minmax(0, 1.4fr) minmax(140px, 1fr) auto auto;
+        grid-template-areas: "icone info barra status botao";
+    }
+}
+
+/*  Partes da linha  */
+.historico .historico-icone {
+    grid-area: icone;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--cor-card) 14%, #fff);
+    color: var(--cor-card);
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.historico .historico-info {
+    grid-area: info;
+    min-width: 0;
+}
+
+.historico .historico-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--texto);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.historico .historico-info span {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+}
+
+/* Barra de progresso */
+.historico .historico-progresso {
+    grid-area: barra;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.historico .historico-barra {
+    flex: 1;
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--borda);
+}
+
+.historico .historico-barra-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--cor-card);
+    transition: width 0.3s ease;
+}
+
+.historico .historico-progresso span {
+    min-width: 36px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+    text-align: right;
+}
+
+/* Selo de status */
+.historico .historico-status {
+    grid-area: status;
+    justify-self: end;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.historico .status-andamento {
+    background: #fff4e0;
+    color: #b45f06;
+}
+
+.historico .status-concluido {
+    background: #e3f6ec;
+    color: #17803d;
+}
+
+/* Botão secundário (contorno) */
+.historico .historico-botao {
+    grid-area: botao;
+    justify-self: end;
+    padding: 9px 16px;
+    border: 1px solid var(--cor-card);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--cor-card);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.historico .historico-botao:hover {
+    background: var(--cor-card);
+    color: var(--branco);
+}
+
+.historico .historico-botao:focus-visible {
+    outline: 2px solid var(--cor-card);
+    outline-offset: 3px;
+}
+
+/* - Estado vazio */
+
+.historico .historico-vazio {
+    padding: 28px 20px;
+    border: 1px dashed var(--borda);
+    border-radius: 14px;
+    background: var(--fundo);
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Cor de cada quiz (valores no :root do index.css)  */
+.historico .card-lgpd {
+    --cor-card: var(--cor-lgpd);
+}
+
+.historico .card-letramento {
+    --cor-card: var(--cor-letramento);
+}
+
+.historico .card-seguranca {
+    --cor-card: var(--cor-seguranca);
+}
+
+.historico .card-saude {
+    --cor-card: var(--cor-saude);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .historico .historico-item,
+    .historico .historico-barra-fill,
+    .historico .historico-botao {
+        transition: none;
+    }
+}
