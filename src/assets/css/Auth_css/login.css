@@ -9,12 +9,42 @@ body {
 
 /* Fundo da página inteira */
 .login-page {
+  position: relative;
+  overflow: hidden;
   min-height: 100vh;
   background-color: #e0ecff;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
+}
+
+/* Gradiente com animação */
+
+.login-page::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(5, 35, 115, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.25) 0%, transparent 42%),
+    radial-gradient(circle at 70% 80%, rgba(5, 35, 115, 0.22) 0%, transparent 45%),
+    radial-gradient(circle at 25% 80%, rgba(147, 197, 253, 0.5) 0%, transparent 45%),
+    #e0ecff;
+  animation: aurora 8s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes aurora {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(15deg) scale(1.2);
+  }
+  100% {
+    transform: rotate(-12deg) scale(1.08);
+  }
 }
 
 /* Card branco que segura os dois lados */
@@ -28,6 +58,22 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   box-shadow: 0 8px 80px rgba(5, 35, 115, 0.35);
+  position: relative;
+  z-index: 1;
+  animation: card-entrada 1.0s ease-out both;
+}
+
+/* Animação do card de entrada */
+
+@keyframes card-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Lado esquerdo: quadrado azul com cantos arredondados */
@@ -50,6 +96,32 @@ body {
   max-width: 340px;
   display: flex;
   flex-direction: column;
+}
+
+/* Animação formulario */
+
+.login-form > * {
+  animation: item-entrada 0.6s ease-out both;
+}
+
+.login-form > :nth-child(1) { animation-delay: 0.4s; }
+.login-form > :nth-child(2) { animation-delay: 0.5s; }
+.login-form > :nth-child(3),
+.login-form > :nth-child(4) { animation-delay: 0.6s; }
+.login-form > :nth-child(5),
+.login-form > :nth-child(6) { animation-delay: 0.7s; }
+.login-form > :nth-child(7) { animation-delay: 0.8s; }
+.login-form > :nth-child(8) { animation-delay: 0.9s; }
+
+@keyframes item-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .login-form h1 {
@@ -163,3 +235,20 @@ body {
     display: none;
   }
 }
+
+
+
+/* ACESSIBILIDADE: desliga as animações para quem pediu menos movimento no sistema */
+@media (prefers-reduced-motion: reduce) {
+  /* Fundo animado (aurora) */
+  .login-page::before {
+    animation: none;
+  }
+
+  /* Entrada do card e dos itens do formulário */
+  .login-card,
+  .login-form > * {
+    animation: none;
+  }
+}
+
