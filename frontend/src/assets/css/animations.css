@@ -18,6 +18,13 @@
     animation: anim-slide-in-top 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.anim-stagger,
+.anim-stagger-fade {
+    --anim-stagger: 70ms;
+    --anim-max-delay: 560ms;
+    --anim-base-delay: 0ms;
+}
+
 .anim-stagger > *,
 .anim-stagger-fade > * {
     animation-duration: 420ms;
@@ -30,30 +37,58 @@
 }
 
 .anim-stagger-fade > * {
-    animation-name: anim-fade-in;
+    animation-name: anim-fade-up;
 }
 
 .anim-stagger > :nth-child(1),
-.anim-stagger-fade > :nth-child(1) { animation-delay: 0ms; }
+.anim-stagger-fade > :nth-child(1) {
+    animation-delay: min(var(--anim-base-delay), var(--anim-max-delay));
+}
+
 .anim-stagger > :nth-child(2),
-.anim-stagger-fade > :nth-child(2) { animation-delay: 70ms; }
+.anim-stagger-fade > :nth-child(2) {
+    animation-delay: min(calc(var(--anim-base-delay) + var(--anim-stagger)), var(--anim-max-delay));
+}
+
 .anim-stagger > :nth-child(3),
-.anim-stagger-fade > :nth-child(3) { animation-delay: 140ms; }
+.anim-stagger-fade > :nth-child(3) {
+    animation-delay: min(calc(var(--anim-base-delay) + var(--anim-stagger) + var(--anim-stagger)), var(--anim-max-delay));
+}
+
 .anim-stagger > :nth-child(4),
-.anim-stagger-fade > :nth-child(4) { animation-delay: 210ms; }
+.anim-stagger-fade > :nth-child(4) {
+    animation-delay: min(calc(var(--anim-base-delay) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger)), var(--anim-max-delay));
+}
+
 .anim-stagger > :nth-child(5),
-.anim-stagger-fade > :nth-child(5) { animation-delay: 280ms; }
+.anim-stagger-fade > :nth-child(5) {
+    animation-delay: min(calc(var(--anim-base-delay) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger)), var(--anim-max-delay));
+}
+
 .anim-stagger > :nth-child(6),
-.anim-stagger-fade > :nth-child(6) { animation-delay: 350ms; }
+.anim-stagger-fade > :nth-child(6) {
+    animation-delay: min(calc(var(--anim-base-delay) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger)), var(--anim-max-delay));
+}
+
 .anim-stagger > :nth-child(7),
-.anim-stagger-fade > :nth-child(7) { animation-delay: 420ms; }
+.anim-stagger-fade > :nth-child(7) {
+    animation-delay: min(calc(var(--anim-base-delay) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger)), var(--anim-max-delay));
+}
+
 .anim-stagger > :nth-child(8),
-.anim-stagger-fade > :nth-child(8) { animation-delay: 490ms; }
+.anim-stagger-fade > :nth-child(8) {
+    animation-delay: min(calc(var(--anim-base-delay) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger) + var(--anim-stagger)), var(--anim-max-delay));
+}
+
+.anim-stagger > :nth-child(n+9),
+.anim-stagger-fade > :nth-child(n+9) {
+    animation-delay: var(--anim-max-delay);
+}
 
 @keyframes anim-fade-up {
     from {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(var(--anim-offset, 12px));
     }
 
     to {
@@ -103,6 +138,215 @@
     }
 }
 
+/* Route-entry animations target content children, never the header/dropdown wrapper. */
+.header.anim-slide-in-top {
+    animation: none;
+}
+
+.home-dashboard.anim-page-enter,
+.biblioteca.anim-page-enter,
+.progresso.anim-page-enter,
+.quiz.anim-page-enter,
+.conteudo-home .cards.anim-page-enter {
+    animation: none;
+}
+
+main:has(.conteudo-home .home-dashboard) > .header .nome-usuario {
+    animation: anim-route-header-home 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+main:has(.conteudo-home > .cards) > .header .nome-usuario {
+    animation: anim-route-header-quiz 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+main:has(.conteudo-home .biblioteca) > .header .nome-usuario {
+    animation: anim-route-header-biblioteca 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+main:has(.conteudo-home .progresso) > .header .nome-usuario {
+    animation: anim-route-header-progresso 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+main:has(.conteudo-home) > .header .nome-usuario {
+    --anim-offset: 8px;
+}
+
+@keyframes anim-route-header-home {
+    from { opacity: 0; transform: translateY(calc(0px - var(--anim-offset))); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes anim-route-header-quiz {
+    from { opacity: 0; transform: translateY(calc(0px - var(--anim-offset))); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes anim-route-header-biblioteca {
+    from { opacity: 0; transform: translateY(calc(0px - var(--anim-offset))); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes anim-route-header-progresso {
+    from { opacity: 0; transform: translateY(calc(0px - var(--anim-offset))); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.home-dashboard .boas-vindas,
+.home-dashboard .cards > .card-top,
+.home-dashboard > .historico .historico-top,
+.conteudo-home > .cards > .card-top,
+.biblioteca .biblioteca-top,
+.biblioteca .biblioteca-aviso,
+.biblioteca > .biblioteca-bloco,
+.progresso .progresso-top,
+.progresso .historico-top,
+.quiz .quiz-topo,
+.quiz > .quiz-descricao,
+.quiz > .quiz-pergunta,
+.quiz > .quiz-feedback,
+.quiz > .quiz-acoes {
+    animation: anim-fade-up 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.home-dashboard .boas-vindas,
+.biblioteca .biblioteca-top,
+.progresso .progresso-top,
+.quiz .quiz-topo,
+.conteudo-home > .cards > .card-top {
+    animation-delay: 60ms;
+}
+
+.home-dashboard .cards > .card-top,
+.biblioteca .biblioteca-aviso,
+.quiz > .quiz-descricao {
+    animation-delay: 130ms;
+}
+
+.biblioteca > .biblioteca-bloco:nth-of-type(2) {
+    animation-delay: 200ms;
+}
+
+.biblioteca > .biblioteca-bloco:nth-of-type(3) {
+    animation-delay: 270ms;
+}
+
+.progresso .historico-top,
+.quiz > .quiz-pergunta {
+    animation-delay: 200ms;
+}
+
+.home-dashboard > .historico .historico-top {
+    animation-delay: 300ms;
+}
+
+.quiz > .quiz-feedback,
+.quiz > .quiz-acoes {
+    animation-delay: 430ms;
+}
+
+.home-dashboard .cards .card-container,
+.conteudo-home > .cards .card-container,
+.home-dashboard > .historico .historico-lista,
+.biblioteca .aviso-temas,
+.biblioteca .fluxo,
+.biblioteca .funcoes,
+.progresso .progresso-resumo,
+.progresso .historico-lista,
+.quiz .quiz-opcoes {
+    --anim-stagger: 70ms;
+}
+
+.home-dashboard .cards .card-container,
+.conteudo-home > .cards .card-container {
+    --anim-base-delay: 200ms;
+}
+
+.home-dashboard > .historico .historico-lista {
+    --anim-base-delay: 370ms;
+}
+
+.biblioteca .aviso-temas {
+    --anim-base-delay: 200ms;
+}
+
+.biblioteca .fluxo {
+    --anim-base-delay: 270ms;
+}
+
+.biblioteca .funcoes {
+    --anim-base-delay: 340ms;
+}
+
+.progresso .progresso-resumo {
+    --anim-base-delay: 130ms;
+}
+
+.progresso .historico-lista {
+    --anim-base-delay: 270ms;
+}
+
+.quiz .quiz-opcoes {
+    --anim-base-delay: 260ms;
+}
+
+.quiz .quiz-resultado > * {
+    animation: anim-fade-up 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.quiz .quiz-resultado > :nth-child(1) { animation-delay: 60ms; }
+.quiz .quiz-resultado > :nth-child(2) { animation-delay: 130ms; }
+.quiz .quiz-resultado > :nth-child(3) { animation-delay: 200ms; }
+.quiz .quiz-resultado > :nth-child(4) { animation-delay: 270ms; }
+.quiz .quiz-resultado > :nth-child(5) { animation-delay: 340ms; }
+
+@media (max-width: 640px) {
+    main:has(.conteudo-home) > .header .nome-usuario {
+        --anim-offset: 6px;
+    }
+
+    .anim-stagger,
+    .anim-stagger-fade {
+        --anim-stagger: 45ms;
+        --anim-max-delay: 360ms;
+    }
+
+    .home-dashboard .cards .card-container,
+    .conteudo-home > .cards .card-container,
+    .home-dashboard > .historico .historico-lista,
+    .biblioteca .aviso-temas,
+    .biblioteca .fluxo,
+    .biblioteca .funcoes,
+    .progresso .progresso-resumo,
+    .progresso .historico-lista,
+    .quiz .quiz-opcoes {
+        --anim-stagger: 45ms;
+        --anim-max-delay: 360ms;
+    }
+
+    .anim-stagger > *,
+    .anim-stagger-fade > * {
+        --anim-offset: 6px;
+    }
+
+    .home-dashboard .boas-vindas,
+    .home-dashboard .cards > .card-top,
+    .home-dashboard > .historico .historico-top,
+    .conteudo-home > .cards > .card-top,
+    .biblioteca .biblioteca-top,
+    .biblioteca .biblioteca-aviso,
+    .biblioteca > .biblioteca-bloco,
+    .progresso .progresso-top,
+    .progresso .historico-top,
+    .quiz .quiz-topo,
+    .quiz > .quiz-descricao,
+    .quiz > .quiz-pergunta,
+    .quiz > .quiz-feedback,
+    .quiz > .quiz-acoes,
+    .quiz .quiz-resultado > * {
+        --anim-offset: 6px;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .anim-page-enter,
     .anim-fade-in,
@@ -112,5 +356,28 @@
     .anim-stagger > *,
     .anim-stagger-fade > * {
         animation: none;
+        animation-delay: 0ms;
+        --anim-delay: 0ms;
+    }
+
+    main:has(.conteudo-home) > .header .nome-usuario,
+    .home-dashboard .boas-vindas,
+    .home-dashboard .cards > .card-top,
+    .home-dashboard > .historico .historico-top,
+    .conteudo-home > .cards > .card-top,
+    .biblioteca .biblioteca-top,
+    .biblioteca .biblioteca-aviso,
+    .biblioteca > .biblioteca-bloco,
+    .progresso .progresso-top,
+    .progresso .historico-top,
+    .quiz .quiz-topo,
+    .quiz > .quiz-descricao,
+    .quiz > .quiz-pergunta,
+    .quiz > .quiz-feedback,
+    .quiz > .quiz-acoes,
+    .quiz .quiz-resultado > * {
+        animation: none;
+        animation-delay: 0ms;
+        --anim-delay: 0ms;
     }
 }

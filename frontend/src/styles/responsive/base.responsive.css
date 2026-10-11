@@ -1,0 +1,39 @@
+@media (max-width: 1024px) {
+  body:has(.sidebar) {
+    width: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  #root:has(.sidebar) {
+    width: 100%;
+    min-height: 100dvh;
+  }
+
+  .sidebar + main {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .sidebar + main .conteudo-home {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .sidebar + main img,
+  .sidebar + main video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .sidebar + main .conteudo-home h1,
+  .sidebar + main .conteudo-home h2 {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidebar + main {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}

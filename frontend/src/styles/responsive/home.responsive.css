@@ -1,0 +1,79 @@
+@media (max-width: 1024px) {
+  .boas-vindas h1 {
+    font-size: clamp(1.5rem, 3.5vw, 1.8rem);
+  }
+
+  .cards .card-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .home-dashboard {
+    gap: 24px;
+  }
+
+  .boas-vindas {
+    padding: clamp(20px, 5vw, 28px);
+    border-radius: 16px;
+  }
+
+  .boas-vindas h1 {
+    font-size: clamp(1.35rem, 6vw, 1.65rem);
+    line-height: 1.2;
+  }
+
+  .boas-vindas p {
+    font-size: clamp(0.85rem, 3.6vw, 0.95rem);
+  }
+
+  .cards .card-container {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .cards .card-quiz {
+    min-height: 0;
+    padding: 20px;
+  }
+
+  .cards .card-quiz-botao {
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .historico {
+    padding: 18px 14px;
+  }
+
+  .historico .historico-item {
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-areas:
+      "icone info"
+      "status status"
+      "barra barra"
+      "botao botao";
+    gap: 10px 12px;
+    padding: 14px;
+  }
+
+  .historico .historico-status {
+    justify-self: start;
+  }
+
+  .historico .historico-botao {
+    justify-self: stretch;
+    min-height: 44px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .boas-vindas {
+    padding: 18px;
+  }
+
+  .cards .card-quiz {
+    padding: 18px 16px;
+  }
+}

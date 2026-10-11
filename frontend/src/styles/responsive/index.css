@@ -1,0 +1,8 @@
+@import "./breakpoints.css";
+@import "./base.responsive.css";
+@import "./header.responsive.css";
+@import "./navigation.responsive.css";
+@import "./home.responsive.css";
+@import "./quiz.responsive.css";
+@import "./biblioteca.responsive.css";
+@import "./progresso.responsive.css";

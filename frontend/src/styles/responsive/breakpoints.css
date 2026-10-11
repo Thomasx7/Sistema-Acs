@@ -1,0 +1,7 @@
+/*
+  Breakpoints da camada responsiva (desktop-first):
+  - Tablet: max-width 1024px
+  - Celular: max-width 640px
+  - Celular pequeno: max-width 380px
+  Acima de 1024px, os estilos atuais permanecem inalterados.
+*/

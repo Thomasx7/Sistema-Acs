@@ -1,0 +1,30 @@
+@media (max-width: 1024px) {
+  .progresso .progresso-resumo {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .progresso {
+    gap: 22px;
+  }
+
+  .progresso .progresso-top h1 {
+    font-size: clamp(1.35rem, 5vw, 1.5rem);
+  }
+
+  .progresso .progresso-resumo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .progresso .resumo-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  .progresso .resumo-card span {
+    font-size: 0.78rem;
+  }
+}
