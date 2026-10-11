@@ -48,7 +48,7 @@ const funcoes = [
 
 function Biblioteca() {
     return (
-        <div className="biblioteca">
+        <div className="biblioteca anim-page-enter">
             <div className="biblioteca-top">
                 <h1>Biblioteca</h1>
                 <p>Materiais de apoio para os seus estudos.</p>
@@ -68,7 +68,7 @@ function Biblioteca() {
                         para cada tema. Por enquanto, você já pode praticar nos quizzes.
                     </p>
 
-                    <ul className="aviso-temas">
+                    <ul className="aviso-temas anim-stagger-fade">
                         {quizzes.map((quiz) => (
                             <li key={quiz.id} className={quiz.classe}>
                                 {quiz.titulo}
@@ -85,7 +85,7 @@ function Biblioteca() {
                     <p>Do primeiro quiz ao acompanhamento do seu progresso.</p>
                 </div>
 
-                <ol className="fluxo">
+                <ol className="fluxo anim-stagger">
                     {passos.map((passo, i) => (
                         <li key={passo.titulo}>
                             <span className="fluxo-numero">{i + 1}</span>
@@ -103,7 +103,7 @@ function Biblioteca() {
                     <p>O que você encontra em cada área do sistema.</p>
                 </div>
 
-                <div className="funcoes">
+                <div className="funcoes anim-stagger">
                     {funcoes.map((funcao) => (
                         <article key={funcao.titulo} className="funcao">
                             <div className="funcao-topo">

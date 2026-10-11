@@ -40,7 +40,7 @@ function Header({ nome = "Mateus" }) {
     }
 
     return (
-        <header className="header">
+        <header className="header anim-slide-in-top">
 
             <div className="nome-usuario">
                 <h2>Olá, {nome}!</h2>

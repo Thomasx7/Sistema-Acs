@@ -18,13 +18,13 @@ function CardsInicio() {
     }
 
     return (
-        <div className="cards">
+        <div className="cards anim-page-enter">
             <div className="card-top">
                 <h1>Escolha seu quiz</h1>
                 <p>Selecione um dos temas abaixo para iniciar o quiz.</p>
             </div>
 
-            <div className="card-container">
+            <div className="card-container anim-stagger-fade">
                 {quizzes.map((quiz) => (
                     <article key={quiz.id} className={`card-quiz ${quiz.classe}`}>
                         <h2>{quiz.titulo}</h2>

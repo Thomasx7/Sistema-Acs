@@ -69,7 +69,7 @@ function QuizJogo({ quiz, perguntas }) {
         else if (porcentagem >= 50) mensagem = "Bom trabalho! Vale revisar alguns pontos.";
 
         return (
-            <div className={`quiz ${quiz.classe}`}>
+            <div className={`quiz ${quiz.classe} anim-page-enter`}>
                 <div className="quiz-resultado">
                     <div className="quiz-anel" style={{ "--pct": porcentagem }}>
                         <span>{porcentagem}%</span>
@@ -100,7 +100,7 @@ function QuizJogo({ quiz, perguntas }) {
     const progressoBarra = ((indice + (confirmada ? 1 : 0)) / total) * 100;
 
     return (
-        <div className={`quiz ${quiz.classe}`}>
+        <div className={`quiz ${quiz.classe} anim-page-enter`}>
             {/* Topo: voltar, progresso e tema */}
             <div className="quiz-topo">
                 <Link to="/" className="quiz-voltar" aria-label="Voltar para o início">
@@ -124,7 +124,7 @@ function QuizJogo({ quiz, perguntas }) {
             <h1 className="quiz-pergunta">{pergunta.titulo}</h1>
 
             {/* Alternativas */}
-            <div className="quiz-opcoes" role="group" aria-label="Alternativas">
+            <div className="quiz-opcoes anim-stagger" role="group" aria-label="Alternativas">
                 {pergunta.alternativas.map((texto, i) => {
                     const escolhida = selecionada === i;
                     const ehCorreta = i === pergunta.correta;
@@ -209,7 +209,7 @@ function Quiz() {
     // /quiz/algo-inexistente
     if (!quiz || !perguntas) {
         return (
-            <div className="quiz">
+            <div className="quiz anim-page-enter">
                 <div className="quiz-resultado">
                     <h1>Quiz não encontrado</h1>
                     <p className="quiz-resultado-texto">

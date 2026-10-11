@@ -13,7 +13,7 @@ function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
 
     return (
-        <aside className={`sidebar ${collapsed ? "sidebar-collapsed" : ""}`}>
+        <aside className={`sidebar ${collapsed ? "sidebar-collapsed" : ""} anim-slide-in-left`}>
             {/* Cabeçalho */}
             <div className="sidebar-header">
                 <h2>Plataforma ACS</h2>

@@ -30,14 +30,14 @@ function Progresso() {
     );
 
     return (
-        <div className="progresso">
+        <div className="progresso anim-page-enter">
             <div className="progresso-top">
                 <h1>Meu progresso</h1>
                 <p>Acompanhe o andamento de cada quiz em um só lugar.</p>
             </div>
 
             {/* Resumo */}
-            <div className="progresso-resumo">
+            <div className="progresso-resumo anim-stagger">
                 <div className="resumo-card resumo-geral">
                     <span>Progresso geral</span>
                     <strong>{progressoGeral}%</strong>
@@ -69,7 +69,7 @@ function Progresso() {
                     <p>Veja onde você parou e continue de onde quiser.</p>
                 </div>
 
-                <ul className="historico-lista">
+                <ul className="historico-lista anim-stagger">
                     {lista.map(({ quiz, status, progresso, atualizadoEm }) => (
                         <QuizItem
                             key={quiz.id}

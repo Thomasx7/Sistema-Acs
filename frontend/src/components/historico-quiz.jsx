@@ -34,7 +34,7 @@ function HistoricoQuiz() {
                     Você ainda não iniciou nenhum quiz. Escolha um tema acima para começar.
                 </div>
             ) : (
-                <ul className="historico-lista">
+                <ul className="historico-lista anim-stagger">
                     {lista.map(({ id, status, progresso, atualizadoEm, quiz }) => (
                         <QuizItem
                             key={id}

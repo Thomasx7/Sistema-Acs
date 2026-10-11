@@ -4,7 +4,7 @@ import "../../assets/css/pages_css/home.css";
 
 function Home() {
     return (
-        <div className="home-dashboard">
+        <div className="home-dashboard anim-page-enter">
             {/* Card de boas-vindas */}
             <div className="boas-vindas">
                 <h1>Seja Bem vindo!</h1>

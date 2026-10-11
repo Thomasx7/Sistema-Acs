@@ -7,6 +7,8 @@
 }
 
 .header {
+    position: relative;
+    z-index: var(--z-header);
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -55,7 +57,7 @@
     /* logo abaixo da bolinha */
     right: 0;
     /* alinhado à borda direita dela */
-    z-index: 50;
+    z-index: var(--z-dropdown);
     display: flex;
     flex-direction: column;
     gap: 2px;
