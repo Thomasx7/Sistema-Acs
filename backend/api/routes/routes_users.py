@@ -9,72 +9,70 @@ from ..models.model_user import User
 bp = Blueprint("users", __name__)
 
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-MIN_PASSWORD_LENGTH = 6
+MIN_SENHA_LENGTH = 6
 
 
-# VALIDAÇÃO 
-def validate_user_data(data, partial=False):
-    """Valida o JSON recebido. Retorna um dict de erros (vazio = ok).
+# VALIDAÇÃO
+def validar_usuario(data, parcial=False):
+    """Retorna um dict de erros (vazio = ok).
 
-    partial=True (PATCH): só valida os campos que vieram.
-    partial=False (POST): name, email e password são obrigatórios.
+    parcial=True (PATCH): valida só os campos enviados.
+    parcial=False (POST): nome, email e senha são obrigatórios.
     """
-    errors = {}
+    erros = {}
 
-    if "name" in data or not partial:
-        name = (data.get("name") or "").strip()
-        if not name:
-            errors["name"] = "Nome é obrigatório."
-        elif len(name) > 120:
-            errors["name"] = "Nome deve ter no máximo 120 caracteres."
+    if "nome" in data or not parcial:
+        nome = (data.get("nome") or "").strip()
+        if not nome:
+            erros["nome"] = "Nome é obrigatório."
+        elif len(nome) > 120:
+            erros["nome"] = "Nome deve ter no máximo 120 caracteres."
 
-    if "email" in data or not partial:
+    if "email" in data or not parcial:
         email = (data.get("email") or "").strip()
         if not email:
-            errors["email"] = "E-mail é obrigatório."
+            erros["email"] = "E-mail é obrigatório."
         elif not EMAIL_REGEX.match(email):
-            errors["email"] = "E-mail inválido."
+            erros["email"] = "E-mail inválido."
 
-    if "password" in data or not partial:
-        password = data.get("password") or ""
-        if len(password) < MIN_PASSWORD_LENGTH:
-            errors["password"] = (
-                f"Senha deve ter no mínimo {MIN_PASSWORD_LENGTH} caracteres."
-            )
+    if "senha" in data or not parcial:
+        senha = data.get("senha") or ""
+        if len(senha) < MIN_SENHA_LENGTH:
+            erros["senha"] = f"Senha deve ter no mínimo {MIN_SENHA_LENGTH} caracteres."
 
-    return errors
+    return erros
 
-# Função auxiliar para checar se o email já está em uso
-def email_in_use(email, ignore_id=None):
+
+# Checa se o e-mail já está em uso
+def email_em_uso(email, ignore_id=None):
     query = db.select(User).filter_by(email=email)
     if ignore_id is not None:
-        query = query.where(User.id != ignore_id)
+        query = query.where(User.id_user != ignore_id)
     return db.session.execute(query).first() is not None
 
 
 # CREATE
 @bp.post("/")
-def create_user():
+def criar_usuario():
     data = request.get_json(silent=True)
     if not data:
         return jsonify({"error": "Envie um JSON válido."}), 400
 
-    errors = validate_user_data(data)
-    if errors:
-        return jsonify({"errors": errors}), 400
+    erros = validar_usuario(data)
+    if erros:
+        return jsonify({"errors": erros}), 400
 
     email = data["email"].strip().lower()
-    if email_in_use(email):
+    if email_em_uso(email):
         return jsonify({"errors": {"email": "E-mail já cadastrado."}}), 409
 
-    user = User(name=data["name"].strip(), email=email)
-    user.set_password(data["password"])
+    user = User(nome=data["nome"].strip(), email=email)
+    user.set_password(data["senha"])
 
     db.session.add(user)
     try:
         db.session.commit()
     except IntegrityError:
-        # Corrida: dois cadastros simultâneos passaram pelo email_in_use
         db.session.rollback()
         return jsonify({"errors": {"email": "E-mail já cadastrado."}}), 409
 
@@ -83,15 +81,15 @@ def create_user():
 
 # LISTA
 @bp.get("/")
-def list_users():
+def listar_usuarios():
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 10, type=int), 100)
-    search = request.args.get("search", "").strip()
+    busca = request.args.get("search", "").strip()
 
-    query = db.select(User).order_by(User.id)
-    if search:
-        like = f"%{search}%"
-        query = query.where(User.name.ilike(like) | User.email.ilike(like))
+    query = db.select(User).order_by(User.id_user)
+    if busca:
+        like = f"%{busca}%"
+        query = query.where(User.nome.ilike(like) | User.email.ilike(like))
 
     pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
 
@@ -104,37 +102,37 @@ def list_users():
     }), 200
 
 
-# LISTA UM EM ESPECIFICO
+# BUSCA UM
 @bp.get("/<int:user_id>")
-def get_user(user_id):
+def buscar_usuario(user_id):
     user = db.get_or_404(User, user_id)
     return jsonify(user.to_dict()), 200
 
 
-# ATUALIZA OS ITENS DO USUARIO
+# ATUALIZA
 @bp.patch("/<int:user_id>")
-def update_user(user_id):
+def editar_usuario(user_id):
     user = db.get_or_404(User, user_id)
 
     data = request.get_json(silent=True)
     if not data:
         return jsonify({"error": "Envie um JSON válido."}), 400
 
-    errors = validate_user_data(data, partial=True)
-    if errors:
-        return jsonify({"errors": errors}), 400
+    erros = validar_usuario(data, parcial=True)
+    if erros:
+        return jsonify({"errors": erros}), 400
 
-    if "name" in data:
-        user.name = data["name"].strip()
+    if "nome" in data:
+        user.nome = data["nome"].strip()
 
     if "email" in data:
         email = data["email"].strip().lower()
-        if email_in_use(email, ignore_id=user.id):
+        if email_em_uso(email, ignore_id=user.id_user):
             return jsonify({"errors": {"email": "E-mail já cadastrado."}}), 409
         user.email = email
 
-    if "password" in data:
-        user.set_password(data["password"])
+    if "senha" in data:
+        user.set_password(data["senha"])
 
     try:
         db.session.commit()
@@ -145,9 +143,9 @@ def update_user(user_id):
     return jsonify(user.to_dict()), 200
 
 
-#DELETE
+# DELETE
 @bp.delete("/<int:user_id>")
-def delete_user(user_id):
+def remover_usuario(user_id):
     user = db.get_or_404(User, user_id)
     db.session.delete(user)
     db.session.commit()

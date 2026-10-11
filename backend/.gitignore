@@ -7,3 +7,6 @@ __pycache__/
 api/test_db.py
 api/__pycache__/
 test_db.py
+
+migrations
+/migrations

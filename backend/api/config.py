@@ -2,7 +2,7 @@ import os
 from datetime import timedelta
 from dotenv import load_dotenv
 
-load_dotenv()  # lê o .env e joga os valores em os.environ
+load_dotenv()  # lê o .env 
 
 
 class Config:
