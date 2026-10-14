@@ -15,7 +15,7 @@
 .historico .historico-top h2 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--azul);
+    color: var(--texto-titulo);
 }
 
 .historico .historico-top p {
@@ -67,7 +67,7 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: color-mix(in srgb, var(--cor-card) 14%, #fff);
+    background: color-mix(in srgb, var(--cor-card) 14%, var(--superficie));
     color: var(--cor-card);
     font-size: 1.05rem;
     font-weight: 600;
@@ -135,13 +135,13 @@
 }
 
 .historico .status-andamento {
-    background: #fff4e0;
-    color: #b45f06;
+    background: var(--aviso-fundo);
+    color: var(--aviso);
 }
 
 .historico .status-concluido {
-    background: #e3f6ec;
-    color: #17803d;
+    background: var(--sucesso-fundo);
+    color: var(--sucesso);
 }
 
 /* Botão secundário (contorno) */
@@ -162,7 +162,7 @@
 
 .historico .historico-botao:hover {
     background: var(--cor-card);
-    color: var(--branco);
+    color: var(--texto-botao-acento);
 }
 
 .historico .historico-botao:focus-visible {
@@ -211,6 +211,6 @@
 
 /* Selo "Não iniciado" (usado na página Progresso) */
 .historico .status-novo {
-    background: #e8edf8;
+    background: var(--estado-inativo-fundo);
     color: var(--texto-suave);
 }

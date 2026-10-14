@@ -10,7 +10,7 @@
 .cards .card-top h1 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--azul);
+    color: var(--texto-titulo);
 }
 
 .cards .card-top p {
@@ -48,7 +48,7 @@
     border-radius: 18px;
     /* leve tom da cor do card no topo, que some para o branco */
     background: linear-gradient(180deg,
-            color-mix(in srgb, var(--cor-card) 9%, #fff) 0%,
+            color-mix(in srgb, var(--cor-card) 9%, var(--superficie)) 0%,
             var(--superficie) 110px);
     box-shadow: var(--sombra-card);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -94,7 +94,7 @@
     padding: 10px 18px;
     border-radius: 12px;
     background: var(--cor-card);
-    color: var(--branco);
+    color: var(--texto-botao-acento);
     font-size: 0.85rem;
     font-weight: 600;
     text-decoration: none;

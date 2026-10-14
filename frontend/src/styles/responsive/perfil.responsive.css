@@ -1,0 +1,69 @@
+@media (max-width: 900px) {
+    .perfil .perfil-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .perfil .perfil-form-card {
+        padding: 22px;
+    }
+
+    .perfil .perfil-lateral {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .perfil .perfil-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .perfil .perfil-lateral {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 540px) {
+    .perfil {
+        gap: 20px;
+    }
+
+    .perfil .perfil-top h1 {
+        font-size: clamp(1.35rem, 5vw, 1.5rem);
+    }
+
+    .perfil .perfil-layout {
+        gap: 14px;
+    }
+
+    .perfil .perfil-card,
+    .perfil .perfil-form-card {
+        padding: 18px;
+    }
+
+    .perfil .perfil-identidade {
+        gap: 14px;
+    }
+
+    .perfil .perfil-avatar-botao {
+        width: 84px;
+        height: 84px;
+        font-size: 1.65rem;
+    }
+
+    .perfil .perfil-camera {
+        width: 30px;
+        height: 30px;
+    }
+
+    .perfil .perfil-campos,
+    .perfil .perfil-lateral {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .perfil .perfil-acoes,
+    .perfil .perfil-salvar {
+        width: 100%;
+    }
+}

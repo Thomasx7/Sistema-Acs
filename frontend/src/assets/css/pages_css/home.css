@@ -12,7 +12,7 @@
     border-radius: 20px;
     background: linear-gradient(120deg, var(--azul) 0%, var(--azul-secundario) 55%, var(--azul-claro) 100%);
     color: var(--branco);
-    box-shadow: 0 16px 36px rgba(5, 35, 115, 0.25);
+    box-shadow: var(--sombra-home);
 }
 
 .boas-vindas::before,
@@ -20,13 +20,13 @@
     content: "";
     position: absolute;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--decoracao-fundo-1);
 }
 
 .boas-vindas::before { width: 220px; height: 220px; top: -80px; right: -40px; }
-.boas-vindas::after  { width: 140px; height: 140px; bottom: -60px; right: 150px; background: rgba(255, 255, 255, 0.06); }
+.boas-vindas::after  { width: 140px; height: 140px; bottom: -60px; right: 150px; background: var(--decoracao-fundo-2); }
 
 .boas-vindas > * { position: relative; z-index: 1; }
 
 .boas-vindas h1 { font-size: 1.8rem; font-weight: 600; color: var(--branco); }
-.boas-vindas p  { margin-top: 6px; max-width: 52ch; font-size: 0.95rem; color: rgba(224, 236, 255, 0.88); }
+.boas-vindas p  { margin-top: 6px; max-width: 52ch; font-size: 0.95rem; color: var(--home-texto); }

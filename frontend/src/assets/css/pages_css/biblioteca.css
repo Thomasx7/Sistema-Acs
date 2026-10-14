@@ -7,7 +7,7 @@
 .biblioteca .biblioteca-top h1 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--azul);
+  color: var(--texto-titulo);
 }
 
 .biblioteca .biblioteca-top p {
@@ -26,7 +26,7 @@
   border-radius: 18px;
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--azul-secundario) 8%, #fff) 0%,
+    color-mix(in srgb, var(--azul-secundario) 8%, var(--superficie)) 0%,
     var(--superficie) 70%
   );
   box-shadow: var(--sombra-card);
@@ -44,15 +44,15 @@
   font-size: 1.15rem;
   font-weight: 700;
   font-style: italic;
-  box-shadow: 0 6px 14px rgba(9, 52, 171, 0.28);
+  box-shadow: var(--biblioteca-sombra-icone);
 }
 
 .biblioteca .aviso-selo {
   display: inline-block;
   padding: 4px 10px;
   border-radius: 999px;
-  background: #fff4e0;
-  color: #b45f06;
+  background: var(--aviso-fundo);
+  color: var(--aviso);
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -61,7 +61,7 @@
   margin-top: 10px;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--azul);
+  color: var(--texto-titulo);
 }
 
 .biblioteca .aviso-texto p {
@@ -118,7 +118,7 @@
 .biblioteca .bloco-top h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--azul);
+  color: var(--texto-titulo);
 }
 
 .biblioteca .bloco-top p {
@@ -209,7 +209,7 @@
 .biblioteca .funcao h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--azul);
+  color: var(--texto-titulo);
 }
 
 .biblioteca .funcao p {
@@ -228,13 +228,13 @@
 }
 
 .biblioteca .status-ok {
-  background: #e3f6ec;
-  color: #17803d;
+  background: var(--sucesso-fundo);
+  color: var(--sucesso);
 }
 
 .biblioteca .status-breve {
-  background: #fff4e0;
-  color: #b45f06;
+  background: var(--aviso-fundo);
+  color: var(--aviso);
 }
 
 .biblioteca .card-lgpd       { --cor-card: var(--cor-lgpd); }

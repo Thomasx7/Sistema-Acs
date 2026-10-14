@@ -16,6 +16,7 @@ A análise do código indica que o projeto está em desenvolvimento e que a maio
 | Quiz interativo | Implementado | Perguntas e respostas locais em arquivos JS |
 | Progresso do usuário | Implementado | Salvo em localStorage |
 | Biblioteca | Parcial | Página informativa e de orientação; conteúdo não estruturado como repositório funcional |
+| Perfil do usuário | Parcial | Perfil, foto e preferência de tema salvos localmente; sem integração de atualização com a API |
 | Cadastro | Pendente | Existem referências visuais, mas sem fluxo funcional |
 | Recuperação de senha | Pendente | Link presente sem rota correspondente |
 | Reset de senha | Pendente | Não identificado no código |
@@ -121,13 +122,15 @@ src/
 | /quiz/:id | Quiz | src/pages/Home/quiz.jsx | execução do questionário | Implementado |
 | /biblioteca | Biblioteca | src/pages/Home/biblioteca.jsx | materiais e orientação | Parcial |
 | /progresso | Progresso | src/pages/Home/progresso.jsx | acompanhamento | Implementado |
+| /perfil | Perfil | src/pages/Home/perfil.jsx | dados pessoais e preferências | Parcial |
 | * | Redirecionamento | src/App.jsx | fallback para / | Implementado |
 
 ### 6.2 Observações
 
 - O sistema usa `BrowserRouter` em `src/main.jsx`.
 - O layout principal é definido em `src/layouts/PainelLayout.jsx`.
-- Há links navegáveis para `/perfil` e `/esqueci-senha` em componentes visuais, mas essas rotas não existem no `Routes` atual.
+- O menu do usuário no Header leva a `/perfil`; a página usa `PainelLayout`.
+- O link `/esqueci-senha` ainda não tem rota correspondente.
 - O menu lateral tem `NavLink` para `/painel`, mas a configuração real do `Routes` usa `/` como base do painel. Isso indica que o sistema de navegação ainda precisa refinamento.
 
 ## 7. Páginas e componentes principais
@@ -146,6 +149,7 @@ Fluxo:
 - `/` renderiza `PainelLayout` com `Home` por padrão.
 - `/quiz` e `/quiz/:id` renderizam a lógica do quiz.
 - `/biblioteca` e `/progresso` renderizam as páginas correspondentes.
+- `/perfil` renderiza o formulário de perfil dentro do layout do painel.
 
 ### 7.2 PainelLayout
 
@@ -313,6 +317,21 @@ Implementação:
 - `concluidos`, `emAndamento` e `naoIniciados` são calculados com `filter`.
 - `progressoGeral` usa `reduce` e `Math.round`.
 
+### 7.12 Perfil
+
+Arquivo: `src/pages/Home/perfil.jsx`
+
+Responsabilidade:
+- permitir editar nome, e-mail, foto e preferência de tema;
+- exibir o resumo do progresso já salvo pelos quizzes;
+- validar os dados antes de habilitar a persistência local.
+
+Persistência:
+- `src/utils/perfil.js` usa a chave `acs-perfil-usuario`;
+- a foto é salva em base64 e limitada a 2 MB;
+- a senha nunca é persistida no navegador; sua atualização depende de integração autenticada com a API.
+- o tema escolhido é salvo como preferência, mas ainda não altera o tema global da aplicação.
+
 ## 8. Login e autenticação
 
 Arquivo: `src/pages/Auth/login.jsx`
@@ -402,6 +421,31 @@ Funções:
 Observações:
 - o progresso é local ao navegador.
 - não há sincronização com servidor.
+
+### 10.3 Perfil e preferência de tema
+
+Arquivo: `src/utils/perfil.js`
+
+- `lerPerfil()` carrega `nome`, `email`, `foto` e `tema` pela chave `acs-perfil-usuario`;
+- `salvarPerfil(perfil)` persiste localmente esses mesmos dados;
+- a senha é mantida somente no estado do formulário e não é armazenada em texto puro;
+- o perfil e a preferência de tema ainda não são sincronizados com a API.
+
+### 10.4 Tema global
+
+Arquivos:
+- `src/context/ThemeContext.jsx`
+- `src/context/useTheme.js`
+- `src/index.css`
+- `index.html`
+
+Comportamento:
+- `ThemeProvider` fornece `theme`, `toggleTheme()` e `setTheme()` para a árvore React;
+- o tema é aplicado ao elemento `<html>` por `data-theme` e `color-scheme`;
+- a preferência utiliza o campo `tema` do objeto salvo em `acs-perfil-usuario`;
+- quando não há preferência persistida, o tema segue `prefers-color-scheme`;
+- um script no `<head>` aplica a preferência antes da montagem React para evitar flash de tema;
+- os tokens de cor do tema escuro são definidos em `src/index.css`.
 
 ## 11. Funções principais e responsabilidades
 

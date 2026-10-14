@@ -7,7 +7,7 @@
 .progresso .progresso-top h1 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--azul);
+    color: var(--texto-titulo);
 }
 
 .progresso .progresso-top p {
@@ -54,7 +54,7 @@
     font-size: 1.8rem;
     font-weight: 600;
     line-height: 1;
-    color: var(--azul);
+    color: var(--texto-titulo);
 }
 
 .progresso .resumo-card small {
@@ -69,13 +69,13 @@
 }
 
 .progresso .resumo-ok {
-    --ponto: #1f9d55;
+    --ponto: var(--sucesso);
 }
 
 .progresso .resumo-andamento {
-    --ponto: #b45f06;
+    --ponto: var(--aviso);
 }
 
 .progresso .resumo-novo {
-    --ponto: #9aa5c4;
+    --ponto: var(--ponto-novo);
 }

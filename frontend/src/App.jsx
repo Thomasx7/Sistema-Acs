@@ -7,6 +7,7 @@ import Home from "./pages/Home/home";
 import Quiz from "./pages/Home/quiz";
 import Biblioteca from "./pages/Home/biblioteca";
 import Progresso from "./pages/Home/progresso";
+import Perfil from "./pages/Home/perfil";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="quiz/:id" element={<Quiz />} />
         <Route path="biblioteca" element={<Biblioteca />} />
         <Route path="progresso" element={<Progresso />} />
+        <Route path="perfil" element={<Perfil />} />
       </Route>
 
       {/* Qualquer endereço desconhecido volta para o início */}

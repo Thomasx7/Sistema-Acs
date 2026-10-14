@@ -1,12 +1,12 @@
 .quiz {
     /* Cores dos estados das alternativas */
-    --sel-fundo: #eaf0ff;
-    --certo: #1f9d55;
-    --certo-fundo: #e8f7ee;
-    --certo-texto: #14532d;
-    --erro: #d64545;
-    --erro-fundo: #fdecec;
-    --erro-texto: #7f1d1d;
+    --sel-fundo: var(--selecionado-fundo);
+    --certo: var(--sucesso);
+    --certo-fundo: var(--sucesso-fundo);
+    --certo-texto: var(--sucesso-texto);
+    --quiz-erro: var(--erro-quiz);
+    --quiz-erro-fundo: var(--erro-quiz-fundo);
+    --quiz-erro-texto: var(--erro-quiz-texto);
 
     max-width: 760px;
     margin: 0 auto;
@@ -41,7 +41,7 @@
 
 .quiz .quiz-voltar:hover {
     background: var(--fundo);
-    color: var(--azul);
+    color: var(--texto-titulo);
 }
 
 .quiz .quiz-progresso {
@@ -75,7 +75,7 @@
     flex-shrink: 0;
     padding: 6px 12px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--cor-card) 12%, #fff);
+    background: color-mix(in srgb, var(--cor-card) 12%, var(--superficie));
     color: var(--cor-card);
     font-size: 0.78rem;
     font-weight: 600;
@@ -95,7 +95,7 @@
     font-size: clamp(1.35rem, 2.6vw, 1.8rem);
     font-weight: 600;
     line-height: 1.25;
-    color: var(--azul);
+    color: var(--texto-titulo);
 }
 
 /*  Alternativas  */
@@ -144,11 +144,11 @@
 
 .quiz .quiz-opcao:not(:disabled):hover {
     border-color: var(--azul-claro);
-    background: #f7f9ff;
+    background: var(--opcao-hover);
 }
 
 .quiz .quiz-opcao:focus-visible {
-    outline: 2px solid var(--azul-secundario);
+    outline: 2px solid var(--foco-contorno);
     outline-offset: 2px;
 }
 
@@ -174,20 +174,20 @@
 .quiz .quiz-opcao.correta .quiz-letra {
     border-color: var(--certo);
     background: var(--certo);
-    color: var(--branco);
+    color: var(--texto-em-sucesso);
 }
 
 /* Errada escolhida (vermelha) */
 .quiz .quiz-opcao.errada {
-    border-color: var(--erro);
-    background: var(--erro-fundo);
-    color: var(--erro-texto);
+    border-color: var(--quiz-erro);
+    background: var(--quiz-erro-fundo);
+    color: var(--quiz-erro-texto);
 }
 
 .quiz .quiz-opcao.errada .quiz-letra {
-    border-color: var(--erro);
-    background: var(--erro);
-    color: var(--branco);
+    border-color: var(--quiz-erro);
+    background: var(--quiz-erro);
+    color: var(--texto-em-erro);
 }
 
 .quiz .quiz-opcao.apagada {
@@ -215,9 +215,9 @@
 }
 
 .quiz .feedback-erro {
-    border-color: var(--erro);
-    background: var(--erro-fundo);
-    color: var(--erro-texto);
+    border-color: var(--quiz-erro);
+    background: var(--quiz-erro-fundo);
+    color: var(--quiz-erro-texto);
 }
 
 /* Botões */
@@ -246,7 +246,7 @@
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
-    box-shadow: 0 8px 18px rgba(5, 35, 115, 0.25);
+    box-shadow: var(--quiz-sombra-botao);
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -255,7 +255,7 @@
 }
 
 .quiz .quiz-botao:focus-visible {
-    outline: 2px solid var(--azul-secundario);
+    outline: 2px solid var(--foco-contorno);
     outline-offset: 3px;
 }
 
@@ -269,7 +269,7 @@
 .quiz .quiz-botao-sec {
     border-color: var(--borda);
     background: transparent;
-    color: var(--azul);
+    color: var(--texto-titulo);
     box-shadow: none;
 }
 
@@ -306,14 +306,14 @@
     position: relative;
     font-size: 1.9rem;
     font-weight: 600;
-    color: var(--azul);
+    color: var(--texto-titulo);
 }
 
 .quiz .quiz-resultado h1 {
     margin-top: 6px;
     font-size: 1.6rem;
     font-weight: 600;
-    color: var(--azul);
+    color: var(--texto-titulo);
 }
 
 .quiz .quiz-resultado-texto {

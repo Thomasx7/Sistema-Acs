@@ -1,0 +1,438 @@
+.perfil {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.perfil .perfil-top h1 {
+    color: var(--texto-titulo);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.perfil .perfil-top p {
+    margin-top: 4px;
+    color: var(--texto-suave);
+    font-size: 0.93rem;
+}
+
+.perfil .perfil-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(250px, 310px);
+    align-items: start;
+    gap: 20px;
+}
+
+.perfil .perfil-card {
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+    background: var(--superficie);
+    box-shadow: var(--sombra-card);
+}
+
+.perfil .perfil-form-card {
+    padding: 28px;
+}
+
+.perfil .perfil-identidade {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--borda);
+}
+
+.perfil .perfil-avatar-area {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.perfil .perfil-avatar-botao {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 104px;
+    height: 104px;
+    padding: 0;
+    overflow: hidden;
+    border: 3px solid var(--branco-gelo);
+    border-radius: 50%;
+    background: var(--azul-secundario);
+    color: var(--branco);
+    font-size: 2rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.perfil .perfil-avatar-botao > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.perfil .perfil-avatar-botao:focus-visible,
+.perfil .perfil-mostrar-senha:focus-visible,
+.perfil .perfil-salvar:focus-visible {
+    outline: 2px solid var(--foco-contorno);
+    outline-offset: 3px;
+}
+
+.perfil .perfil-camera {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 2px solid var(--superficie);
+    border-radius: 50%;
+    background: var(--azul);
+    color: var(--branco);
+}
+
+.perfil .perfil-camera svg {
+    width: 17px;
+    height: 17px;
+}
+
+.perfil .perfil-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.perfil .perfil-sobretitulo {
+    color: var(--texto-suave);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.perfil .perfil-identidade-texto h2 {
+    margin-top: 4px;
+    color: var(--texto-titulo);
+    font-size: 1.3rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.perfil .perfil-identidade-texto > p {
+    margin-top: 5px;
+    color: var(--texto-suave);
+    font-size: 0.84rem;
+}
+
+.perfil .perfil-identidade-texto .perfil-erro-foto {
+    color: var(--erro);
+    font-weight: 500;
+}
+
+.perfil .perfil-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-top: 24px;
+}
+
+.perfil .perfil-secao-titulo h2,
+.perfil .perfil-card-titulo h2,
+.perfil .perfil-tema h2 {
+    color: var(--texto-titulo);
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.perfil .perfil-secao-titulo p,
+.perfil .perfil-tema > div > p {
+    margin-top: 4px;
+    color: var(--texto-suave);
+    font-size: 0.85rem;
+}
+
+.perfil .perfil-senha-titulo {
+    padding-top: 4px;
+}
+
+.perfil .perfil-campos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.perfil .perfil-campo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 7px;
+}
+
+.perfil .perfil-campo label {
+    color: var(--texto);
+    font-size: 0.86rem;
+    font-weight: 500;
+}
+
+.perfil .perfil-campo input {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    outline: none;
+    background: var(--superficie);
+    color: var(--texto);
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.perfil .perfil-campo input:focus {
+    border-color: var(--foco-contorno);
+    box-shadow: 0 0 0 3px var(--foco-sombra);
+}
+
+.perfil .perfil-campo input[aria-invalid="true"] {
+    border-color: var(--erro);
+}
+
+.perfil .perfil-senha-campo {
+    position: relative;
+}
+
+.perfil .perfil-senha-campo input {
+    padding-right: 76px;
+}
+
+.perfil .perfil-mostrar-senha {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    padding: 4px;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: var(--texto-link);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.perfil .perfil-erro,
+.perfil .perfil-ajuda {
+    min-height: 1em;
+    font-size: 0.78rem;
+}
+
+.perfil .perfil-erro {
+    color: var(--erro);
+}
+
+.perfil .perfil-ajuda {
+    color: var(--texto-suave);
+}
+
+.perfil .perfil-aviso-senha {
+    margin-top: -4px;
+    color: var(--texto-suave);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.perfil .perfil-feedback {
+    padding: 11px 13px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+.perfil .perfil-feedback-sucesso {
+    background: var(--branco-gelo);
+    color: var(--texto-titulo);
+}
+
+.perfil .perfil-feedback-erro {
+    background: var(--erro-fundo);
+    color: var(--erro);
+}
+
+.perfil .perfil-acoes {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 2px;
+}
+
+.perfil .perfil-salvar {
+    min-height: 44px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--azul);
+    color: var(--branco);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.perfil .perfil-salvar:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: var(--barra-progresso);
+}
+
+.perfil .perfil-salvar:disabled {
+    background: var(--texto-suave);
+    color: var(--texto-botao-desabilitado);
+    cursor: not-allowed;
+}
+
+.perfil .perfil-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.perfil .perfil-card-titulo .perfil-sobretitulo {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.perfil .perfil-progresso-numero {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    margin-top: 22px;
+}
+
+.perfil .perfil-progresso-numero strong {
+    color: var(--texto-titulo);
+    font-size: 2.25rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.perfil .perfil-progresso-numero span,
+.perfil .perfil-progresso-resumo,
+.perfil .perfil-progresso-detalhe {
+    color: var(--texto-suave);
+    font-size: 0.82rem;
+}
+
+.perfil .perfil-barra {
+    height: 9px;
+    margin-top: 14px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--branco-gelo);
+}
+
+.perfil .perfil-barra span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--azul-secundario);
+    transition: width 0.3s ease;
+}
+
+.perfil .perfil-progresso-resumo {
+    margin-top: 10px;
+}
+
+.perfil .perfil-progresso-detalhe {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--borda);
+}
+
+.perfil .perfil-progresso-detalhe strong {
+    color: var(--texto);
+}
+
+.perfil .perfil-tema {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.perfil .perfil-tema-controle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--texto);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.perfil .perfil-tema-controle input {
+    position: absolute;
+    right: 0;
+    width: 48px;
+    height: 28px;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.perfil .perfil-tema-trilho {
+    position: relative;
+    flex-shrink: 0;
+    width: 48px;
+    height: 28px;
+    border: 1px solid var(--borda);
+    border-radius: 999px;
+    background: var(--branco-gelo);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.perfil .perfil-tema-trilho::after {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--superficie);
+    box-shadow: var(--sombra-card);
+    content: "";
+    transition: transform 0.2s ease;
+}
+
+.perfil .perfil-tema-controle input:checked + .perfil-tema-trilho {
+    border-color: var(--tema-ativo);
+    background: var(--tema-ativo);
+}
+
+.perfil .perfil-tema-controle input:checked + .perfil-tema-trilho::after {
+    transform: translateX(20px);
+}
+
+.perfil .perfil-tema-controle input:focus-visible + .perfil-tema-trilho {
+    outline: 2px solid var(--foco-contorno);
+    outline-offset: 3px;
+}
+
+.perfil .perfil-tema-nota {
+    color: var(--texto-suave);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .perfil .perfil-campo input,
+    .perfil .perfil-salvar,
+    .perfil .perfil-barra span,
+    .perfil .perfil-tema-trilho,
+    .perfil .perfil-tema-trilho::after {
+        transition: none;
+    }
+}

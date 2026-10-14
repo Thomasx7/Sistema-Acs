@@ -1,7 +1,7 @@
 .nome-usuario {
     margin-right: auto;
     margin-left: -10px;
-    color: var(--azul);
+    color: var(--texto-titulo);
     font-size: 1.1rem;
     font-weight: 500;
 }
@@ -42,11 +42,11 @@
 .header .header-avatar:hover,
 .header .header-avatar[aria-expanded="true"] {
     background: var(--azul);
-    box-shadow: 0 0 0 4px rgba(9, 52, 171, 0.18);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--azul-secundario) 18%, transparent);
 }
 
 .header .header-avatar:focus-visible {
-    outline: 2px solid var(--azul-secundario);
+    outline: 2px solid var(--foco-contorno);
     outline-offset: 3px;
 }
 
@@ -63,10 +63,10 @@
     gap: 2px;
     min-width: 200px;
     padding: 8px;
-    border: 1px solid rgba(9, 52, 171, 0.14);
+    border: 1px solid var(--menu-borda);
     border-radius: 14px;
-    background: var(--branco);
-    box-shadow: 0 12px 32px rgba(5, 35, 115, 0.18);
+    background: var(--superficie);
+    box-shadow: var(--menu-sombra);
     transform-origin: top right;
     animation: header-menu-abrir 0.16s ease-out;
 }
@@ -93,7 +93,7 @@
     border: 1px solid transparent;
     border-radius: 10px;
     background: transparent;
-    color: var(--azul);
+    color: var(--texto-titulo);
     font-size: 0.93rem;
     font-weight: 500;
     text-align: left;
@@ -105,19 +105,19 @@
 .header .header-menu a:hover,
 .header .header-menu button:hover {
     background: var(--branco-gelo);
-    border-color: rgba(9, 52, 171, 0.2);
+    border-color: var(--menu-borda-hover);
 }
 
 .header .header-menu a:focus-visible,
 .header .header-menu button:focus-visible {
-    outline: 2px solid var(--azul-secundario);
+    outline: 2px solid var(--foco-contorno);
     outline-offset: -2px;
 }
 
 .header .header-menu .header-menu-sair {
     margin-top: 6px;
     position: relative;
-    color: #b3261e;
+    color: var(--erro);
 }
 
 .header .header-menu .header-menu-sair::before {
@@ -127,12 +127,12 @@
     left: 6px;
     right: 6px;
     height: 1px;
-    background: rgba(9, 52, 171, 0.12);
+    background: var(--menu-divisor);
 }
 
 .header .header-menu .header-menu-sair:hover {
-    background: #fdecea;
-    border-color: rgba(179, 38, 30, 0.25);
+    background: var(--erro-fundo);
+    border-color: var(--menu-borda-erro);
 }
 
 
