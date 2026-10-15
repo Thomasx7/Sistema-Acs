@@ -1,8 +1,8 @@
 export const CHAVE_PERFIL = "acs-perfil-usuario";
 
 export const PERFIL_PADRAO = {
-    nome: "Mateus",
-    email: "mateus@example.com",
+    nome: "Thomas",
+    email: "thomas@example.com",
     foto: "",
     tema: "claro",
 };

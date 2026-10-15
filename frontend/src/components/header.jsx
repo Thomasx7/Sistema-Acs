@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import "../assets/css/components_css/header.css";
 
-function Header({ nome = "Mateus" }) {
+function Header({ nome = "Thomas" }) {
 
     const [aberto, setAberto] = useState(false);
     const perfilRef = useRef(null);
