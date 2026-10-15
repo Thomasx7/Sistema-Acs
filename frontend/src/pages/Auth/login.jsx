@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "../../assets/css/Auth_css/login.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { DEV_BYPASS_AUTH } from "../../utils/auth";
 
 // Campo de senha com o botão do olho.
 // Vai ser usado no login e no cadastro.
@@ -60,6 +61,7 @@ function PasswordField({ id, value, onChange }) {
 }
 
 function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -83,6 +85,13 @@ function Login() {
 
   function handleSubmit(event) {
     event.preventDefault();
+
+    // TODO: reativar proteção de rotas / autenticação real
+    if (DEV_BYPASS_AUTH) {
+      navigate("/home");
+      return;
+    }
+
     console.log("Dados do login:", { email, password });
   }
 

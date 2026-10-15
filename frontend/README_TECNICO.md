@@ -16,7 +16,7 @@ A análise do código indica que o projeto está em desenvolvimento e que a maio
 | Quiz interativo | Implementado | Perguntas e respostas locais em arquivos JS |
 | Progresso do usuário | Implementado | Salvo em localStorage |
 | Biblioteca | Parcial | Página informativa e de orientação; conteúdo não estruturado como repositório funcional |
-| Perfil do usuário | Parcial | Perfil, foto e preferência de tema salvos localmente; sem integração de atualização com a API |
+| Perfil do usuário | Parcial | Perfil e foto salvos localmente; o tema vale durante a sessão e não há integração de atualização com a API |
 | Cadastro | Pendente | Existem referências visuais, mas sem fluxo funcional |
 | Recuperação de senha | Pendente | Link presente sem rota correspondente |
 | Reset de senha | Pendente | Não identificado no código |
@@ -330,7 +330,7 @@ Persistência:
 - `src/utils/perfil.js` usa a chave `acs-perfil-usuario`;
 - a foto é salva em base64 e limitada a 2 MB;
 - a senha nunca é persistida no navegador; sua atualização depende de integração autenticada com a API.
-- o tema escolhido é salvo como preferência, mas ainda não altera o tema global da aplicação.
+- o tema é gerenciado pelo `ThemeContext` e não é salvo junto aos dados do perfil.
 
 ## 8. Login e autenticação
 
@@ -426,10 +426,10 @@ Observações:
 
 Arquivo: `src/utils/perfil.js`
 
-- `lerPerfil()` carrega `nome`, `email`, `foto` e `tema` pela chave `acs-perfil-usuario`;
-- `salvarPerfil(perfil)` persiste localmente esses mesmos dados;
+- `lerPerfil()` carrega `nome`, `email` e `foto` pela chave `acs-perfil-usuario`;
+- `salvarPerfil(perfil)` persiste localmente `nome`, `email` e `foto`;
 - a senha é mantida somente no estado do formulário e não é armazenada em texto puro;
-- o perfil e a preferência de tema ainda não são sincronizados com a API.
+- o perfil ainda não é sincronizado com a API.
 
 ### 10.4 Tema global
 
@@ -442,9 +442,9 @@ Arquivos:
 Comportamento:
 - `ThemeProvider` fornece `theme`, `toggleTheme()` e `setTheme()` para a árvore React;
 - o tema é aplicado ao elemento `<html>` por `data-theme` e `color-scheme`;
-- a preferência utiliza o campo `tema` do objeto salvo em `acs-perfil-usuario`;
-- quando não há preferência persistida, o tema segue `prefers-color-scheme`;
-- um script no `<head>` aplica a preferência antes da montagem React para evitar flash de tema;
+- o tema sempre inicia em `light`, sem ler preferências antigas ou `prefers-color-scheme`;
+- um script no `<head>` aplica `light` antes da montagem React para evitar flash de tema;
+- a troca para `dark` ou `light` pelo perfil altera o tema global durante a sessão, sem persistência entre recargas;
 - os tokens de cor do tema escuro são definidos em `src/index.css`.
 
 ## 11. Funções principais e responsabilidades

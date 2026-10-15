@@ -33,7 +33,7 @@ function Sidebar() {
                 <ul>
                 <li>
                     <NavLink
-                    to="/painel"
+                    to="/home"
                     end
                     className={({ isActive }) => (isActive ? "active" : "")}
                     >

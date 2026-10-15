@@ -5,25 +5,9 @@
     <link rel="icon" type="image/svg+xml" href="/robot1.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>
-      (() => {
-        const temaSistema = window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
-        let tema = temaSistema;
-
-        try {
-          const perfilSalvo = localStorage.getItem("acs-perfil-usuario");
-          const preferencia = perfilSalvo ? JSON.parse(perfilSalvo).tema : null;
-
-          if (preferencia === "escuro" || preferencia === "dark") tema = "dark";
-          if (preferencia === "claro" || preferencia === "light") tema = "light";
-        } catch (erro) {
-          console.error("Não foi possível ler o tema salvo antes da montagem.", erro);
-        }
-
-        document.documentElement.dataset.theme = tema;
-        document.documentElement.style.colorScheme = tema;
-      })();
+      // Mantém a tela clara desde o primeiro paint; para restaurar preferências, ajuste também o ThemeProvider.
+      document.documentElement.dataset.theme = "light";
+      document.documentElement.style.colorScheme = "light";
     </script>
     <title>Quiz-ACS</title>
   </head>

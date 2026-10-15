@@ -164,7 +164,6 @@ function Perfil() {
             nome: nome.trim(),
             email: email.trim(),
             foto,
-            tema: theme === "dark" ? "escuro" : "claro",
         };
 
         try {
@@ -407,23 +406,14 @@ function Perfil() {
                                 type="checkbox"
                                 role="switch"
                                 checked={theme === "dark"}
-                                onChange={(evento) => {
-                                    const salvo = setTheme(evento.target.checked ? "dark" : "light");
-                                    setFeedback(salvo
-                                        ? null
-                                        : {
-                                            tipo: "erro",
-                                            mensagem: "O tema foi aplicado, mas não foi possível salvar a preferência neste navegador.",
-                                        }
-                                    );
-                                }}
+                                onChange={(evento) => setTheme(evento.target.checked ? "dark" : "light")}
                                 aria-label={theme === "dark" ? "Desativar tema escuro" : "Ativar tema escuro"}
                                 aria-pressed={theme === "dark"}
                             />
                             <span className="perfil-tema-trilho" aria-hidden="true" />
                         </label>
                         <p className="perfil-tema-nota">
-                            O tema é aplicado imediatamente e sua preferência é salva neste navegador.
+                            O tema é aplicado imediatamente durante esta sessão.
                         </p>
                     </section>
                 </aside>
