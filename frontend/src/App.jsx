@@ -16,9 +16,10 @@ function App() {
       {/* Auth */}
       <Route path="/login" element={<Login />} />
 
-      {/* Rota Pai: painel na raiz */}
+      {/* TODO: reativar proteção de rotas / autenticação real */}
       <Route path="/" element={<PainelLayout />}>
-        <Route index element={<Home />} />
+        <Route index element={<Navigate to="/login" replace />} />
+        <Route path="home" element={<Home />} />
         <Route path="quiz" element={<Quiz />} />
         <Route path="quiz/:id" element={<Quiz />} />
         <Route path="biblioteca" element={<Biblioteca />} />
@@ -26,8 +27,8 @@ function App() {
         <Route path="perfil" element={<Perfil />} />
       </Route>
 
-      {/* Qualquer endereço desconhecido volta para o início */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Qualquer endereço desconhecido volta para o login */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

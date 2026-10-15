@@ -87,7 +87,7 @@ function QuizJogo({ quiz, perguntas }) {
                         <button type="button" className="quiz-botao quiz-botao-sec" onClick={refazer}>
                             Refazer quiz
                         </button>
-                        <Link to="/" className="quiz-botao">
+                        <Link to="/home" className="quiz-botao">
                             Voltar ao início
                         </Link>
                     </div>
@@ -103,7 +103,7 @@ function QuizJogo({ quiz, perguntas }) {
         <div className={`quiz ${quiz.classe} anim-page-enter`}>
             {/* Topo: voltar, progresso e tema */}
             <div className="quiz-topo">
-                <Link to="/" className="quiz-voltar" aria-label="Voltar para o início">
+                <Link to="/quiz" className="quiz-voltar" aria-label="Voltar para o início">
                     ←
                 </Link>
 
@@ -216,7 +216,7 @@ function Quiz() {
                         Não encontramos esse tema. Volte ao início e escolha um dos quizzes.
                     </p>
                     <div className="quiz-acoes quiz-acoes-centro">
-                        <Link to="/" className="quiz-botao">
+                        <Link to="/home" className="quiz-botao">
                             Voltar ao início
                         </Link>
                     </div>
