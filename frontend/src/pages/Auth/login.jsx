@@ -2,6 +2,8 @@ import { useState } from "react";
 import "../../assets/css/Auth_css/login.css";
 import { Link, useNavigate } from "react-router-dom";
 import { DEV_BYPASS_AUTH } from "../../utils/auth";
+import roboCadastro from "../../assets/images/robo_cadastro.png";
+import roboLogin from "../../assets/images/robo_login.png";
 
 // Campo de senha com o botão do olho.
 // Vai ser usado no login e no cadastro.
@@ -98,7 +100,16 @@ function Login() {
   return (
     <div className="login-page">
         <div className={`login-card ${isSignup ? "is-signup" : ""}`}>
-        <div className="login-image" />
+        <div className="login-image">
+          <img
+            src={isSignup ? roboCadastro : roboLogin}
+            alt={
+              isSignup
+                ? "Robô mascote segurando uma prancheta"
+                : "Robô mascote dando tchau"
+            }
+          />
+        </div>
 
         {/* Cadastro (metade esquerda) */}
         <div className="login-form-area form-pane signup-pane">
