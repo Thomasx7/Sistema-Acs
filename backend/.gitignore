@@ -1,12 +1,26 @@
+# Ambiente Virtual
 .venv/
+env/
 venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Variáveis de Ambiente e Segredos
 .env
 env
-__pycache__/
-*.pyc
-api/test_db.py
-api/__pycache__/
-test_db.py
+.ENV
+ENV
+instance/
+.pytest_cache/
 
+#Migrações
 migrations
-/migrations
+.migrations
+
+# IDEs
+.vscode/
+.idea/
