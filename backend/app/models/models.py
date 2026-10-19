@@ -11,3 +11,7 @@ class Usuarios(db.Model):
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
     permissao = db.Column(db.String(20), default='Comum') # Adm ou Comum
     status = db.Column(db.String(20), default='Ativo')
+    
+    # Isso para a tratativa das tentativas do usuario para logar no sistema
+    tentativas_falhas = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+    bloqueado_ate = db.Column(db.DateTime, nullable=True)

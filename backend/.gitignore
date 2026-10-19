@@ -14,12 +14,9 @@ __pycache__/
 env
 .ENV
 ENV
+!.env.exemplo
 instance/
 .pytest_cache/
-
-#Migrações
-migrations
-.migrations
 
 # IDEs
 .vscode/
