@@ -1,0 +1,83 @@
+import { lerToken, removerToken } from "../utils/tokenStorage";
+
+const API_URL = "http://localhost:5000"; //TODO Mudar aqui URL backend
+
+// Erro padronizado: toda falha da API chega às telas neste formato.
+export class ApiError extends Error {
+    constructor(mensagem, status, retryAfter = null) {
+        super(mensagem);
+        this.name = "ApiError";
+        this.status = status;         // 400, 401, 429...
+        this.retryAfter = retryAfter; // segundos de espera (bloqueio do login)
+    }
+}
+
+// O AuthContext registra aqui o que fazer quando a sessão expira.
+let aoExpirarSessao = null;
+
+export function definirAoExpirarSessao(funcao) {
+    aoExpirarSessao = funcao;
+}
+
+// Extrai os segundos de espera: do header Retry-After ou, se o
+// navegador não deixar ler, da mensagem ("tente novamente em 40s").
+function lerRetryAfter(resposta, mensagem) {
+    const header = Number(resposta.headers.get("Retry-After"));
+    if (Number.isFinite(header) && header > 0) return header;
+
+    const achado = /(\d+)\s*s\b/.exec(mensagem || "");
+    return achado ? Number(achado[1]) : null;
+}
+
+async function requisicao(metodo, caminho, corpo) {
+    const token = lerToken();
+
+    const headers = { Accept: "application/json" };
+    if (corpo !== undefined) headers["Content-Type"] = "application/json";
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    let resposta;
+    try {
+        resposta = await fetch(`${API_URL}${caminho}`, {
+            method: metodo,
+            headers,
+            body: corpo !== undefined ? JSON.stringify(corpo) : undefined,
+        });
+    } catch {
+        throw new ApiError(
+            "Não foi possível conectar ao servidor. Tente novamente.",
+            0
+        );
+    }
+
+    // Se o corpo não for JSON, vira objeto vazio em vez de quebrar.
+    const dados = await resposta.json().catch(() => ({}));
+
+    if (!resposta.ok) {
+        // Mensagem do backend: {"erro": "..."} (as rotas do JWT usam "msg")
+        const mensagem =
+            dados.erro || dados.msg || "Ocorreu um erro. Tente novamente.";
+
+        // 401 com token enviado = sessão expirada ou token inválido.
+        // Sem token (ex.: senha errada no login), não é expiração.
+        if (resposta.status === 401 && token) {
+            removerToken();
+            if (aoExpirarSessao) aoExpirarSessao();
+        }
+
+        throw new ApiError(
+            mensagem,
+            resposta.status,
+            resposta.status === 429 ? lerRetryAfter(resposta, mensagem) : null
+        );
+    }
+
+    return dados;
+}
+
+export const api = {
+    get: (caminho) => requisicao("GET", caminho),
+    post: (caminho, corpo) => requisicao("POST", caminho, corpo ?? {}),
+    put: (caminho, corpo) => requisicao("PUT", caminho, corpo ?? {}),
+    delete: (caminho) => requisicao("DELETE", caminho),
+};

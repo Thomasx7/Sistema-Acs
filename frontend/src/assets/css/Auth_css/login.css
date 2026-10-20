@@ -350,3 +350,34 @@ body {
     transition: none;
   }
 }
+
+/* AVISOS DE ERRO E SUCESSO */
+.form-erro,
+.form-sucesso {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.form-erro {
+  background-color: #fdecec;
+  color: #b3261e;
+  border: 1px solid #f5c2c0;
+}
+
+.form-sucesso {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #c8e6c9;
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-button:disabled:hover {
+  background-color: var(--azul);
+}

@@ -19,7 +19,7 @@ def create_app():
     # Inicializando
     db.init_app(app)
     mail.init_app(app)
-    CORS(app)
+    CORS(app, expose_headers=["Retry-After"])
     migrate.init_app(app, db)
     jwt.init_app(app)
 

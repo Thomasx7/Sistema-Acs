@@ -1,6 +1,6 @@
 import re
 
-SENHA_MIN = 4
+SENHA_MIN = 6
 
 # local@dominio.tld  (aceita .com, .br, .com.br, .org etc.)
 EMAIL_REGEX = re.compile(
