@@ -1,15 +1,25 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
+import { useAuth } from "../context/useAuth";
 import "../assets/css/components_css/header.css";
 
-function Header({ nome = "Usuário" }) {
+function Header() {
+
+    const { usuario, logout } = useAuth();
+    const navigate = useNavigate();
+
+    // Nome vindo do backend (o "?? Usuário" é só uma rede de segurança)
+    const nomeCompleto = usuario?.nome ?? "Usuário";
+
+    // Na saudação aparece só o primeiro nome: "Olá, Thomas!"
+    const primeiroNome = nomeCompleto.trim().split(" ")[0];
+
+    // Primeira letra do nome, em maiúscula (aparece dentro da bolinha)
+    const inicial = nomeCompleto.trim().charAt(0).toUpperCase();
 
     const [aberto, setAberto] = useState(false);
     const perfilRef = useRef(null);
-
-    // Primeira letra do nome, em maiúscula (aparece dentro da bolinha)
-    const inicial = nome.trim().charAt(0).toUpperCase();
 
     useEffect(() => {
         function aoClicarFora(evento) {
@@ -36,14 +46,15 @@ function Header({ nome = "Usuário" }) {
 
     function handleSair() {
         setAberto(false);
-        window.location.href = '/login';
+        logout();                              // apaga o token e zera o usuário
+        navigate("/login", { replace: true }); // vai para o login sem recarregar a página
     }
 
     return (
         <header className="header anim-slide-in-top">
 
             <div className="nome-usuario">
-                <h2>Olá, {nome}!</h2>
+                <h2>Olá, {primeiroNome}!</h2>
             </div>
 
             <div className="header-perfil" ref={perfilRef}>
