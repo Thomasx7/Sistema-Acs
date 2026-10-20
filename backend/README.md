@@ -82,7 +82,7 @@ As variáveis `MAIL_*` configuram o Flask-Mail; os endpoints atuais de usuários
 O projeto já possui Flask-Migrate, a pasta `migrations` e uma migration para criar a tabela `usuarios`. Com o PostgreSQL configurado e a partir de `backend`, aplique-a com:
 
 ```bash
-flask --app app db upgrade
+flask --app app db init
 ```
 
 Não é necessário inicializar as migrations existentes. Se futuramente os models forem alterados, crie uma nova revisão e aplique-a:
