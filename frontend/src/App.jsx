@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Auth/login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import PainelLayout from "./layouts/PainelLayout";
 import Home from "./pages/Home/home";
@@ -14,19 +15,21 @@ function App() {
   return (
     <Routes>
 
-      {/* Auth */}
+      {/* Auth (pública) */}
       <Route path="/login" element={<Login />} />
       <Route path="/esqueci-senha" element={<EsqueciSenha />} />
 
-      {/* TODO: reativar proteção de rotas / autenticação real */}
-      <Route path="/" element={<PainelLayout />}>
-        <Route index element={<Navigate to="/login" replace />} />
-        <Route path="home" element={<Home />} />
-        <Route path="quiz" element={<Quiz />} />
-        <Route path="quiz/:id" element={<Quiz />} />
-        <Route path="biblioteca" element={<Biblioteca />} />
-        <Route path="progresso" element={<Progresso />} />
-        <Route path="perfil" element={<Perfil />} />
+      {/* Painel: só entra quem estiver logado */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<PainelLayout />}>
+          <Route index element={<Navigate to="/home" replace />} />
+          <Route path="home" element={<Home />} />
+          <Route path="quiz" element={<Quiz />} />
+          <Route path="quiz/:id" element={<Quiz />} />
+          <Route path="biblioteca" element={<Biblioteca />} />
+          <Route path="progresso" element={<Progresso />} />
+          <Route path="perfil" element={<Perfil />} />
+        </Route>
       </Route>
 
       {/* Qualquer endereço desconhecido volta para o login */}
