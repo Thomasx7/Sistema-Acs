@@ -8,6 +8,7 @@ import Quiz from "./pages/Home/quiz";
 import Biblioteca from "./pages/Home/biblioteca";
 import Progresso from "./pages/Home/progresso";
 import Perfil from "./pages/Home/perfil";
+import EsqueciSenha from "./pages/Auth/esqueci-senha";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
 
       {/* Auth */}
       <Route path="/login" element={<Login />} />
+      <Route path="/esqueci-senha" element={<EsqueciSenha />} />
 
       {/* TODO: reativar proteção de rotas / autenticação real */}
       <Route path="/" element={<PainelLayout />}>

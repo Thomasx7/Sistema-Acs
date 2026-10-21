@@ -1,0 +1,59 @@
+/* Tela "Esqueci minha senha".
+   Usa o card, o painel azul e os campos do login.css; aqui ficam só as diferenças. */
+
+/* Link "Voltar para o login" no topo do formulário */
+.back-link {
+  align-self: flex-start;
+  margin-bottom: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--login-link);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* Título que quebra de linha no celular: mantém centralizado */
+.reset-title {
+  text-align: center;
+}
+
+/* Subtítulo em mais de uma linha: centraliza o texto */
+.reset-subtitle {
+  text-align: center;
+}
+
+/* Textos da mensagem "Verifique seu e-mail" */
+.reset-info {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--login-texto-suave);
+}
+
+.reset-info-small {
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+.reset-email {
+  color: var(--login-texto-forte);
+  overflow-wrap: anywhere;
+}
+
+/* Link com a aparência do botão azul */
+.link-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+/* Botão enquanto envia */
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
