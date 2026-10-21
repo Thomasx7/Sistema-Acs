@@ -1,5 +1,5 @@
 # Inicializa o projeto
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from .config import Config
@@ -22,6 +22,19 @@ def create_app():
     CORS(app, expose_headers=["Retry-After"])
     migrate.init_app(app, db)
     jwt.init_app(app)
+    
+    # Erros do JWT em português e sempre com status 401
+    @jwt.unauthorized_loader
+    def token_ausente(motivo):
+        return jsonify({"erro": "Faça login para continuar"}), 401
+
+    @jwt.invalid_token_loader
+    def token_invalido(motivo):
+        return jsonify({"erro": "Sessão inválida. Faça login novamente"}), 401
+
+    @jwt.expired_token_loader
+    def token_expirado(jwt_header, jwt_payload):
+        return jsonify({"erro": "Sessão expirada. Faça login novamente"}), 401
 
     from app.models.models import Usuarios  
 

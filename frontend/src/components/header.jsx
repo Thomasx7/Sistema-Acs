@@ -11,8 +11,6 @@ function Header() {
 
     // Nome vindo do backend (o "?? Usuário" é só uma rede de segurança)
     const nomeCompleto = usuario?.nome ?? "Usuário";
-
-    // Na saudação aparece só o primeiro nome: "Olá, Thomas!"
     const primeiroNome = nomeCompleto.trim().split(" ")[0];
 
     // Primeira letra do nome, em maiúscula (aparece dentro da bolinha)

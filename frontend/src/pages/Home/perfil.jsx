@@ -1,27 +1,24 @@
 import { useRef, useState } from "react";
 
+import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/useTheme";
 import { quizzes } from "../../data/quizzes";
+import { api, ApiError } from "../../services/api";
 import { lerHistorico } from "../../utils/progresso";
-import { lerPerfil, PERFIL_PADRAO, salvarPerfil } from "../../utils/perfil";
+import { lerFoto, salvarFoto } from "../../utils/perfil";
+import {
+    SENHA_MIN,
+    normalizarEmail,
+    validarEmail,
+    validarSenha,
+} from "../../utils/validacao";
 
 import "../../assets/css/pages_css/perfil.css";
 
 const TAMANHO_MAXIMO_FOTO = 2 * 1024 * 1024;
 const TIPOS_IMAGEM = ["image/jpeg", "image/png", "image/webp"];
 const EXTENSOES_IMAGEM = [".jpg", ".jpeg", ".png", ".webp"];
-
-function obterPerfilInicial() {
-    try {
-        return { dados: lerPerfil(), erro: "" };
-    } catch (erro) {
-        console.error("Não foi possível carregar o perfil salvo.", erro);
-        return {
-            dados: { ...PERFIL_PADRAO },
-            erro: "Não foi possível carregar os dados salvos. Você pode editar e salvar um novo perfil.",
-        };
-    }
-}
+const NOME_MAX = 100; 
 
 function obterIniciais(nome) {
     return nome
@@ -34,27 +31,35 @@ function obterIniciais(nome) {
 }
 
 function Perfil() {
-    const [inicial] = useState(obterPerfilInicial);
-    const [perfilOriginal, setPerfilOriginal] = useState(inicial.dados);
-    const [nome, setNome] = useState(inicial.dados.nome);
-    const [email, setEmail] = useState(inicial.dados.email);
-    const [foto, setFoto] = useState(inicial.dados.foto);
+    const { usuario, atualizarUsuario } = useAuth();
     const { theme, setTheme } = useTheme();
+
+    // Nome e e-mail começam com o que veio do banco 
+    const [nome, setNome] = useState(usuario.nome);
+    const [email, setEmail] = useState(usuario.email);
+
+    // A foto ainda é local
+    const [fotoSalva, setFotoSalva] = useState(() => lerFoto(usuario.id_usuario));
+    const [foto, setFoto] = useState(fotoSalva);
+
+    const [senhaAtual, setSenhaAtual] = useState("");
     const [senha, setSenha] = useState("");
     const [confirmacaoSenha, setConfirmacaoSenha] = useState("");
+    const [mostrarSenhaAtual, setMostrarSenhaAtual] = useState(false);
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [mostrarConfirmacao, setMostrarConfirmacao] = useState(false);
+
     const [erros, setErros] = useState({});
     const [erroFoto, setErroFoto] = useState("");
-    const [feedback, setFeedback] = useState(
-        inicial.erro ? { tipo: "erro", mensagem: inicial.erro } : null
-    );
+    const [feedback, setFeedback] = useState(null);
+    const [salvando, setSalvando] = useState(false);
     const inputFotoRef = useRef(null);
 
+  
     const alterado =
-        nome !== perfilOriginal.nome ||
-        email !== perfilOriginal.email ||
-        foto !== perfilOriginal.foto ||
+        nome !== usuario.nome ||
+        email !== usuario.email ||
+        foto !== fotoSalva ||
         senha !== "" ||
         confirmacaoSenha !== "";
 
@@ -128,18 +133,22 @@ function Perfil() {
 
         if (!nome.trim()) {
             novosErros.nome = "Informe seu nome.";
-        } else if (nome.trim().length > 120) {
-            novosErros.nome = "O nome deve ter no máximo 120 caracteres.";
+        } else if (nome.trim().length > NOME_MAX) {
+            novosErros.nome = `O nome deve ter no máximo ${NOME_MAX} caracteres.`;
         }
 
-        if (!email.trim()) {
-            novosErros.email = "Informe seu e-mail.";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-            novosErros.email = "Informe um e-mail válido.";
+        const erroEmail = validarEmail(normalizarEmail(email));
+        if (erroEmail) {
+            novosErros.email = erroEmail;
         }
 
-        if (senha && senha.length < 6) {
-            novosErros.senha = "A senha deve ter no mínimo 6 caracteres.";
+        if (senha) {
+            const erroSenha = validarSenha(senha);
+            if (erroSenha) novosErros.senha = erroSenha;
+
+            if (!senhaAtual) {
+                novosErros.senhaAtual = "Informe sua senha atual para trocar a senha.";
+            }
         }
 
         if (confirmacaoSenha && !senha) {
@@ -154,38 +163,75 @@ function Perfil() {
         return Object.keys(novosErros).length === 0;
     }
 
-    function salvarAlteracoes(evento) {
+    async function salvarAlteracoes(evento) {
         evento.preventDefault();
+        if (salvando) return;
+
         setFeedback(null);
 
         if (!validarFormulario()) return;
 
-        const dadosAtualizados = {
-            nome: nome.trim(),
-            email: email.trim(),
-            foto,
-        };
+        const nomeLimpo = nome.trim();
+        const emailLimpo = normalizarEmail(email);
+
+        // Envia para a API só o que mudou
+        const corpo = {};
+        if (nomeLimpo !== usuario.nome) corpo.nome = nomeLimpo;
+        if (emailLimpo !== usuario.email) corpo.email = emailLimpo;
+        if (senha) {
+            corpo.senha = senha;
+            corpo.senha_atual = senhaAtual;
+        }
+
+        const mudouFoto = foto !== fotoSalva;
+        const temDadosParaEnviar = Object.keys(corpo).length > 0;
+
+        setSalvando(true);
 
         try {
-            salvarPerfil(dadosAtualizados);
-            setPerfilOriginal(dadosAtualizados);
-            setNome(dadosAtualizados.nome);
-            setEmail(dadosAtualizados.email);
+            if (temDadosParaEnviar) {
+                const resposta = await api.put(`/usuarios/${usuario.id_usuario}`, corpo);
+                // Atualiza o contexto: o Header muda o nome na hora
+                atualizarUsuario(resposta.usuario);
+            }
+
+            let fotoOk = true;
+            if (mudouFoto) {
+                fotoOk = salvarFoto(usuario.id_usuario, foto);
+                if (fotoOk) setFotoSalva(foto);
+            }
+
+            // Mostra no formulário os valores já tratados
+            setNome(nomeLimpo);
+            setEmail(emailLimpo);
+            setSenhaAtual("");
             setSenha("");
             setConfirmacaoSenha("");
             setErros({});
-            setFeedback({
-                tipo: "sucesso",
-                mensagem: senha
-                    ? "Perfil salvo neste dispositivo. A nova senha não foi alterada; a integração segura com a API ainda está pendente."
-                    : "Alterações salvas neste dispositivo.",
-            });
-        } catch (erro) {
-            console.error("Não foi possível salvar as alterações do perfil.", erro);
+
+            if (!fotoOk) {
+                setFeedback({
+                    tipo: "erro",
+                    mensagem: "Seus dados foram salvos, mas a foto não coube no navegador. Tente uma imagem menor.",
+                });
+            } else {
+                setFeedback({
+                    tipo: "sucesso",
+                    mensagem: senha
+                        ? "Alterações salvas. Sua senha foi atualizada."
+                        : "Alterações salvas com sucesso.",
+                });
+            }
+        } catch (falha) {
             setFeedback({
                 tipo: "erro",
-                mensagem: "Não foi possível salvar. Verifique o espaço disponível no navegador e tente novamente.",
+                mensagem:
+                    falha instanceof ApiError
+                        ? falha.message
+                        : "Não foi possível salvar. Tente novamente.",
             });
+        } finally {
+            setSalvando(false);
         }
     }
 
@@ -249,7 +295,7 @@ function Perfil() {
                                     id="perfil-nome"
                                     type="text"
                                     autoComplete="name"
-                                    maxLength={120}
+                                    maxLength={NOME_MAX}
                                     value={nome}
                                     onChange={(evento) => {
                                         atualizarCampo(setNome, evento.target.value);
@@ -281,7 +327,38 @@ function Perfil() {
 
                         <div className="perfil-secao-titulo perfil-senha-titulo">
                             <h2>Alterar senha</h2>
-                            <p>Deixe em branco se não quiser alterar sua senha.</p>
+                            <p>Para trocar a senha, informe a atual e a nova. Deixe em branco se não quiser alterar.</p>
+                        </div>
+
+                        <div className="perfil-campos">
+                            <div className="perfil-campo">
+                                <label htmlFor="perfil-senha-atual">Senha atual</label>
+                                <div className="perfil-senha-campo">
+                                    <input
+                                        id="perfil-senha-atual"
+                                        type={mostrarSenhaAtual ? "text" : "password"}
+                                        autoComplete="current-password"
+                                        value={senhaAtual}
+                                        onChange={(evento) => {
+                                            atualizarCampo(setSenhaAtual, evento.target.value);
+                                            setErros((atuais) => ({ ...atuais, senhaAtual: "" }));
+                                        }}
+                                        aria-invalid={Boolean(erros.senhaAtual)}
+                                        aria-describedby={erros.senhaAtual ? "perfil-senha-atual-erro" : undefined}
+                                    />
+                                    <button
+                                        className="perfil-mostrar-senha"
+                                        type="button"
+                                        onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
+                                        aria-label={mostrarSenhaAtual ? "Ocultar senha atual" : "Mostrar senha atual"}
+                                    >
+                                        {mostrarSenhaAtual ? "Ocultar" : "Mostrar"}
+                                    </button>
+                                </div>
+                                {erros.senhaAtual && (
+                                    <span className="perfil-erro" id="perfil-senha-atual-erro">{erros.senhaAtual}</span>
+                                )}
+                            </div>
                         </div>
 
                         <div className="perfil-campos">
@@ -311,7 +388,7 @@ function Perfil() {
                                 </div>
                                 {erros.senha
                                     ? <span className="perfil-erro" id="perfil-senha-erro">{erros.senha}</span>
-                                    : <span className="perfil-ajuda" id="perfil-senha-ajuda">Mínimo de 6 caracteres.</span>}
+                                    : <span className="perfil-ajuda" id="perfil-senha-ajuda">Mínimo de {SENHA_MIN} caracteres.</span>}
                             </div>
 
                             <div className="perfil-campo">
@@ -344,10 +421,6 @@ function Perfil() {
                             </div>
                         </div>
 
-                        <p className="perfil-aviso-senha">
-                            A senha não é armazenada no navegador. A troca real depende da integração autenticada com a API.
-                        </p>
-
                         {feedback && (
                             <p
                                 className={`perfil-feedback perfil-feedback-${feedback.tipo}`}
@@ -358,8 +431,12 @@ function Perfil() {
                         )}
 
                         <div className="perfil-acoes">
-                            <button className="perfil-salvar" type="submit" disabled={!alterado}>
-                                {alterado ? "Salvar alterações" : "Editar informações"}
+                            <button className="perfil-salvar" type="submit" disabled={!alterado || salvando}>
+                                {salvando
+                                    ? "Salvando..."
+                                    : alterado
+                                        ? "Salvar alterações"
+                                        : "Editar informações"}
                             </button>
                         </div>
                     </form>

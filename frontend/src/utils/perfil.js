@@ -1,33 +1,28 @@
-export const CHAVE_PERFIL = "acs-perfil-usuario";
+// Foto de perfil: fica neste navegador, separada por usuário.
 
-export const PERFIL_PADRAO = {
-    nome: "Usuário Padrão",
-    email: "usuariopadrao@example.com",
-    foto: "",
-};
-
-export function lerPerfil() {
-    const salvo = localStorage.getItem(CHAVE_PERFIL);
-    if (!salvo) return { ...PERFIL_PADRAO };
-
-    const perfil = JSON.parse(salvo);
-    if (!perfil || typeof perfil !== "object" || Array.isArray(perfil)) {
-        throw new Error("Os dados de perfil salvos estão inválidos.");
-    }
-
-    return {
-        nome: typeof perfil.nome === "string" ? perfil.nome : PERFIL_PADRAO.nome,
-        email: typeof perfil.email === "string" ? perfil.email : PERFIL_PADRAO.email,
-        foto: typeof perfil.foto === "string" ? perfil.foto : "",
-    };
+function chaveDaFoto(idUsuario) {
+    return `acs-foto-${idUsuario}`;
 }
 
-export function salvarPerfil(perfil) {
-    const dadosPersistidos = {
-        nome: perfil.nome,
-        email: perfil.email,
-        foto: perfil.foto,
-    };
+export function lerFoto(idUsuario) {
+    try {
+        const foto = localStorage.getItem(chaveDaFoto(idUsuario));
+        return foto && foto.startsWith("data:image/") ? foto : "";
+    } catch {
+        return "";
+    }
+}
 
-    localStorage.setItem(CHAVE_PERFIL, JSON.stringify(dadosPersistidos));
+// Devolve true se salvou, false se o navegador não deixou (ex.: sem espaço).
+export function salvarFoto(idUsuario, foto) {
+    try {
+        if (foto) {
+            localStorage.setItem(chaveDaFoto(idUsuario), foto);
+        } else {
+            localStorage.removeItem(chaveDaFoto(idUsuario));
+        }
+        return true;
+    } catch {
+        return false;
+    }
 }
