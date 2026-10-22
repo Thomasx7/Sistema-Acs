@@ -1,8 +1,8 @@
-"""Criando tabela de usuarios
+"""descricao da alteracao
 
-Revision ID: dbfb82bf86be
+Revision ID: 53e9180c8fa8
 Revises: 
-Create Date: 2026-10-19 09:52:16.974939
+Create Date: 2026-10-20 22:07:25.932628
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'dbfb82bf86be'
+revision = '53e9180c8fa8'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,6 +26,8 @@ def upgrade():
     sa.Column('data_cadastro', sa.DateTime(), nullable=True),
     sa.Column('permissao', sa.String(length=20), nullable=True),
     sa.Column('status', sa.String(length=20), nullable=True),
+    sa.Column('tentativas_falhas', sa.Integer(), server_default='0', nullable=False),
+    sa.Column('bloqueado_ate', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id_usuario'),
     sa.UniqueConstraint('email')
     )
