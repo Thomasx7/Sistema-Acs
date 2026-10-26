@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../../assets/css/Auth_css/login.css";
 import "../../assets/css/Auth_css/esqueci-senha.css";
-import roboLogin from "../../assets/images/robo_login.png";
+import roboLogin from "../../assets/images/robo-esqueci-senha.png";
 
 function EsqueciSenha() {
   const [email, setEmail] = useState("");
