@@ -4,11 +4,12 @@ from app import db
 from app.models.models import Usuarios
 from app.utils.decorators import autenticado, apenas_adm, eh_adm
 from app.utils.hash import hash_password, check_password
+from app.utils.permissoes import PERMISSAO_ADM, PERMISSAO_COMUM
 from app.utils.validators import normalizar_email, validar_email, validar_senha
 
 user_bp = Blueprint('user_bp', __name__)
 
-PERMISSOES = ("Adm", "Comum")
+PERMISSOES = (PERMISSAO_ADM, PERMISSAO_COMUM)
 STATUS = ("Ativo", "Inativo")
 NOME_MAX = 100  
 
@@ -33,7 +34,7 @@ def validar_nome(nome):
     return None
 
 
-# TODO LISTAR TODOS OS USUÁRIOS (só Adm)
+# TODO LISTAR TODOS OS USUÁRIOS (só administradores)
 @user_bp.route('/', methods=['GET'])
 @apenas_adm
 def get_users():
@@ -41,7 +42,7 @@ def get_users():
     return jsonify([serializar(user) for user in usuarios]), 200
 
 
-# TODO BUSCAR UM USUÁRIO POR ID (Adm ou o próprio usuário)
+# TODO BUSCAR UM USUÁRIO POR ID (administrador ou o próprio usuário)
 @user_bp.route('/<int:id_usuario>', methods=['GET'])
 @autenticado
 def get_user_by_id(id_usuario):
@@ -98,7 +99,7 @@ def create_user():
     }), 201
 
 
-# TODO EDITAR UM USUÁRIO (Adm ou o próprio usuário)
+# TODO EDITAR UM USUÁRIO (administrador ou o próprio usuário)
 @user_bp.route('/<int:id_usuario>', methods=['PUT'])
 @autenticado
 def update_user(id_usuario):
@@ -139,7 +140,7 @@ def update_user(id_usuario):
                 return jsonify({"erro": "Email já cadastrado"}), 400
             mudancas["email"] = novo_email
 
-    # Permissão e status: só Adm, e nunca nos próprios dados
+    # Permissão e status: só administradores, e nunca nos próprios dados
     for campo, validos in (("permissao", PERMISSOES), ("status", STATUS)):
         if campo not in data or data[campo] == getattr(usuario, campo):
             continue  # não enviou, ou enviou o mesmo valor: nada a fazer
@@ -190,7 +191,7 @@ def update_user(id_usuario):
     }), 200
 
 
-# TODO DELETAR UM USUÁRIO (só Adm)
+# TODO DELETAR UM USUÁRIO (só administradores)
 @user_bp.route('/<int:id_usuario>', methods=['DELETE'])
 @apenas_adm
 def delete_user(id_usuario):

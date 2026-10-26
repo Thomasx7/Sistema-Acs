@@ -3,27 +3,46 @@ import { Link } from "react-router-dom";
 import "../../assets/css/Auth_css/login.css";
 import "../../assets/css/Auth_css/esqueci-senha.css";
 import roboLogin from "../../assets/images/robo-esqueci-senha.png";
+import { api, ApiError } from "../../services/api";
+import { normalizarEmail, validarEmail } from "../../utils/validacao";
 
 function EsqueciSenha() {
   const [email, setEmail] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  const [erro, setErro] = useState("");
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (enviando) return;
+
+    const emailNormalizado = normalizarEmail(email);
+    const erroEmail = validarEmail(emailNormalizado);
+    if (erroEmail) {
+      setErro(erroEmail);
+      return;
+    }
+
+    setErro("");
     setEnviando(true);
-
-    // TODO: chamar a API quando o backend tiver a rota de recuperação de senha.
-    // Por enquanto só simulamos o envio.
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
-    setEnviando(false);
-    setEnviado(true);
+    try {
+      await api.post("/auth/esqueci-senha", { email: emailNormalizado });
+      setEnviado(true);
+    } catch (falha) {
+      setErro(
+        falha instanceof ApiError
+          ? falha.message
+          : "Ocorreu um erro inesperado. Tente novamente."
+      );
+    } finally {
+      setEnviando(false);
+    }
   }
 
   function tentarOutroEmail() {
     setEnviado(false);
     setEmail("");
+    setErro("");
   }
 
   return (
@@ -38,8 +57,8 @@ function EsqueciSenha() {
             <div className="login-form" role="status">
               <h1 className="reset-title">Verifique seu e-mail</h1>
               <p className="reset-info">
-                Se <strong className="reset-email">{email}</strong> estiver
-                cadastrado, você vai receber um link para criar uma nova senha.
+                Se o e-mail estiver cadastrado, você receberá um link para
+                criar uma nova senha.
               </p>
               <p className="reset-info reset-info-small">
                 Não encontrou? Olhe também a caixa de spam.
@@ -61,7 +80,7 @@ function EsqueciSenha() {
               </p>
             </div>
           ) : (
-            <form className="login-form" onSubmit={handleSubmit}>
+            <form className="login-form" onSubmit={handleSubmit} noValidate>
               <Link to="/login" className="back-link">
                 ← Voltar para o login
               </Link>
@@ -79,9 +98,18 @@ function EsqueciSenha() {
                 autoComplete="email"
                 placeholder="Digite seu e-mail"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setErro("");
+                }}
                 required
               />
+
+              {erro && (
+                <p className="form-erro" role="alert">
+                  {erro}
+                </p>
+              )}
 
               <button
                 type="submit"

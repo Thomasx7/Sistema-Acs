@@ -7,9 +7,83 @@ from flask_jwt_extended import (
 
 from app.models.models import Usuarios
 from app.services.auth_service import autenticar, AuthError
+from app.services.email_service import enviar_email_reset
+from app.services.reset_senha_service import (
+    TokenRedefinicaoInvalido,
+    buscar_token_valido,
+    gerar_token,
+    redefinir,
+)
 from app.utils.validators import normalizar_email, validar_email, validar_senha
 
 auth_bp = Blueprint('auth_bp', __name__)
+
+MSG_REDEFINICAO_SOLICITADA = (
+    "Se o e-mail estiver cadastrado, você receberá um link para criar uma nova senha."
+)
+MSG_LINK_INVALIDO = "Link inválido ou expirado"
+
+
+@auth_bp.route('/esqueci-senha', methods=['POST'])
+def esqueci_senha():
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return jsonify({"erro": "Email inválido"}), 400
+    email = data.get("email")
+    if not isinstance(email, str):
+        return jsonify({"erro": "Email inválido"}), 400
+
+    email = normalizar_email(email)
+    if validar_email(email):
+        return jsonify({"erro": "Email inválido"}), 400
+
+    usuario = Usuarios.query.filter_by(email=email, status="Ativo").first()
+    if usuario:
+        token = gerar_token(usuario)
+        if token:
+            enviar_email_reset(usuario, token)
+
+    return jsonify({"mensagem": MSG_REDEFINICAO_SOLICITADA}), 200
+
+
+@auth_bp.route('/redefinir-senha/validar', methods=['POST'])
+def validar_token_redefinicao():
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return jsonify({"erro": MSG_LINK_INVALIDO}), 400
+    token = data.get("token")
+    if not isinstance(token, str) or not token:
+        return jsonify({"erro": MSG_LINK_INVALIDO}), 400
+
+    if not buscar_token_valido(token):
+        return jsonify({"erro": MSG_LINK_INVALIDO}), 400
+
+    return jsonify({"valido": True}), 200
+
+
+@auth_bp.route('/redefinir-senha', methods=['POST'])
+def redefinir_senha():
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return jsonify({"erro": MSG_LINK_INVALIDO}), 400
+    token = data.get("token")
+    senha = data.get("senha")
+
+    if not isinstance(token, str) or not token:
+        return jsonify({"erro": MSG_LINK_INVALIDO}), 400
+    if not isinstance(senha, str):
+        return jsonify({"erro": "Senha é obrigatória"}), 400
+
+    erro_senha = validar_senha(senha)
+    if erro_senha:
+        return jsonify({"erro": erro_senha}), 400
+
+    try:
+        redefinir(token, senha)
+    except TokenRedefinicaoInvalido:
+        return jsonify({"erro": MSG_LINK_INVALIDO}), 400
+
+    return jsonify({"mensagem": "Senha redefinida com sucesso"}), 200
 
 
 # TODO LOGIN

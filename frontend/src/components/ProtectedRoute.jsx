@@ -7,7 +7,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 
 // Porteiro das rotas.
-// Com permissao="Adm": só quem tem essa permissão entra.
+// Quando recebe uma permissão específica, só quem a possui entra.
 function ProtectedRoute({ permissao }) {
     const { usuario, autenticado, carregando } = useAuth();
 

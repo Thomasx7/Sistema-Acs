@@ -1,0 +1,277 @@
+.usuarios {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+}
+
+.usuarios-top h1 {
+    color: var(--texto-titulo);
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.usuarios-top p {
+    margin-top: 5px;
+    color: var(--texto-suave);
+    font-size: 0.94rem;
+}
+
+.usuarios-resumo {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.usuarios-resumo-card,
+.usuarios-lista,
+.usuarios-mensagem {
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+    background: var(--superficie);
+    box-shadow: var(--sombra-card);
+}
+
+.usuarios-resumo-card {
+    padding: 16px 18px;
+}
+
+.usuarios-resumo-card span {
+    display: block;
+    color: var(--texto-suave);
+    font-size: 0.84rem;
+}
+
+.usuarios-resumo-card strong {
+    display: block;
+    margin-top: 6px;
+    color: var(--texto-titulo);
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.usuarios-resumo-ativo strong {
+    color: var(--sucesso);
+}
+
+.usuarios-resumo-inativo strong {
+    color: var(--erro);
+}
+
+.usuarios-resumo-adm strong {
+    color: var(--azul-secundario);
+}
+
+.usuarios-lista {
+    min-width: 0;
+    padding: 18px;
+}
+
+.usuarios-ferramentas {
+    display: flex;
+    align-items: end;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.usuarios-ferramentas label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 150px;
+    color: var(--texto);
+    font-size: 0.83rem;
+    font-weight: 500;
+}
+
+.usuarios-ferramentas .usuarios-busca {
+    flex: 1 1 240px;
+}
+
+.usuarios-ferramentas input,
+.usuarios-ferramentas select {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    background: var(--superficie);
+    color: var(--texto);
+    font: inherit;
+}
+
+.usuarios-ferramentas input:focus-visible,
+.usuarios-ferramentas select:focus-visible,
+.usuarios-ferramentas button:focus-visible,
+.usuarios-paginacao button:focus-visible,
+.usuarios-erro button:focus-visible,
+.usuarios-tabela-container:focus-visible {
+    outline: 3px solid var(--foco-contorno);
+    outline-offset: 2px;
+}
+
+.usuarios-limpar,
+.usuarios-paginacao button,
+.usuarios-erro button {
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--azul-secundario);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--texto-link);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 500;
+}
+
+.usuarios-limpar:hover,
+.usuarios-paginacao button:not(:disabled):hover {
+    background: var(--selecionado-fundo);
+}
+
+.usuarios-tabela-container {
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+}
+
+.usuarios table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--texto);
+    text-align: left;
+}
+
+.usuarios caption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+.usuarios th,
+.usuarios td {
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--borda);
+    font-size: 0.87rem;
+    vertical-align: middle;
+}
+
+.usuarios th {
+    background: var(--fundo);
+    color: var(--texto-suave);
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.usuarios tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.usuarios tbody tr:hover {
+    background: var(--opcao-hover);
+}
+
+.usuarios-nome {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.usuarios-voce {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--selecionado-fundo);
+    color: var(--texto-link);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.usuarios-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-adm {
+    background: var(--selecionado-fundo);
+    color: var(--texto-link);
+}
+
+.badge-comum {
+    background: var(--estado-inativo-fundo);
+    color: var(--texto-suave);
+}
+
+.badge-ativo {
+    background: var(--sucesso-fundo);
+    color: var(--sucesso-texto);
+}
+
+.badge-inativo {
+    background: var(--erro-fundo);
+    color: var(--erro);
+}
+
+.usuarios td.usuarios-vazio {
+    padding: 28px 14px;
+    color: var(--texto-suave);
+    text-align: center;
+}
+
+.usuarios-paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 16px;
+    color: var(--texto-suave);
+    font-size: 0.84rem;
+}
+
+.usuarios-paginacao > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.usuarios-paginacao button:disabled {
+    border-color: var(--borda);
+    color: var(--texto-suave);
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.usuarios-mensagem {
+    padding: 20px;
+    color: var(--texto);
+}
+
+.usuarios-erro {
+    border-color: var(--erro);
+    background: var(--erro-fundo);
+    color: var(--texto-titulo);
+}
+
+.usuarios-erro button {
+    margin-top: 12px;
+    border-color: var(--azul-secundario);
+    background: var(--azul-secundario);
+    color: var(--texto-botao);
+}
+
+.usuarios-erro button:hover {
+    background: var(--login-botao-hover);
+}

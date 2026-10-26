@@ -109,6 +109,12 @@
     object-fit: contain;
 }
 
+.sidebar nav a .sidebar-usuarios-icone {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+}
+
 .sidebar nav a:hover {
     background: var(--sidebar-hover);
     border-color: var(--sidebar-borda-hover);

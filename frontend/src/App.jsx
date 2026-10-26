@@ -10,6 +10,11 @@ import Biblioteca from "./pages/Home/biblioteca";
 import Progresso from "./pages/Home/progresso";
 import Perfil from "./pages/Home/perfil";
 import EsqueciSenha from "./pages/Auth/esqueci-senha";
+import RedefinirSenha from "./pages/Auth/redefinir-senha";
+import Termos from "./pages/Legal/termos";
+import Privacidade from "./pages/Legal/privacidade";
+import Usuarios from "./pages/Home/usuarios";
+import { PERMISSAO_ADM } from "./utils/permissoes";
 
 function App() {
   return (
@@ -18,6 +23,9 @@ function App() {
       {/* Auth (pública) */}
       <Route path="/login" element={<Login />} />
       <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+      <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+      <Route path="/termos" element={<Termos />} />
+      <Route path="/privacidade" element={<Privacidade />} />
 
       {/* Painel: só entra quem estiver logado */}
       <Route element={<ProtectedRoute />}>
@@ -29,6 +37,9 @@ function App() {
           <Route path="biblioteca" element={<Biblioteca />} />
           <Route path="progresso" element={<Progresso />} />
           <Route path="perfil" element={<Perfil />} />
+          <Route element={<ProtectedRoute permissao={PERMISSAO_ADM} />}>
+            <Route path="usuarios" element={<Usuarios />} />
+          </Route>
         </Route>
       </Route>
 

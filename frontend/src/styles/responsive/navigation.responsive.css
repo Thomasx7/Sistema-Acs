@@ -63,6 +63,11 @@
     height: 20px;
   }
 
+  .sidebar nav a .sidebar-usuarios-icone {
+    width: 20px;
+    height: 20px;
+  }
+
   .sidebar-collapsed .sidebar-header h2,
   .sidebar-collapsed nav a span {
     display: block;

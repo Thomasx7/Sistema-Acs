@@ -4,10 +4,11 @@ from flask import g, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app.models.models import Usuarios
+from app.utils.permissoes import PERMISSAO_ADM
 
 
 def eh_adm(usuario):
-    return usuario.permissao == "Adm"
+    return usuario.permissao == PERMISSAO_ADM
 
 
 def autenticado(funcao):
@@ -29,7 +30,7 @@ def autenticado(funcao):
 
 
 def apenas_adm(funcao):
-    """Exige login e permissão de Adm."""
+    """Exige login e permissão administrativa."""
 
     @wraps(funcao)
     @autenticado

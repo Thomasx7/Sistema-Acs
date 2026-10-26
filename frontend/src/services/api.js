@@ -54,12 +54,15 @@ async function requisicao(metodo, caminho, corpo) {
     const dados = await resposta.json().catch(() => ({}));
 
     if (!resposta.ok) {
+        console.warn("[API] Requisição falhou:", metodo, caminho, resposta.status);
+
         // Mensagem do backend: {"erro": "..."} (as rotas do JWT usam "msg")
         const mensagem =
             dados.erro || dados.msg || "Ocorreu um erro. Tente novamente.";
 
         // 401 com token enviado = sessão expirada ou token inválido.
         // Sem token (ex.: senha errada no login), não é expiração.
+        // Respostas 403 são negadas por permissão e não encerram a sessão.
         if (resposta.status === 401 && token) {
             removerToken();
             if (aoExpirarSessao) aoExpirarSessao();

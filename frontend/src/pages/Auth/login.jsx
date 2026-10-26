@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import "../../assets/css/Auth_css/login.css";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 import { ApiError } from "../../services/api";
+import PasswordField from "../../components/PasswordField";
 import {
   normalizarEmail,
   validarEmail,
@@ -10,64 +11,6 @@ import {
 } from "../../utils/validacao";
 import roboCadastro from "../../assets/images/robo_cadastro.png";
 import roboLogin from "../../assets/images/robo_login.png";
-
-// Campo de senha com o botão do olho.
-// Vai ser usado no login e no cadastro.
-function PasswordField({ id, value, onChange, autoComplete }) {
-  const [showPassword, setShowPassword] = useState(false);
-
-  return (
-    <div className="password-field">
-      <input
-        id={id}
-        type={showPassword ? "text" : "password"}
-        placeholder="Digite sua senha"
-        value={value}
-        onChange={onChange}
-        autoComplete={autoComplete}
-        required
-      />
-      <button
-        type="button"
-        className="eye-button"
-        onClick={() => setShowPassword(!showPassword)}
-        aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-      >
-        {showPassword ? (
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-            <line x1="1" y1="1" x2="23" y2="23" />
-          </svg>
-        ) : (
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        )}
-      </button>
-    </div>
-  );
-}
 
 // Transforma qualquer falha em uma mensagem para mostrar na tela.
 function mensagemDeErro(falha) {
@@ -90,6 +33,8 @@ function validarCadastro(nome, email, senha, aceitouTermos) {
 
 function Login() {
   const { autenticado, carregando, login, cadastrar } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Dados do login
   const [email, setEmail] = useState("");
@@ -99,7 +44,9 @@ function Login() {
   // Segundos que faltam para o bloqueio (5 tentativas erradas) acabar.
   const [segundosBloqueio, setSegundosBloqueio] = useState(0);
   // Aviso de sucesso mostrado no login depois de cadastrar.
-  const [sucesso, setSucesso] = useState("");
+  const [sucesso, setSucesso] = useState(
+    () => location.state?.mensagem || ""
+  );
 
   // false = mostra o login | true = mostra o cadastro
   const [isSignup, setIsSignup] = useState(false);
@@ -123,6 +70,12 @@ function Login() {
 
     return () => clearTimeout(timer);
   }, [segundosBloqueio]);
+
+  useEffect(() => {
+    if (location.state?.mensagem) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   // Alterna entre login e cadastro limpando os avisos da tela anterior.
   function trocarFormulario(mostrarCadastro) {
@@ -275,7 +228,26 @@ function Login() {
                 onChange={(event) => setAcceptedTerms(event.target.checked)}
                 required
               />
-              Li e concordo com os Termos e a Política de Privacidade
+              <span className="terms-texto">
+                Li e concordo com os{" "}
+                <Link
+                  to="/termos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  Termos
+                </Link>{" "}
+                e a{" "}
+                <Link
+                  to="/privacidade"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  Política de Privacidade
+                </Link>
+              </span>
             </label>
 
             {erroCadastro && (

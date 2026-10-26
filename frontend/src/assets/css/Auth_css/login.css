@@ -260,18 +260,43 @@ body {
 /* ===== TERMOS E LINKS DE TROCA ===== */
 .login-form .terms {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   margin-bottom: 18px;
-  font-size: 13px;
   font-weight: 400;
-  color: #555555;
+  color: var(--login-texto-forte);
 }
 
 .login-form .terms input {
-  width: auto;
-  height: auto;
-  margin: 0;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: var(--azul);
+}
+
+.terms-texto {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.login-form .terms a,
+.login-form .terms a:visited {
+  color: var(--login-link);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-form .terms a:hover {
+  text-decoration: underline;
+}
+
+.login-form .terms a:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--login-focus);
+  outline-offset: 2px;
 }
 
 .switch-text {

@@ -40,9 +40,11 @@ def create_app():
 
     # Importando as Rotas
     from app.routes.auth_routes import auth_bp
+    from app.routes.admin_routes import admin_bp
     from app.routes.usuario_routes import user_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(user_bp, url_prefix='/usuarios')
 
     return app

@@ -3,6 +3,8 @@ import { useState } from "react";
 import QuizItem from "./quiz-item";
 import { quizzes } from "../data/quizzes";
 import { lerHistorico } from "../utils/progresso";
+import { useAuth } from "../context/useAuth";
+import { ehAdm } from "../utils/permissoes";
 
 import "../assets/css/components_css/historico-quiz.css";
 
@@ -10,7 +12,8 @@ import "../assets/css/components_css/historico-quiz.css";
 const LIMITE = 5;
 
 function HistoricoQuiz() {
-    
+    const { usuario } = useAuth();
+    const administrador = ehAdm(usuario);
     const [lista] = useState(() =>
         lerHistorico()
             .map((item) => ({
@@ -25,13 +28,15 @@ function HistoricoQuiz() {
     return (
         <section className="historico">
             <div className="historico-top">
-                <h2>Últimos quiz</h2>
+                <h2>Últimos quizzes</h2>
                 <p>Seus quizzes mais recentes aparecem aqui.</p>
             </div>
 
             {lista.length === 0 ? (
                 <div className="historico-vazio">
-                    Você ainda não iniciou nenhum quiz. Escolha um tema acima para começar.
+                    {administrador
+                        ? "Você ainda não iniciou nenhum quiz. Acesse o menu Quiz para começar."
+                        : "Você ainda não iniciou nenhum quiz. Escolha um tema acima para começar."}
                 </div>
             ) : (
                 <ul className="historico-lista anim-stagger">

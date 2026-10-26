@@ -74,25 +74,97 @@ Edite o `.env` e configure as variáveis usadas em `app/config.py`:
 | `MAIL_USERNAME` | Usuário ou endereço de e-mail do servidor SMTP. |
 | `MAIL_PASSWORD` | Senha ou senha de aplicativo do servidor SMTP. |
 | `MAIL_USE_TLS` | Use `True` para habilitar TLS ou `False` para desabilitá-lo. O código compara o valor com a string `True`. |
+| `MAIL_DEFAULT_SENDER` | Remetente dos e-mails; se vazio, usa `MAIL_USERNAME`. |
+| `FRONTEND_URL` | Endereço base do frontend usado nos links enviados por e-mail, sem barra no final. O padrão é `http://localhost:5173`. |
+| `RESET_SENHA_EXPIRA_MINUTOS` | Validade do link de redefinição em minutos. O padrão é `30`. |
 
-As variáveis `MAIL_*` configuram o Flask-Mail; os endpoints atuais de usuários não enviam e-mails. Não há leitura de `FLASK_APP` ou `FLASK_ENV` no backend. O arquivo `.env` é carregado por `app/config.py` e não deve ser enviado ao repositório.
+As variáveis `MAIL_*` configuram o Flask-Mail. O arquivo `.env` é carregado por `app/config.py` e não deve ser enviado ao repositório.
 
 ## 4️⃣ Executar as migrations
 
-O projeto já possui Flask-Migrate, a pasta `migrations` e uma migration para criar a tabela `usuarios`. Com o PostgreSQL configurado e a partir de `backend`, aplique-a com:
+O projeto já possui Flask-Migrate e a pasta `migrations`. Com o PostgreSQL configurado e a partir de `backend`, aplique as migrations existentes com:
 
 ```bash
-flask --app app db init
+flask --app app db upgrade
 ```
 
-Não é necessário inicializar as migrations existentes. Se futuramente os models forem alterados, crie uma nova revisão e aplique-a:
+Não execute `db init` para um projeto que já possui a pasta de migrations. Quando os models forem alterados, crie uma nova revisão e aplique-a:
 
 ```bash
 flask --app app db migrate -m "descricao da alteracao"
 flask --app app db upgrade
 ```
 
-## 5️⃣ Rodar o projeto
+## 5️⃣ Recuperação de senha
+
+As rotas públicas de recuperação de senha são:
+
+### Solicitar link — `POST /auth/esqueci-senha`
+
+Corpo:
+
+```json
+{ "email": "usuario@example.com" }
+```
+
+Para qualquer e-mail válido, a resposta é sempre a mesma, mesmo que a conta não exista ou esteja inativa:
+
+```json
+{
+  "mensagem": "Se o e-mail estiver cadastrado, você receberá um link para criar uma nova senha."
+}
+```
+
+Um novo pedido só pode gerar outro e-mail após 60 segundos. O link anterior é invalidado quando um novo token é criado.
+
+### Validar link — `POST /auth/redefinir-senha/validar`
+
+Corpo:
+
+```json
+{ "token": "TOKEN_RECEBIDO_POR_EMAIL" }
+```
+
+Resposta para um token ainda válido:
+
+```json
+{ "valido": true }
+```
+
+Tokens inválidos, expirados ou já usados retornam HTTP 400:
+
+```json
+{ "erro": "Link inválido ou expirado" }
+```
+
+### Redefinir senha — `POST /auth/redefinir-senha`
+
+Corpo:
+
+```json
+{
+  "token": "TOKEN_RECEBIDO_POR_EMAIL",
+  "senha": "minha-nova-senha"
+}
+```
+
+Resposta de sucesso:
+
+```json
+{ "mensagem": "Senha redefinida com sucesso" }
+```
+
+O token é de uso único e expira após o intervalo definido por `RESET_SENHA_EXPIRA_MINUTOS`.
+
+### Testar localmente
+
+1. Configure `FRONTEND_URL=http://localhost:5173`, deixe `MAIL_SERVER` e `MAIL_USERNAME` vazios no `.env` local e aplique as migrations com `flask --app app db upgrade`.
+2. Sem SMTP configurado, execute `python app.py` em modo debug. Ao solicitar a recuperação em `http://localhost:5173/esqueci-senha`, o backend registra o link no console. Esse comportamento de desenvolvimento não é usado quando `debug` está desativado.
+3. Abra o link no navegador, defina uma nova senha e entre novamente em `/login`.
+
+Com SMTP configurado, o link é enviado para o e-mail da conta ativa. A tela de solicitação não revela se o endereço está cadastrado.
+
+## 6️⃣ Rodar o projeto
 
 Com o ambiente virtual ativado e a partir de `backend`:
 

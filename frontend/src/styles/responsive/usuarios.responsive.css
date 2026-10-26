@@ -1,0 +1,54 @@
+@media (max-width: 900px) {
+    .usuarios-resumo {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .usuarios {
+        gap: 18px;
+    }
+
+    .usuarios-lista {
+        padding: 14px;
+    }
+
+    .usuarios-paginacao {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .usuarios-resumo {
+        gap: 10px;
+    }
+
+    .usuarios-resumo-card {
+        padding: 13px;
+    }
+
+    .usuarios-resumo-card strong {
+        font-size: 1.35rem;
+    }
+
+    .usuarios-ferramentas,
+    .usuarios-ferramentas label,
+    .usuarios-ferramentas button {
+        width: 100%;
+    }
+
+    .usuarios-ferramentas label {
+        min-width: 0;
+    }
+
+    .usuarios-paginacao > div {
+        justify-content: space-between;
+        width: 100%;
+        gap: 6px;
+    }
+
+    .usuarios-paginacao button {
+        padding-inline: 9px;
+    }
+}
