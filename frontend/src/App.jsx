@@ -4,6 +4,7 @@ import Login from "./pages/Auth/login";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import PainelLayout from "./layouts/PainelLayout";
+import AuthLayout from "./layouts/AuthLayout";
 import Home from "./pages/Home/home";
 import Quiz from "./pages/Home/quiz";
 import Biblioteca from "./pages/Home/biblioteca";
@@ -21,9 +22,11 @@ function App() {
     <Routes>
 
       {/* Auth (pública) */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/esqueci-senha" element={<EsqueciSenha />} />
-      <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+        <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+      </Route>
       <Route path="/termos" element={<Termos />} />
       <Route path="/privacidade" element={<Privacidade />} />
 
