@@ -36,17 +36,21 @@ function DidioTutor({ estado, titulo, texto, explicacao }) {
             />
 
             {/* role="status": leitores de tela anunciam quando a fala muda */}
+            
+            {/* Balão 1: fala do Didio */}
             <div className="didio-fala" role="status">
                 <strong>{titulo}</strong>
                 <p>{texto}</p>
-                {explicacao && (
-                    <p className="didio-explicacao">
-                        <span className="didio-rotulo">Por quê?</span> {explicacao}
-                    </p>
-                )}
             </div>
 
-            <p className="didio-aviso">Privacidade também é cuidado.</p>
+            {/* Balão 2: explicação (só aparece depois de confirmar) */}
+            {explicacao && (
+                <div className="didio-fala didio-explicacao" role="status">
+                    <p>
+                        <span className="didio-rotulo">Por quê?</span> {explicacao}
+                    </p>
+                </div>
+            )}
         </aside>
     );
 }

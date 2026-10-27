@@ -77,7 +77,7 @@ function QuizJogo({ quiz, perguntas }) {
         else if (porcentagem >= 50) mensagem = "Bom trabalho! Vale revisar alguns pontos.";
 
         return (
-            <div className={`quiz ${quiz.classe} quiz-com-didio anim-page-enter`}>
+            <div className={`quiz ${quiz.classe} anim-page-enter`}>
                 <div className="quiz-resultado">
                     <div className="quiz-anel" style={{ "--pct": porcentagem }}>
                         <span>{porcentagem}%</span>
@@ -107,99 +107,103 @@ function QuizJogo({ quiz, perguntas }) {
     /* Pergunta */
     const progressoBarra = ((indice + (confirmada ? 1 : 0)) / total) * 100;
 
-    return (
-        <div className={`quiz ${quiz.classe} anim-page-enter`}>
-            {/* Topo: voltar, progresso e tema */}
-            <div className="quiz-topo">
-                <Link to="/quiz" className="quiz-voltar" aria-label="Voltar para o início">
-                    ←
-                </Link>
+        return (
+        <div className="quiz-layout anim-page-enter">
+            <div className={`quiz ${quiz.classe}`}>
+                {/* Topo: voltar, progresso e tema */}
+                <div className="quiz-topo">
+                    <Link to="/quiz" className="quiz-voltar" aria-label="Voltar para o início">
+                        ←
+                    </Link>
 
-                <div className="quiz-progresso">
-                    <span>
-                        Questão {indice + 1} de {total}
-                    </span>
-                    <div className="quiz-barra">
-                        <div className="quiz-barra-fill" style={{ width: `${progressoBarra}%` }} />
+                    <div className="quiz-progresso">
+                        <span>
+                            Questão {indice + 1} de {total}
+                        </span>
+                        <div className="quiz-barra">
+                            <div className="quiz-barra-fill" style={{ width: `${progressoBarra}%` }} />
+                        </div>
                     </div>
+
+                    <span className="quiz-tema">{quiz.titulo}</span>
                 </div>
 
-                <span className="quiz-tema">{quiz.titulo}</span>
-            </div>
+                {/* Enunciado */}
+                <div className="quiz-enunciado">
+                    <p className="quiz-descricao">{pergunta.descricao}</p>
+                    <h1 className="quiz-pergunta">{pergunta.titulo}</h1>
+                </div>
 
-            {/* Enunciado */}
-            <div className="quiz-enunciado">
-                <p className="quiz-descricao">{pergunta.descricao}</p>
-                <h1 className="quiz-pergunta">{pergunta.titulo}</h1>
-            </div>
+                {/* Alternativas */}
+                <div className="quiz-opcoes anim-stagger" role="group" aria-label="Alternativas">
+                    {pergunta.alternativas.map((texto, i) => {
+                        const escolhida = selecionada === i;
+                        const ehCorreta = i === pergunta.correta;
 
-            {/* Alternativas */}
-            <div className="quiz-opcoes anim-stagger" role="group" aria-label="Alternativas">
-                {pergunta.alternativas.map((texto, i) => {
-                    const escolhida = selecionada === i;
-                    const ehCorreta = i === pergunta.correta;
+                        // Define o visual de cada alternativa
+                        let estado = "";
+                        if (!confirmada) {
+                            if (escolhida) estado = "selecionada";   // azul
+                        } else if (ehCorreta) {
+                            estado = "correta";                      // verde
+                        } else if (escolhida) {
+                            estado = "errada";                       // vermelho
+                        } else {
+                            estado = "apagada";
+                        }
 
-                    // Define o visual de cada alternativa
-                    let estado = "";
-                    if (!confirmada) {
-                        if (escolhida) estado = "selecionada";   // azul
-                    } else if (ehCorreta) {
-                        estado = "correta";                      // verde
-                    } else if (escolhida) {
-                        estado = "errada";                       // vermelho
-                    } else {
-                        estado = "apagada";
-                    }
+                        let marcador = LETRAS[i];
+                        if (estado === "correta") marcador = "✓";
+                        if (estado === "errada") marcador = "✕";
 
-                    let marcador = LETRAS[i];
-                    if (estado === "correta") marcador = "✓";
-                    if (estado === "errada") marcador = "✕";
+                        return (
+                            <button
+                                key={i}
+                                type="button"
+                                className={`quiz-opcao ${estado}`}
+                                onClick={() => escolher(i)}
+                                disabled={confirmada}
+                                aria-pressed={escolhida}
+                            >
+                                <span className="quiz-letra">{marcador}</span>
+                                <span>{texto}</span>
+                            </button>
+                        );
+                    })}
+                </div>
 
-                    return (
+                {/* Botão: primeiro confirma, depois continua */}
+                <div className="quiz-acoes">
+                    {!confirmada ? (
                         <button
-                            key={i}
                             type="button"
-                            className={`quiz-opcao ${estado}`}
-                            onClick={() => escolher(i)}
-                            disabled={confirmada}
-                            aria-pressed={escolhida}
+                            className="quiz-botao"
+                            onClick={confirmar}
+                            disabled={selecionada === null}
                         >
-                            <span className="quiz-letra">{marcador}</span>
-                            <span>{texto}</span>
+                            Confirmar resposta
                         </button>
-                    );
-                })}
+                    ) : (
+                        <button type="button" className="quiz-botao" onClick={continuar}>
+                            {ultima ? "Finalizar" : "Continuar"}
+                        </button>
+                    )}
+                </div>
             </div>
 
-            {/* Didio: incentiva antes de confirmar e explica depois */}
-            <DidioTutor
-                estado={estadoDidio}
-                titulo={fala.titulo}
-                texto={
-                    estadoDidio === "erro"
-                        ? `${fala.texto} A alternativa certa é a ${LETRAS[pergunta.correta]}.`
-                        : fala.texto
-                }
-                explicacao={confirmada ? pergunta.explicacao : null}
-            />
-
-            {/* Botão: primeiro confirma, depois continua */}
-            <div className="quiz-acoes">
-                {!confirmada ? (
-                    <button
-                        type="button"
-                        className="quiz-botao"
-                        onClick={confirmar}
-                        disabled={selecionada === null}
-                    >
-                        Confirmar resposta
-                    </button>
-                ) : (
-                    <button type="button" className="quiz-botao" onClick={continuar}>
-                        {ultima ? "Finalizar" : "Continuar"}
-                    </button>
-                )}
-            </div>
+            {/* Didio: agora fica ao lado do card */}
+            <aside className="quiz-lateral">
+                <DidioTutor
+                    estado={estadoDidio}
+                    titulo={fala.titulo}
+                    texto={
+                        estadoDidio === "erro"
+                            ? `${fala.texto} A alternativa certa é a ${LETRAS[pergunta.correta]}.`
+                            : fala.texto
+                    }
+                    explicacao={confirmada ? pergunta.explicacao : null}
+                />
+            </aside>
         </div>
     );
 }

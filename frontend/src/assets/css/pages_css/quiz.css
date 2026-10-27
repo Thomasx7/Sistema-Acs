@@ -102,7 +102,7 @@
 .quiz .quiz-opcoes {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 18px;
     margin-top: 24px;
 }
 
@@ -111,7 +111,7 @@
     align-items: center;
     gap: 14px;
     width: 100%;
-    padding: 16px 18px;
+    padding: 20px 22px;
     border: 1.5px solid var(--borda);
     border-radius: 14px;
     background: var(--superficie);
@@ -343,6 +343,46 @@
 /* Quando não há tema (ex.: "Quiz não encontrado") */
 .quiz:not([class*="card-"]) {
     --cor-card: var(--azul-secundario);
+}
+
+/* Quiz com Didio ao lado */
+.quiz-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px; /* quiz | Didio */
+    gap: 24px;
+    max-width: 1120px;
+    margin: 0 auto;
+    align-items: stretch;
+}
+
+/* o card ocupa a coluna da esquerda, sem se centralizar sozinho */
+.quiz-layout .quiz {
+    max-width: none;
+    margin: 0;
+}
+
+
+
+/* painel do Didio */
+.quiz-lateral {
+    display: grid;
+    grid-template-rows: 1fr; /* o Didio estica até o fim do painel */
+    padding: 20px;
+    border: 1px solid var(--borda);
+    border-radius: 20px;
+    background: var(--superficie);
+    box-shadow: var(--sombra-card);
+}
+
+/* telas menores: Didio volta para baixo */
+@media (max-width: 1000px) {
+    .quiz-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .quiz-lateral {
+        position: static;
+    }
 }
 
 @media (max-width: 600px) {
