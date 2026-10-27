@@ -1,0 +1,186 @@
+/* ===== Didio, ajudante do quiz ===== */
+
+/* ---- Telas grandes: pergunta à esquerda, Didio à direita (no mesmo card) ---- */
+.quiz.quiz-com-didio {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-rows: auto auto auto auto 1fr;
+    grid-template-areas:
+        "topo      topo"
+        "enunciado didio"
+        "opcoes    didio"
+        "acoes     didio"
+        ".         didio";
+    column-gap: 28px;
+    max-width: 1040px;
+}
+
+.quiz-com-didio .quiz-topo {
+    grid-area: topo;
+}
+
+.quiz-com-didio .quiz-enunciado {
+    grid-area: enunciado;
+}
+
+.quiz-com-didio .quiz-opcoes {
+    grid-area: opcoes;
+}
+
+.quiz-com-didio .quiz-acoes {
+    grid-area: acoes;
+}
+
+.quiz-com-didio .didio {
+    grid-area: didio;
+}
+
+/* ---- O Didio ---- */
+.didio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding-left: 28px;
+    border-left: 1px solid var(--borda);
+}
+
+.didio-cabecalho {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-self: stretch;
+}
+
+.didio-nome {
+    font-weight: 700;
+    color: var(--texto-titulo);
+}
+
+.didio-papel {
+    font-size: 0.78rem;
+    color: var(--texto-suave);
+}
+
+.didio-imagem {
+    width: auto;
+    height: 190px;
+    object-fit: contain;
+    animation: didio-troca 0.3s ease both;
+}
+
+@keyframes didio-troca {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Balão de fala */
+.didio-fala {
+    align-self: stretch;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--fundo);
+    color: var(--texto);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.didio-fala strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+    color: var(--texto-titulo);
+}
+
+.didio-fala p {
+    margin: 0;
+}
+
+.didio-fala .didio-explicacao {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+}
+
+.didio-rotulo {
+    font-weight: 700;
+}
+
+/* Cores quando a pessoa acerta ou erra (as mesmas das alternativas) */
+.didio-acerto .didio-fala {
+    background: var(--certo-fundo);
+    color: var(--certo-texto);
+}
+
+.didio-erro .didio-fala {
+    background: var(--quiz-erro-fundo);
+    color: var(--quiz-erro-texto);
+}
+
+.didio-acerto .didio-fala strong,
+.didio-erro .didio-fala strong {
+    color: inherit;
+}
+
+.didio-aviso {
+    margin: 0;
+    font-size: 0.78rem;
+    text-align: center;
+    color: var(--texto-suave);
+}
+
+/* ---- Tablet e celular: o Didio vira um bloco compacto entre as alternativas e o botão ---- */
+@media (max-width: 1100px) {
+    .quiz.quiz-com-didio {
+        display: block;
+        max-width: 760px;
+    }
+
+    /* Linha de cima: Didio pequeno + nome. Linha de baixo: balão na largura toda */
+    .didio {
+        display: grid;
+        grid-template-columns: 64px minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        align-items: center;
+        gap: 10px 12px;
+        margin-top: 20px;
+        padding: 14px;
+        border: 1px solid var(--borda);
+        border-radius: 14px;
+        background: var(--fundo);
+    }
+
+    .didio-imagem {
+        grid-column: 1;
+        grid-row: 1;
+        width: 64px;
+        height: 96px;
+    }
+
+    .didio-cabecalho {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .didio-fala {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        background: var(--superficie);
+    }
+
+    .didio-aviso {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .didio-imagem {
+        animation: none;
+    }
+}

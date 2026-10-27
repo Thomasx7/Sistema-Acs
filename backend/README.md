@@ -85,7 +85,7 @@ As variáveis `MAIL_*` configuram o Flask-Mail. O arquivo `.env` é carregado po
 O projeto já possui Flask-Migrate e a pasta `migrations`. Com o PostgreSQL configurado e a partir de `backend`, aplique as migrations existentes com:
 
 ```bash
-flask --app app db upgrade
+flask --app app db init
 ```
 
 Não execute `db init` para um projeto que já possui a pasta de migrations. Quando os models forem alterados, crie uma nova revisão e aplique-a:

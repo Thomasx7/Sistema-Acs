@@ -6,6 +6,9 @@ import { quizzes } from "../../data/quizzes";
 import { perguntasPorQuiz } from "../../data/perguntas";
 import { salvarProgresso } from "../../utils/progresso";
 
+import DidioTutor from "../../components/didio-tutor";
+import { falasDidio } from "../../data/didio";
+
 import "../../assets/css/pages_css/quiz.css";
 
 const LETRAS = ["A", "B", "C", "D"];
@@ -23,6 +26,11 @@ function QuizJogo({ quiz, perguntas }) {
     const pergunta = perguntas[indice];
     const ultima = indice === total - 1;
     const acertou = selecionada === pergunta.correta;
+
+    // O que o Didio mostra agora: "inicio" (antes de confirmar), "acerto" ou "erro"
+    const estadoDidio = !confirmada ? "inicio" : acertou ? "acerto" : "erro";
+    const falas = falasDidio[estadoDidio];
+    const fala = falas[indice % falas.length]; // uma fala diferente a cada pergunta
 
     // Só dá para trocar de alternativa antes de confirmar
     function escolher(i) {
@@ -69,7 +77,7 @@ function QuizJogo({ quiz, perguntas }) {
         else if (porcentagem >= 50) mensagem = "Bom trabalho! Vale revisar alguns pontos.";
 
         return (
-            <div className={`quiz ${quiz.classe} anim-page-enter`}>
+            <div className={`quiz ${quiz.classe} quiz-com-didio anim-page-enter`}>
                 <div className="quiz-resultado">
                     <div className="quiz-anel" style={{ "--pct": porcentagem }}>
                         <span>{porcentagem}%</span>
@@ -120,8 +128,10 @@ function QuizJogo({ quiz, perguntas }) {
             </div>
 
             {/* Enunciado */}
-            <p className="quiz-descricao">{pergunta.descricao}</p>
-            <h1 className="quiz-pergunta">{pergunta.titulo}</h1>
+            <div className="quiz-enunciado">
+                <p className="quiz-descricao">{pergunta.descricao}</p>
+                <h1 className="quiz-pergunta">{pergunta.titulo}</h1>
+            </div>
 
             {/* Alternativas */}
             <div className="quiz-opcoes anim-stagger" role="group" aria-label="Alternativas">
@@ -161,20 +171,17 @@ function QuizJogo({ quiz, perguntas }) {
                 })}
             </div>
 
-            {/* Retorno depois de confirmar */}
-            {confirmada && (
-                <div
-                    className={`quiz-feedback ${acertou ? "feedback-certo" : "feedback-erro"}`}
-                    role="status"
-                >
-                    <strong>
-                        {acertou
-                            ? "Resposta correta!"
-                            : `Não foi dessa vez. A alternativa certa é a ${LETRAS[pergunta.correta]}.`}
-                    </strong>
-                    <p>{pergunta.explicacao}</p>
-                </div>
-            )}
+            {/* Didio: incentiva antes de confirmar e explica depois */}
+            <DidioTutor
+                estado={estadoDidio}
+                titulo={fala.titulo}
+                texto={
+                    estadoDidio === "erro"
+                        ? `${fala.texto} A alternativa certa é a ${LETRAS[pergunta.correta]}.`
+                        : fala.texto
+                }
+                explicacao={confirmada ? pergunta.explicacao : null}
+            />
 
             {/* Botão: primeiro confirma, depois continua */}
             <div className="quiz-acoes">
