@@ -215,21 +215,6 @@ body {
   box-shadow: 0 0 0 3px var(--login-focus-sombra);
 }
 
-.forgot-password {
-  display: flex;  
-  margin-top: -8px;
-  margin-bottom: 18px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--login-link);
-  text-decoration: none;
-  
-}
-
-.forgot-password:hover {
-  text-decoration: underline;
-}
-
 /* Campo de senha: o botão do olho fica por cima do input */
 .password-field {
   position: relative;

@@ -17,7 +17,7 @@ O Sistema ACS é uma aplicação web desenvolvida em React para apoiar o aprendi
 - Segurança da informação
 - Saúde digital
 
-A aplicação está em desenvolvimento e a estrutura atual representa principalmente o frontend da solução.
+A aplicação está em desenvolvimento e inclui frontend React e API Flask com autenticação JWT e persistência de usuários em PostgreSQL.
 
 ## Objetivo
 
@@ -39,7 +39,7 @@ A interface foi criada para propor uma jornada simples de estudo, com:
 - 🧠 Fluxo de quiz com perguntas, alternativas e explicações
 - 📈 Acompanhamento de progresso salvo no navegador via localStorage
 - 📝 Histórico de quizzes recentes
-- 🔐 Tela de login com campos e alternância de visualização da senha
+- 🔐 Login e cadastro de usuários integrados à API
 - 📚 Página de biblioteca com informações gerais e fluxo de uso
 
 ### Parcialmente implementadas
@@ -50,12 +50,7 @@ A interface foi criada para propor uma jornada simples de estudo, com:
 
 ### Pendentes / futuras
 
-- 👤 Cadastro de usuários
-- 🔑 Recuperação de senha
-- 🔐 Reset de senha
-- 🗄️ Integração com API e banco de dados
-- 🧾 Autenticação real com sessão, token ou sistema de login persistente
-- 📦 Armazenamento centralizado de dados e histórico de usuários
+- 📦 Sincronização do progresso e histórico de quizzes com o backend
 
 ## Tecnologias utilizadas
 
@@ -88,33 +83,29 @@ O fluxo principal é simples:
 - Navegação por rotas internas
 - Quiz interativo com dados locais
 - Página de progresso funcional localmente
-- Base visual para login e áreas do sistema
+- Login, cadastro e áreas autenticadas integrados à API
 
 ### Em desenvolvimento
 
-- Autenticação real
-- Fluxos de cadastro e recuperação de senha
-- Integração com backend
-- Persistência de dados em servidor
+- Sincronização do progresso e do histórico de quizzes com o backend
 
 ### Próximas etapas
 
-- Criar camada de serviços/API client
-- Implementar backend e autenticação
-- Integrar banco de dados
+- Expandir a camada de serviços para a futura sincronização do progresso
 - Expandir biblioteca de materiais
-- Ajustar rotas e menu com autenticação real
+- Sincronizar progresso e histórico de quizzes com o backend
 
-## Visão futura
+## Arquitetura atual e evolução
 
-A arquitetura prevista para a evolução do sistema é:
+A arquitetura atual inclui:
 
 - frontend em React para interface e experiência do usuário;
-- serviços/APIs para comunicação com o backend;
-- API backend para regras de negócio e acesso aos dados;
-- banco de dados para persistência de usuários, progresso e conteúdo.
+- serviços no frontend para comunicação com a API Flask;
+- backend Flask para autenticação, cadastro e gerenciamento de usuários;
+- PostgreSQL para persistência dos usuários;
+- localStorage para o progresso e histórico dos quizzes.
 
-Essa estrutura futura ainda não está implementada no código atual.
+A sincronização do progresso e a expansão da biblioteca ainda estão previstas.
 
 ## Observações importantes
 
@@ -122,9 +113,8 @@ Este projeto ainda não está finalizado e não deve ser tratado como produto pr
 
 Além disso:
 
-- o login atual é uma interface visual, sem autenticação real;
-- o cadastro não está implementado como fluxo funcional;
-- a recuperação e o reset de senha são apenas referências visuais/pendentes;
+- login e cadastro usam a API backend com autenticação JWT;
+- não há bloqueio de login por tentativas nem recuperação de senha por e-mail;
 - o histórico e o progresso são armazenados no navegador e não em um backend centralizado.
 
 ## Como executar o projeto
@@ -141,4 +131,4 @@ Além disso:
 
 ## Conclusão
 
-O Sistema ACS já possui uma base funcional de frontend para educação digital e acompanhamento de aprendizado. Ele demonstra claramente a intenção do produto e a estrutura inicial do fluxo de uso, mas ainda depende de etapas futuras de backend, autenticação e persistência para evoluir para uma solução completa e integrada.
+O Sistema ACS já possui uma base funcional de frontend para educação digital e acompanhamento de aprendizado, além de backend com autenticação e persistência de usuários. A sincronização do progresso e a expansão da biblioteca permanecem como etapas futuras.

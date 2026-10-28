@@ -10,8 +10,6 @@ import Quiz from "./pages/Home/quiz";
 import Biblioteca from "./pages/Home/biblioteca";
 import Progresso from "./pages/Home/progresso";
 import Perfil from "./pages/Home/perfil";
-import EsqueciSenha from "./pages/Auth/esqueci-senha";
-import RedefinirSenha from "./pages/Auth/redefinir-senha";
 import Termos from "./pages/Legal/termos";
 import Privacidade from "./pages/Legal/privacidade";
 import Usuarios from "./pages/Home/usuarios";
@@ -24,8 +22,6 @@ function App() {
       {/* Auth (pública) */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
-        <Route path="/esqueci-senha" element={<EsqueciSenha />} />
-        <Route path="/redefinir-senha" element={<RedefinirSenha />} />
       </Route>
       <Route path="/termos" element={<Termos />} />
       <Route path="/privacidade" element={<Privacidade />} />

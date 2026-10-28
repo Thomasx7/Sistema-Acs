@@ -4,7 +4,7 @@
 
 Este repositório contém a implementação atual de um frontend em React para a plataforma ACS. O sistema foi desenvolvido para oferecer uma experiência de aprendizagem em temas como LGPD, letramento digital, segurança da informação e saúde digital.
 
-A análise do código indica que o projeto está em desenvolvimento e que a maior parte da implementação atual está concentrada em interface, navegação e lógica local de quiz. Não há confirmação de API/backend integrada, autenticação real, banco de dados ou persistência centralizada.
+A análise do código indica que o projeto está em desenvolvimento, com quizzes e progresso locais e login/cadastro integrados à API Flask, autenticados por JWT e persistidos no PostgreSQL.
 
 ## 2. Estado atual do projeto
 
@@ -12,17 +12,16 @@ A análise do código indica que o projeto está em desenvolvimento e que a maio
 |---|---|---|
 | Interface principal | Implementado | Estrutura visual em React + CSS |
 | Navegação | Implementado | Rotas definidas com react-router-dom |
-| Login | Parcial | Tela visual e lógica local de formulário; sem autenticação real |
+| Login | Implementado | Autenticação na API por JWT |
 | Quiz interativo | Implementado | Perguntas e respostas locais em arquivos JS |
 | Progresso do usuário | Implementado | Salvo em localStorage |
 | Biblioteca | Parcial | Página informativa e de orientação; conteúdo não estruturado como repositório funcional |
 | Perfil do usuário | Parcial | Perfil e foto salvos localmente; o tema vale durante a sessão e não há integração de atualização com a API |
-| Cadastro | Pendente | Existem referências visuais, mas sem fluxo funcional |
-| Recuperação de senha | Pendente | Link presente sem rota correspondente |
-| Reset de senha | Pendente | Não identificado no código |
-| API/backend | Pendente | Não há integração implementada |
-| Banco de dados | Pendente | Não há persistência remota |
-| Autenticação | Pendente | Não há contexto, token, sessão ou guardas de rota |
+| Cadastro | Implementado | Criação de conta pela API |
+| Recuperação de senha | Não disponível | O fluxo de recuperação por e-mail foi removido |
+| API/backend | Implementado | Cliente HTTP integrado à API Flask |
+| Banco de dados | Implementado no backend | Usuários persistidos em PostgreSQL; progresso permanece local |
+| Autenticação | Implementado | Contexto de autenticação, token JWT e rotas protegidas |
 
 ## 3. Stack tecnológica
 
@@ -47,7 +46,7 @@ A análise do código indica que o projeto está em desenvolvimento e que a maio
 
 ### 3.3 Observações sobre a stack
 
-Não foi identificado uso de bibliotecas de UI, formulários, validação de formulário, state management global, animação ou backend. O projeto depende fortemente de dados estáticos em arquivos JavaScript.
+Não foram identificadas bibliotecas de UI, formulários ou gerenciamento de estado global. A autenticação usa `AuthContext`, há comunicação com a API Flask e os dados de quizzes permanecem estáticos em arquivos JavaScript.
 
 ## 4. Arquitetura atual
 
@@ -56,23 +55,24 @@ Não foi identificado uso de bibliotecas de UI, formulários, validação de for
 ```mermaid
 flowchart LR
     U[Usuário] --> F[Frontend React]
-    F --> C[Componentes e páginas]
-    C --> E[Estados locais do React]
-    E --> L[localStorage]
-    C --> D[Dados estáticos em src/data]
+    F --> A[Serviços e contexto de autenticação]
+    A --> B[Backend Flask / API]
+    B --> DB[(PostgreSQL: usuários)]
+    F --> Q[Quizzes e progresso local]
+    Q --> L[localStorage]
 ```
 
-### 4.2 Arquitetura futura planejada
+### 4.2 Evolução planejada
 
 ```mermaid
 flowchart LR
     U[Usuário] --> F[Frontend React]
-    F --> S[API Client / Serviços]
-    S --> B[Backend / API]
-    B --> DB[(Banco de dados)]
+    F --> S[Sincronização de quizzes e progresso]
+    S --> B[Backend Flask / API]
+    B --> DB[(PostgreSQL)]
 ```
 
-> A segunda arquitetura representa o futuro planejado do sistema, não a implementação atual.
+> A segunda arquitetura representa a sincronização de quizzes e progresso ainda planejada.
 
 ## 5. Estrutura de diretórios
 
@@ -130,7 +130,7 @@ src/
 - O sistema usa `BrowserRouter` em `src/main.jsx`.
 - O layout principal é definido em `src/layouts/PainelLayout.jsx`.
 - O menu do usuário no Header leva a `/perfil`; a página usa `PainelLayout`.
-- O link `/esqueci-senha` ainda não tem rota correspondente.
+- Endereços desconhecidos, incluindo antigos endereços de redefinição de senha, redirecionam para `/login`.
 - O menu lateral tem `NavLink` para `/painel`, mas a configuração real do `Routes` usa `/` como base do painel. Isso indica que o sistema de navegação ainda precisa refinamento.
 
 ## 7. Páginas e componentes principais
@@ -142,7 +142,7 @@ Arquivo: `src/App.jsx`
 Responsabilidade:
 - registrar as rotas da aplicação;
 - renderizar o layout do painel para páginas internas;
-- redirecionar rotas desconhecidas para `/`.
+- redirecionar rotas desconhecidas para `/login`.
 
 Fluxo:
 - `/login` renderiza Login.
@@ -195,10 +195,9 @@ Hooks:
 - `useEffect`: escuta cliques fora do menu e tecla `Escape` para fechar.
 
 Ações:
-- `handleSair()`: fecha o menu e redireciona para `/login` usando `window.location.href`.
+- `handleSair()`: encerra a sessão, remove o token e redireciona para `/login`.
 
 Observações:
-- não há autenticação verdadeira; o sair apenas troca a URL.
 - o link "Perfil" aponta para `/perfil`, mas essa rota não existe.
 
 ### 7.5 Home
@@ -340,50 +339,17 @@ Arquivo: `src/pages/Auth/login.jsx`
 
 - Há campos de e-mail e senha.
 - Há botão para mostrar/ocultar senha.
-- `handleSubmit` impede o recarregamento da página, coleta os valores e faz `console.log` no navegador.
+- `handleSubmit` valida os dados e autentica por meio do serviço de API.
 
 ### 8.2 Estado atual da autenticação
 
-Não há:
-- `useContext` para autenticação;
-- `localStorage` de sessão;
-- token;
-- verificação de credenciais;
-- proteção de rotas;
-- backend;
-- contexto global de usuário.
+O `AuthContext` gerencia a autenticação e o usuário atual; o token JWT é armazenado no `sessionStorage` e as rotas do painel são protegidas. O backend valida credenciais e status da conta.
 
-Conclusão:
-- o login atual é uma interface visual, não uma autenticação real.
-
-## 9. Cadastro, recuperação e reset de senha
+## 9. Cadastro
 
 ### 9.1 Cadastro
 
-Estado identificado:
-- não há página de cadastro no `Routes`.
-- não há `form` de cadastro.
-- não há persistência ou API.
-
-Conclusão:
-- funcionalidade pendente.
-
-### 9.2 Recuperação de senha
-
-Identificado:
-- existe um link `Link to="/esqueci-senha"` no formulário de login.
-- não existe rota correspondente em `App.jsx`.
-
-Conclusão:
-- interface de referência presente, mas sem implementação real.
-
-### 9.3 Reset de senha
-
-Identificado:
-- não foi encontrada rota, componente ou fluxo de reset.
-
-Conclusão:
-- pendente e não implementado.
+O cadastro é realizado pelo formulário da tela de login e enviado à API. O sistema não oferece recuperação ou redefinição de senha por e-mail; endereços desconhecidos redirecionam para `/login`.
 
 ## 10. Dados e armazenamento
 
@@ -397,8 +363,7 @@ Responsabilidade:
 - armazenar o catálogo de temas e as perguntas do quiz.
 
 Observações:
-- os comentários dentro do arquivo indicam que, quando houver backend, estes dados podem ser trocados por chamadas à API.
-- no estado atual, os dados são estáticos e mockados.
+- os quizzes e perguntas ainda são estáticos e mockados; sua integração com a API pode ser feita futuramente.
 
 ### 10.2 Progresso salvo localmente
 
@@ -497,7 +462,7 @@ Responsabilidade:
 - bloquear submit padrão e registrar os valores no console do navegador.
 
 Observação:
-- não há autenticação real nem integração com API.
+- login e cadastro comunicam-se com a API backend.
 
 ### `confirmar()`
 
@@ -525,8 +490,8 @@ Responsabilidade:
 
 ### Observações
 
-- Não há `useContext`.
-- Não há hooks personalizados criados no projeto.
+- O `AuthContext` usa contexto React para compartilhar a sessão.
+- Há hooks personalizados para autenticação e tema.
 - Não há reducers, stores globais ou gerenciamento centralizado de estado.
 
 ## 13. Formulários e validação
@@ -553,27 +518,15 @@ Eventos:
 - `onSubmit` dispara `handleSubmit`
 
 Comportamento atual:
-- coleta os dados e imprime no console
-- não navega para painel após login
-- não valida credenciais no servidor
+- valida os dados e envia as credenciais à API;
+- após autenticação bem-sucedida, navega para o painel;
+- exibe as mensagens retornadas pelo backend.
 
 ## 14. API e backend
 
 ### Situação atual
 
-O código atual não possui qualquer módulo dedicado à comunicação com API. Não existem endpoints, clientes HTTP, interceptadores, contexto de autenticação ou serviços no padrão de `fetch`, `axios` ou equivalentes.
-
-### Evolução prevista
-
-A arquitetura pretendida deve incluir:
-
-- camada de serviços para acesso à API;
-- autenticação via backend;
-- gestão de usuários e progresso;
-- persistência em banco de dados;
-- endpoints para login, cadastro e recuperação de senha.
-
-> Nenhuma dessas camadas foi implementada no código disponível.
+O cliente em `src/services/api.js` usa `fetch` para chamar o backend Flask. O login e o cadastro são integrados; o contexto de autenticação mantém a sessão JWT e o backend persiste os usuários em PostgreSQL. O progresso dos quizzes permanece salvo localmente no navegador.
 
 ## 15. Fluxos principais documentados
 
@@ -625,11 +578,9 @@ React renderiza estatísticas e status por tema
 
 ## 16. Limitações e pendências
 
-- Não há autenticação real.
-- Não há backend nem integração de servidor.
-- O login apenas simula a ação de entrada.
-- Cadastro e recuperação de senha são pendentes.
-- O menu e links de perfil e recuperação de senha apontam para rotas inexistentes.
+- Não há recuperação ou redefinição de senha por e-mail.
+- Perfil, histórico e progresso dos quizzes não são sincronizados com o backend.
+- Endereços desconhecidos redirecionam para `/login`.
 - Biblioteca ainda é informacional.
 - Dados de perguntas e quizzes são estáticos e mockados.
 - Não há suíte de testes com Jest, Vitest ou Testing Library identificada.
@@ -668,28 +619,23 @@ npm run dev
 npm run build
 ```
 
-## 18. Variáveis de ambiente
+## 18. Configuração da API
 
-Não foi encontrado um arquivo `.env` ou configuração de variáveis de ambiente no repositório. O projeto atual não depende de variáveis de ambiente para funcionar localmente.
-
-Se a solução futuramente consumir API, o mais provável é que seja criado um padrão como:
+O cliente usa atualmente a URL `http://localhost:5000` definida em `src/services/api.js`. Não há configuração de variáveis de ambiente no frontend.
 
 ```env
 VITE_API_URL=https://api.exemplo.com
 ```
 
-> Este exemplo é fictício e não representa implementação real no projeto.
+O exemplo indica uma possível configuração futura para ambientes diferentes.
 
 ## 19. Próximas etapas sugeridas
 
-1. Definir a autenticação real e a regra de sessão/usuário.
-2. Criar backend e endpoints mínimos.
-3. Implementar cadastro, login, recuperação e reset de senha.
-4. Criar camada de serviços para comunicação com a API.
-5. Migrar os dados de `src/data` para persistência dinâmica.
-6. Ajustar rotas e links inconsistentes.
-7. Expandir a biblioteca e o conteúdo de apoio.
-8. Adicionar testes automatizados.
+1. Sincronizar quizzes e progresso com a API.
+2. Migrar os dados de `src/data` para persistência dinâmica.
+3. Ajustar rotas e links inconsistentes.
+4. Expandir a biblioteca e o conteúdo de apoio.
+5. Adicionar testes automatizados.
 
 ## 20. Glossário técnico
 

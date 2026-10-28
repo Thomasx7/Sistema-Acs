@@ -1,7 +1,7 @@
 export const NOME_PLATAFORMA = "Plataforma ACS";
 export const NOME_RESPONSAVEL = "[PREENCHER: nome da instituição/responsável]";
 export const EMAIL_CONTATO = "[PREENCHER: e-mail do encarregado/DPO]";
-export const DATA_ATUALIZACAO = "26/10/2026";
+export const DATA_ATUALIZACAO = "28/10/2026";
 
 export const termosDeUso = {
   titulo: "Termos de Uso",
@@ -122,7 +122,6 @@ export const politicaPrivacidade = {
       itens: [
         "nome, e-mail e senha informados durante o cadastro. A senha é armazenada somente em formato de hash criptográfico, nunca em texto puro;",
         "data de cadastro, permissão e status da conta;",
-        "tentativas de login malsucedidas e informações necessárias ao bloqueio temporário após tentativas, para proteção da conta;",
         "progresso e histórico de quizzes, além da foto de perfil, armazenados no próprio navegador por meio do localStorage;",
         "token de sessão armazenado no sessionStorage do navegador, que é apagado quando a aba é fechada.",
       ],
@@ -131,7 +130,7 @@ export const politicaPrivacidade = {
       id: "finalidades",
       titulo: "Finalidades do tratamento",
       paragrafos: [
-        "Os dados são tratados para permitir o cadastro, a autenticação e a gestão da conta; disponibilizar os recursos educacionais; registrar o progresso e o histórico de quizzes no navegador; manter controles de permissões e status; proteger contas contra tentativas indevidas de acesso; e responder a solicitações ou cumprir obrigações legais.",
+        "Os dados são tratados para permitir o cadastro, a autenticação e a gestão da conta; disponibilizar os recursos educacionais; registrar o progresso e o histórico de quizzes no navegador; manter controles de permissões e status; e responder a solicitações ou cumprir obrigações legais.",
       ],
     },
     {
@@ -150,7 +149,7 @@ export const politicaPrivacidade = {
       id: "compartilhamento",
       titulo: "Compartilhamento",
       paragrafos: [
-        "Não vendemos dados pessoais. O compartilhamento poderá ocorrer quando exigido por lei, por ordem de autoridade competente ou com provedores de infraestrutura ou de e-mail estritamente necessários à operação da plataforma, observadas as medidas e obrigações aplicáveis de proteção de dados.",
+        "Não vendemos dados pessoais. O compartilhamento poderá ocorrer quando exigido por lei, por ordem de autoridade competente ou com provedores de infraestrutura estritamente necessários à operação da plataforma, observadas as medidas e obrigações aplicáveis de proteção de dados.",
       ],
     },
     {
@@ -165,7 +164,7 @@ export const politicaPrivacidade = {
       id: "seguranca",
       titulo: "Segurança da informação",
       paragrafos: [
-        "O sistema utiliza medidas de segurança compatíveis com seu funcionamento atual, incluindo armazenamento de senha em formato hash, token de sessão JWT, bloqueio temporário após tentativas de login malsucedidas e controle de permissões. Essas medidas reduzem riscos, mas nenhum sistema pode garantir segurança absoluta.",
+        "O sistema utiliza medidas de segurança compatíveis com seu funcionamento atual, incluindo armazenamento de senha em formato hash, token de sessão JWT e controle de permissões. Essas medidas reduzem riscos, mas nenhum sistema pode garantir segurança absoluta.",
         "Mantenha sua senha em sigilo e evite utilizar dispositivos compartilhados sem encerrar a sessão.",
       ],
     },

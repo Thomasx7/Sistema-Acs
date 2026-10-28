@@ -4,11 +4,10 @@ const API_URL = "http://localhost:5000"; //TODO Mudar aqui URL backend
 
 // Erro padronizado: toda falha da API chega às telas neste formato.
 export class ApiError extends Error {
-    constructor(mensagem, status, retryAfter = null) {
+    constructor(mensagem, status) {
         super(mensagem);
         this.name = "ApiError";
-        this.status = status;         // 400, 401, 429...
-        this.retryAfter = retryAfter; // segundos de espera (bloqueio do login)
+        this.status = status;
     }
 }
 
@@ -17,16 +16,6 @@ let aoExpirarSessao = null;
 
 export function definirAoExpirarSessao(funcao) {
     aoExpirarSessao = funcao;
-}
-
-// Extrai os segundos de espera: do header Retry-After ou, se o
-// navegador não deixar ler, da mensagem ("tente novamente em 40s").
-function lerRetryAfter(resposta, mensagem) {
-    const header = Number(resposta.headers.get("Retry-After"));
-    if (Number.isFinite(header) && header > 0) return header;
-
-    const achado = /(\d+)\s*s\b/.exec(mensagem || "");
-    return achado ? Number(achado[1]) : null;
 }
 
 async function requisicao(metodo, caminho, corpo) {
@@ -68,11 +57,7 @@ async function requisicao(metodo, caminho, corpo) {
             if (aoExpirarSessao) aoExpirarSessao();
         }
 
-        throw new ApiError(
-            mensagem,
-            resposta.status,
-            resposta.status === 429 ? lerRetryAfter(resposta, mensagem) : null
-        );
+        throw new ApiError(mensagem, resposta.status);
     }
 
     return dados;
