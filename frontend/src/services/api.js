@@ -18,7 +18,7 @@ export function definirAoExpirarSessao(funcao) {
     aoExpirarSessao = funcao;
 }
 
-async function requisicao(metodo, caminho, corpo) {
+async function requisicao(metodo, caminho, corpo, options = {}) {
     const token = lerToken();
 
     const headers = { Accept: "application/json" };
@@ -31,8 +31,10 @@ async function requisicao(metodo, caminho, corpo) {
             method: metodo,
             headers,
             body: corpo !== undefined ? JSON.stringify(corpo) : undefined,
+            signal: options.signal,
         });
-    } catch {
+    } catch (erro) {
+        if (erro.name === "AbortError") throw erro;
         throw new ApiError(
             "Não foi possível conectar ao servidor. Tente novamente.",
             0
@@ -64,7 +66,7 @@ async function requisicao(metodo, caminho, corpo) {
 }
 
 export const api = {
-    get: (caminho) => requisicao("GET", caminho),
+    get: (caminho, options) => requisicao("GET", caminho, undefined, options),
     post: (caminho, corpo) => requisicao("POST", caminho, corpo ?? {}),
     put: (caminho, corpo) => requisicao("PUT", caminho, corpo ?? {}),
     delete: (caminho) => requisicao("DELETE", caminho),

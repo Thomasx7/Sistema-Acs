@@ -9,6 +9,17 @@
         gap: 18px;
     }
 
+    .usuarios-top {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 13px;
+    }
+
+    .usuarios-top-acoes,
+    .usuarios-adicionar {
+        width: 100%;
+    }
+
     .usuarios-lista {
         padding: 14px;
     }
@@ -16,6 +27,71 @@
     .usuarios-paginacao {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .usuarios-tabela-container {
+        overflow: visible;
+        border: 0;
+    }
+
+    .usuarios table,
+    .usuarios thead,
+    .usuarios tbody,
+    .usuarios tr,
+    .usuarios td {
+        display: block;
+        width: 100%;
+    }
+
+    .usuarios thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    .usuarios tbody {
+        display: grid;
+        gap: 12px;
+    }
+
+    .usuarios tbody tr {
+        padding: 5px 13px;
+        border: 1px solid var(--borda);
+        border-radius: 10px;
+        background: var(--superficie);
+        box-shadow: var(--sombra-card);
+    }
+
+    .usuarios tbody tr:hover {
+        background: var(--opcao-hover);
+    }
+
+    .usuarios th,
+    .usuarios td {
+        border-bottom: 0;
+    }
+
+    .usuarios tbody td:not(.usuarios-vazio) {
+        display: grid;
+        grid-template-columns: minmax(105px, 0.7fr) minmax(0, 1.3fr);
+        gap: 12px;
+        padding: 8px 0;
+        overflow-wrap: anywhere;
+    }
+
+    .usuarios tbody td:not(.usuarios-vazio)::before {
+        content: attr(data-label);
+        color: var(--texto-suave);
+        font-size: 0.79rem;
+        font-weight: 600;
+    }
+
+    .usuarios td.usuarios-vazio {
+        padding: 20px 10px;
     }
 }
 

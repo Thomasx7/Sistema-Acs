@@ -4,6 +4,7 @@ import { useAuth } from "../../context/useAuth";
 import { listarUsuarios } from "../../services/admin";
 import { ApiError } from "../../services/api";
 import { PERMISSAO_ADM } from "../../utils/permissoes";
+import UsuarioModal from "../../components/UsuarioModal";
 import "../../assets/css/pages_css/usuarios.css";
 
 const ITENS_POR_PAGINA = 10;
@@ -32,7 +33,7 @@ function mensagemDoErro(erro) {
 }
 
 function Usuarios() {
-    const { usuario } = useAuth();
+    const { usuario, atualizarUsuario } = useAuth();
     const [usuarios, setUsuarios] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
@@ -41,6 +42,9 @@ function Usuarios() {
     const [statusFiltro, setStatusFiltro] = useState("");
     const [permissaoFiltro, setPermissaoFiltro] = useState("");
     const [pagina, setPagina] = useState(1);
+    const [atualizacao, setAtualizacao] = useState(0);
+    const [modal, setModal] = useState(null);
+    const [feedback, setFeedback] = useState("");
 
     useEffect(() => {
         let cancelado = false;
@@ -62,7 +66,13 @@ function Usuarios() {
         return () => {
             cancelado = true;
         };
-    }, [tentativa]);
+    }, [tentativa, atualizacao]);
+
+    useEffect(() => {
+        if (!feedback) return undefined;
+        const temporizador = window.setTimeout(() => setFeedback(""), 5000);
+        return () => window.clearTimeout(temporizador);
+    }, [feedback]);
 
     const usuariosFiltrados = useMemo(() => {
         const termo = normalizarBusca(busca);
@@ -81,7 +91,8 @@ function Usuarios() {
     }, [usuarios, busca, statusFiltro, permissaoFiltro]);
 
     const totalPaginas = Math.ceil(usuariosFiltrados.length / ITENS_POR_PAGINA);
-    const inicio = (pagina - 1) * ITENS_POR_PAGINA;
+    const paginaAtual = Math.min(pagina, Math.max(totalPaginas, 1));
+    const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
     const usuariosDaPagina = usuariosFiltrados.slice(inicio, inicio + ITENS_POR_PAGINA);
     const quantidadeMostrada = usuariosDaPagina.length;
     const filtrosAtivos = Boolean(busca.trim() || statusFiltro || permissaoFiltro);
@@ -114,12 +125,53 @@ function Usuarios() {
         setTentativa((atual) => atual + 1);
     }
 
+    function abrirEdicao(id) {
+        setModal({ modo: "editar", id });
+    }
+
+    function salvarConcluido(mensagem, usuarioSalvo) {
+        if (
+            modal?.modo === "editar" &&
+            String(modal.id) === String(usuario?.id_usuario) &&
+            usuarioSalvo
+        ) {
+            atualizarUsuario(usuarioSalvo);
+        }
+
+        setFeedback(mensagem);
+        setAtualizacao((atual) => atual + 1);
+    }
+
     return (
         <div className="usuarios anim-page-enter">
             <header className="usuarios-top">
-                <h1>Usuários</h1>
-                <p>Gerencie e consulte os usuários cadastrados no sistema.</p>
+                <div>
+                    <h1>Usuários</h1>
+                    <p>Gerencie e consulte os usuários cadastrados no sistema.</p>
+                </div>
+                <div className="usuarios-top-acoes">
+                    <button
+                        type="button"
+                        className="usuarios-adicionar"
+                        onClick={() => setModal({ modo: "criar" })}
+                    >
+                        + Adicionar usuário
+                    </button>
+                </div>
             </header>
+
+            {feedback && (
+                <div className="usuarios-sucesso" role="status">
+                    <span>{feedback}</span>
+                    <button
+                        type="button"
+                        onClick={() => setFeedback("")}
+                        aria-label="Fechar mensagem"
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
 
             {!carregando && !erro && (
                 <>
@@ -208,10 +260,27 @@ function Usuarios() {
                                 </thead>
                                 <tbody>
                                     {usuariosDaPagina.map((item) => (
-                                        <tr key={item.id_usuario}>
+                                        <tr
+                                            key={item.id_usuario}
+                                            tabIndex="-1"
+                                            onClick={(evento) => {
+                                                evento.currentTarget.focus();
+                                                abrirEdicao(item.id_usuario);
+                                            }}
+                                        >
                                             <td data-label="Nome">
                                                 <span className="usuarios-nome">
-                                                    {item.nome}
+                                                    <button
+                                                        type="button"
+                                                        className="usuarios-nome-botao"
+                                                        onClick={(evento) => {
+                                                            evento.stopPropagation();
+                                                            abrirEdicao(item.id_usuario);
+                                                        }}
+                                                        aria-label={`Editar ${item.nome}`}
+                                                    >
+                                                        {item.nome}
+                                                    </button>
                                                     {String(item.id_usuario) ===
                                                         String(usuario?.id_usuario) && (
                                                         <span className="usuarios-voce">Você</span>
@@ -267,18 +336,20 @@ function Usuarios() {
                             <div>
                                 <button
                                     type="button"
-                                    onClick={() => setPagina((atual) => atual - 1)}
-                                    disabled={pagina <= 1}
+                                    onClick={() => setPagina(Math.max(paginaAtual - 1, 1))}
+                                    disabled={paginaAtual <= 1}
                                 >
                                     Anterior
                                 </button>
                                 <span aria-live="polite">
-                                    Página {totalPaginas ? pagina : 0} de {totalPaginas}
+                                    Página {totalPaginas ? paginaAtual : 0} de {totalPaginas}
                                 </span>
                                 <button
                                     type="button"
-                                    onClick={() => setPagina((atual) => atual + 1)}
-                                    disabled={pagina >= totalPaginas}
+                                    onClick={() =>
+                                        setPagina(Math.min(paginaAtual + 1, totalPaginas))
+                                    }
+                                    disabled={paginaAtual >= totalPaginas}
                                 >
                                     Próxima
                                 </button>
@@ -301,6 +372,16 @@ function Usuarios() {
                         Tentar novamente
                     </button>
                 </div>
+            )}
+
+            {modal && (
+                <UsuarioModal
+                    modo={modal.modo}
+                    usuarioId={modal.id}
+                    usuarioLogado={usuario}
+                    onFechar={() => setModal(null)}
+                    onSalvo={salvarConcluido}
+                />
             )}
         </div>
     );

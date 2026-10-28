@@ -89,6 +89,7 @@ DROP TABLE IF EXISTS redefinicoes_senha;
 | `POST /usuarios/` | Público (cadastro) |
 | `PUT /usuarios/<id_usuario>` | Usuário autenticado: próprio cadastro ou ADM; alterações de permissão/status somente ADM |
 | `DELETE /usuarios/<id_usuario>` | Apenas ADM |
+| `POST /admin/usuarios` | Apenas ADM (cria usuário com permissão e status definidos pelo administrador) |
 | `GET /admin/dashboard` | Apenas ADM |
 
 A permissão de administrador é `ADM`. Defina o primeiro administrador diretamente no banco:

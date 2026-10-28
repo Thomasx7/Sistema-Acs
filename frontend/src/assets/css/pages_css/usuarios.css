@@ -11,6 +11,41 @@
     font-weight: 600;
 }
 
+.usuarios-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.usuarios-top-acoes {
+    flex: 0 0 auto;
+}
+
+.usuarios-adicionar {
+    min-height: 42px;
+    padding: 9px 15px;
+    border: 1px solid var(--azul-secundario);
+    border-radius: 9px;
+    background: var(--azul-secundario);
+    color: var(--texto-botao);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.usuarios-adicionar:hover {
+    background: var(--login-botao-hover);
+}
+
+.usuarios-adicionar:focus-visible,
+.usuarios-sucesso button:focus-visible,
+.usuarios-nome-botao:focus-visible {
+    outline: 3px solid var(--foco-contorno);
+    outline-offset: 3px;
+}
+
 .usuarios-top p {
     margin-top: 5px;
     color: var(--texto-suave);
@@ -259,6 +294,41 @@
     color: var(--texto);
 }
 
+.usuarios-sucesso {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 15px;
+    border: 1px solid var(--sucesso);
+    border-radius: 10px;
+    background: var(--sucesso-fundo);
+    color: var(--sucesso-texto);
+    font-size: 0.9rem;
+}
+
+.usuarios-sucesso button {
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-size: 1.1rem;
+}
+
+.usuarios tbody tr {
+    cursor: pointer;
+}
+
+.usuarios tbody tr:focus-visible,
+.usuarios tbody tr:focus-within {
+    outline: 2px solid var(--foco-contorno);
+    outline-offset: -2px;
+}
+
 .usuarios-erro {
     border-color: var(--erro);
     background: var(--erro-fundo);
@@ -274,4 +344,20 @@
 
 .usuarios-erro button:hover {
     background: var(--login-botao-hover);
+}
+
+.usuarios-nome-botao {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--texto);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 500;
+    text-align: left;
+}
+
+.usuarios-nome-botao:hover {
+    color: var(--texto-link);
+    text-decoration: underline;
 }

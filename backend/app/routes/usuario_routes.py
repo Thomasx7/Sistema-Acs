@@ -4,35 +4,10 @@ from app import db
 from app.models.models import Usuarios
 from app.utils.decorators import autenticado, apenas_adm, eh_adm
 from app.utils.hash import hash_password, check_password
-from app.utils.permissoes import PERMISSAO_ADM, PERMISSAO_COMUM
+from app.utils.usuarios import PERMISSOES, STATUS, serializar, validar_nome
 from app.utils.validators import normalizar_email, validar_email, validar_senha
 
 user_bp = Blueprint('user_bp', __name__)
-
-PERMISSOES = (PERMISSAO_ADM, PERMISSAO_COMUM)
-STATUS = ("Ativo", "Inativo")
-NOME_MAX = 100  
-
-
-def serializar(usuario):
-    return {
-        'id_usuario': usuario.id_usuario,
-        'nome': usuario.nome,
-        'email': usuario.email,
-        'permissao': usuario.permissao,
-        'status': usuario.status,
-        'data_cadastro': usuario.data_cadastro.strftime('%Y-%m-%d %H:%M:%S')
-    }
-
-
-def validar_nome(nome):
-    """Retorna a mensagem de erro, ou None se o nome for válido."""
-    if not isinstance(nome, str) or not nome.strip():
-        return "Nome é obrigatório"
-    if len(nome.strip()) > NOME_MAX:
-        return f"O nome deve ter no máximo {NOME_MAX} caracteres"
-    return None
-
 
 # TODO LISTAR TODOS OS USUÁRIOS (só administradores)
 @user_bp.route('/', methods=['GET'])
