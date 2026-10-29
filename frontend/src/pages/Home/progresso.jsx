@@ -1,14 +1,11 @@
-import { useState } from "react";
-
 import QuizItem from "../../components/quiz-item";
 import { quizzes } from "../../data/quizzes";
-import { lerHistorico } from "../../utils/progresso";
+import { useProgresso } from "../../hooks/useProgresso";
 
 import "../../assets/css/components_css/progresso.css";
 
 function Progresso() {
-    // Lê o andamento salvo uma vez, quando a página abre
-    const [historico] = useState(() => lerHistorico());
+    const { historico, carregando, erro, recarregar } = useProgresso();
 
     const lista = quizzes.map((quiz) => {
         const item = historico.find((h) => h.id === quiz.id);
@@ -29,6 +26,33 @@ function Progresso() {
         lista.reduce((soma, i) => soma + i.progresso, 0) / total
     );
 
+    if (carregando) {
+        return (
+            <div className="progresso anim-page-enter">
+                <div className="progresso-top">
+                    <h1>Meu progresso</h1>
+                    <p>Acompanhe o andamento de cada quiz em um só lugar.</p>
+                </div>
+                <div role="status">Carregando seu progresso...</div>
+            </div>
+        );
+    }
+
+    if (erro) {
+        return (
+            <div className="progresso anim-page-enter">
+                <div className="progresso-top">
+                    <h1>Meu progresso</h1>
+                    <p>Acompanhe o andamento de cada quiz em um só lugar.</p>
+                </div>
+                <div role="alert">
+                    Não foi possível carregar seu progresso.
+                    <button type="button" onClick={recarregar}>Tentar novamente</button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="progresso anim-page-enter">
             <div className="progresso-top">
@@ -36,7 +60,6 @@ function Progresso() {
                 <p>Acompanhe o andamento de cada quiz em um só lugar.</p>
             </div>
 
-            {/* Resumo */}
             <div className="progresso-resumo anim-stagger">
                 <div className="resumo-card resumo-geral">
                     <span>Progresso geral</span>

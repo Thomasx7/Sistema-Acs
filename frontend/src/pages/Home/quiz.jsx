@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import CardsInicio from "../../components/cards-Inicio";
 import { quizzes } from "../../data/quizzes";
 import { perguntasPorQuiz } from "../../data/perguntas";
-import { salvarProgresso } from "../../utils/progresso";
+import { salvarProgresso } from "../../services/progresso";
 
 import DidioTutor from "../../components/didio-tutor";
 import { falasDidio } from "../../data/didio";
@@ -39,15 +39,20 @@ function QuizJogo({ quiz, perguntas }) {
 
     // Mostra verde/vermelho e registra o andamento para o histórico da Home
     function confirmar() {
+        const proximoAcertos = acertou ? acertos + 1 : acertos;
         setConfirmada(true);
-        if (acertou) setAcertos(acertos + 1);
+        if (acertou) setAcertos(proximoAcertos);
 
-        salvarProgresso(
-            quiz.id,
-            ultima
-                ? { status: "concluido", progresso: 100 }
-                : { status: "andamento", progresso: Math.round(((indice + 1) / total) * 100) }
-        );
+        const payload = ultima
+            ? { status: "concluido", progresso: 100, acertos: proximoAcertos, totalPerguntas: total }
+            : {
+                status: "andamento",
+                progresso: Math.round(((indice + 1) / total) * 100),
+                acertos: proximoAcertos,
+                totalPerguntas: total,
+            };
+
+        salvarProgresso(quiz.id, payload);
     }
 
     function continuar() {

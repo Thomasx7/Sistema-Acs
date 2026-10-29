@@ -1,18 +1,18 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { quizzes } from "../data/quizzes";
-import { lerHistorico } from "../utils/progresso";
+import { useProgresso } from "../hooks/useProgresso";
 
 import "../assets/css/components_css/cards-inicio.css";
 
 function CardsInicio() {
-    // Lê o andamento salvo uma vez, quando a Home abre
-    const [historico] = useState(() => lerHistorico());
+    const { historico, carregando, erro } = useProgresso();
 
     function textoDoBotao(id) {
-        const item = historico.find((h) => h.id === id);
+        if (carregando) return "Abrir quiz";
+        if (erro) return "Iniciar Quiz";
 
+        const item = historico.find((h) => h.id === id);
         if (!item) return "Iniciar Quiz";
         return item.status === "concluido" ? "Quiz concluído" : "Quiz em andamento";
     }

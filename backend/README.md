@@ -63,20 +63,31 @@ O projeto já possui Flask-Migrate e a pasta `migrations`. Não execute `db init
 flask --app app db upgrade
 ```
 
-Para bancos que ainda têm as colunas e a tabela antigas, cada desenvolvedor pode gerar e aplicar localmente uma migration:
+Para bancos que ainda tenham uma estrutura antiga, cada desenvolvedor pode gerar e aplicar localmente a migration da tabela de progresso, sem versionar o arquivo no Git:
 
 ```bash
-flask --app app db migrate -m "remove bloqueio de login e redefinicao de senha"
+flask --app app db migrate -m "tabela progresso_quiz"
 flask --app app db upgrade
 ```
 
-A pasta `migrations/versions` é ignorada pelo Git; portanto, cada desenvolvedor gera e aplica as migrations localmente. Se `db migrate` acusar `Can't locate revision`, aplique manualmente o SQL abaixo:
+A pasta `migrations/versions` é ignorada pelo Git; portanto, cada desenvolvedor gera e aplica as migrations localmente. Se a migration não existir ainda, a tabela equivalente pode ser criada manualmente com:
 
 ```sql
-ALTER TABLE usuarios DROP COLUMN IF EXISTS tentativas_falhas;
-ALTER TABLE usuarios DROP COLUMN IF EXISTS bloqueado_ate;
-DROP TABLE IF EXISTS redefinicoes_senha;
+CREATE TABLE IF NOT EXISTS progresso_quiz (
+    id_progresso SERIAL PRIMARY KEY,
+    id_usuario INTEGER NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    id_quiz VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'andamento',
+    progresso INTEGER NOT NULL DEFAULT 0,
+    acertos INTEGER NOT NULL DEFAULT 0,
+    total_perguntas INTEGER NOT NULL DEFAULT 0,
+    atualizado_em TIMESTAMP NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    CONSTRAINT uq_progresso_usuario_quiz UNIQUE (id_usuario, id_quiz),
+    CONSTRAINT ck_progresso_faixa CHECK (progresso BETWEEN 0 AND 100)
+);
 ```
+
+Observação: a aplicação usa `atualizado_em` em UTC e o front converte para `new Date(valor)` com o sufixo `Z`. Cada desenvolvedor deve gerar e aplicar sua própria migration localmente.
 
 ## 5. Endpoints
 

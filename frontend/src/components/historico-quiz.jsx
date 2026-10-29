@@ -1,28 +1,31 @@
-import { useState } from "react";
+import { useMemo } from "react";
 
 import QuizItem from "./quiz-item";
 import { quizzes } from "../data/quizzes";
-import { lerHistorico } from "../utils/progresso";
 import { useAuth } from "../context/useAuth";
 import { ehAdm } from "../utils/permissoes";
+import { useProgresso } from "../hooks/useProgresso";
 
 import "../assets/css/components_css/historico-quiz.css";
 
-// Quantos quizzes aparecem na lista
 const LIMITE = 5;
 
 function HistoricoQuiz() {
     const { usuario } = useAuth();
     const administrador = ehAdm(usuario);
-    const [lista] = useState(() =>
-        lerHistorico()
-            .map((item) => ({
-                ...item,
-                quiz: quizzes.find((q) => q.id === item.id),
-            }))
-            .filter((item) => item.quiz)
-            .sort((a, b) => new Date(b.atualizadoEm) - new Date(a.atualizadoEm))
-            .slice(0, LIMITE)
+    const { historico, carregando, erro, recarregar } = useProgresso();
+
+    const lista = useMemo(
+        () =>
+            historico
+                .map((item) => ({
+                    ...item,
+                    quiz: quizzes.find((q) => q.id === item.id),
+                }))
+                .filter((item) => item.quiz)
+                .sort((a, b) => new Date(b.atualizadoEm) - new Date(a.atualizadoEm))
+                .slice(0, LIMITE),
+        [historico]
     );
 
     return (
@@ -32,7 +35,14 @@ function HistoricoQuiz() {
                 <p>Seus quizzes mais recentes aparecem aqui.</p>
             </div>
 
-            {lista.length === 0 ? (
+            {carregando ? (
+                <div role="status">Carregando seus quizzes...</div>
+            ) : erro ? (
+                <div role="alert">
+                    Não foi possível carregar seu histórico de quizzes.
+                    <button type="button" onClick={recarregar}>Tentar novamente</button>
+                </div>
+            ) : lista.length === 0 ? (
                 <div className="historico-vazio">
                     {administrador
                         ? "Você ainda não iniciou nenhum quiz. Acesse o menu Quiz para começar."

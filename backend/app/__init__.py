@@ -33,15 +33,17 @@ def create_app():
     def token_expirado(jwt_header, jwt_payload):
         return jsonify({"erro": "Sessão expirada. Faça login novamente"}), 401
 
-    from app.models.models import Usuarios  
+    from app.models.models import Usuarios, ProgressoQuiz
 
     # Importando as Rotas
     from app.routes.auth_routes import auth_bp
     from app.routes.admin_routes import admin_bp
     from app.routes.usuario_routes import user_bp
-    
+    from app.routes.progresso_routes import progresso_bp
+
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(user_bp, url_prefix='/usuarios')
+    app.register_blueprint(progresso_bp, url_prefix='/progresso')
 
     return app

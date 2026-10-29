@@ -3,8 +3,8 @@ import { useRef, useState } from "react";
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/useTheme";
 import { quizzes } from "../../data/quizzes";
+import { useProgresso } from "../../hooks/useProgresso";
 import { api, ApiError } from "../../services/api";
-import { lerHistorico } from "../../utils/progresso";
 import { lerFoto, salvarFoto } from "../../utils/perfil";
 import {
     SENHA_MIN,
@@ -33,6 +33,7 @@ function obterIniciais(nome) {
 function Perfil() {
     const { usuario, atualizarUsuario } = useAuth();
     const { theme, setTheme } = useTheme();
+    const { historico, carregando, erro, recarregar } = useProgresso();
 
     // Nome e e-mail começam com o que veio do banco 
     const [nome, setNome] = useState(usuario.nome);
@@ -63,7 +64,6 @@ function Perfil() {
         senha !== "" ||
         confirmacaoSenha !== "";
 
-    const historico = lerHistorico();
     const itensProgresso = quizzes.map((quiz) => {
         const item = historico.find((registro) => registro?.id === quiz.id);
         const progresso = item ? Number(item.progresso) : 0;
@@ -449,27 +449,38 @@ function Perfil() {
                             <h2 id="perfil-progresso-titulo">Meu progresso</h2>
                         </div>
 
-                        <div className="perfil-progresso-numero">
-                            <strong>{progressoGeral}%</strong>
-                            <span>concluído</span>
-                        </div>
-                        <div
-                            className="perfil-barra"
-                            role="progressbar"
-                            aria-label="Progresso geral dos quizzes"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                            aria-valuenow={progressoGeral}
-                        >
-                            <span style={{ width: `${progressoGeral}%` }} />
-                        </div>
-                        <p className="perfil-progresso-resumo">
-                            {concluidos} de {quizzes.length} quizzes concluídos
-                        </p>
-                        <div className="perfil-progresso-detalhe">
-                            <span>Em andamento</span>
-                            <strong>{emAndamento}</strong>
-                        </div>
+                        {carregando ? (
+                            <div role="status">Carregando seu progresso...</div>
+                        ) : erro ? (
+                            <div role="alert">
+                                Não foi possível carregar seu progresso.
+                                <button type="button" onClick={recarregar}>Tentar novamente</button>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="perfil-progresso-numero">
+                                    <strong>{progressoGeral}%</strong>
+                                    <span>concluído</span>
+                                </div>
+                                <div
+                                    className="perfil-barra"
+                                    role="progressbar"
+                                    aria-label="Progresso geral dos quizzes"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"
+                                    aria-valuenow={progressoGeral}
+                                >
+                                    <span style={{ width: `${progressoGeral}%` }} />
+                                </div>
+                                <p className="perfil-progresso-resumo">
+                                    {concluidos} de {quizzes.length} quizzes concluídos
+                                </p>
+                                <div className="perfil-progresso-detalhe">
+                                    <span>Em andamento</span>
+                                    <strong>{emAndamento}</strong>
+                                </div>
+                            </>
+                        )}
                     </section>
 
                     <section className="perfil-card perfil-tema" aria-labelledby="perfil-tema-titulo">
