@@ -8,6 +8,7 @@ import { salvarProgresso } from "../../services/progresso";
 
 import DidioTutor from "../../components/didio-tutor";
 import { falasDidio } from "../../data/didio";
+import didioFinal from "../../assets/images/didio-parabens.png";
 
 import "../../assets/css/pages_css/quiz.css";
 
@@ -19,7 +20,7 @@ function QuizJogo({ quiz, perguntas }) {
 
     const [indice, setIndice] = useState(0);            // pergunta atual
     const [selecionada, setSelecionada] = useState(null); // alternativa marcada (azul)
-    const [confirmada, setConfirmada] = useState(false);  
+    const [confirmada, setConfirmada] = useState(false);
     const [acertos, setAcertos] = useState(0);
     const [finalizado, setFinalizado] = useState(false);
 
@@ -82,29 +83,36 @@ function QuizJogo({ quiz, perguntas }) {
         else if (porcentagem >= 50) mensagem = "Bom trabalho! Vale revisar alguns pontos.";
 
         return (
-            <div className={`quiz ${quiz.classe} anim-page-enter`}>
-                <div className="quiz-resultado">
-                    <div className="quiz-anel" style={{ "--pct": porcentagem }}>
-                        <span>{porcentagem}%</span>
-                    </div>
+            <div className="quiz-layout anim-page-enter">
+                <div className={`quiz ${quiz.classe}`}>
+                    <div className="quiz-resultado">
+                        <div className="quiz-anel" style={{ "--pct": porcentagem }}>
+                            <span>{porcentagem}%</span>
+                        </div>
 
-                    <p className="quiz-descricao">{quiz.titulo}</p>
-                    <h1>Quiz finalizado!</h1>
-                    <p className="quiz-resultado-texto">
-                        Você acertou {acertos} de {total} {total === 1 ? "pergunta" : "perguntas"}.
-                        <br />
-                        {mensagem}
-                    </p>
+                        <p className="quiz-descricao">{quiz.titulo}</p>
+                        <h1>Quiz finalizado!</h1>
+                        <p className="quiz-resultado-texto">
+                            Você acertou {acertos} de {total} {total === 1 ? "pergunta" : "perguntas"}.
+                            <br />
+                            {mensagem}
+                        </p>
 
-                    <div className="quiz-acoes quiz-acoes-centro">
-                        <button type="button" className="quiz-botao quiz-botao-sec" onClick={refazer}>
-                            Refazer quiz
-                        </button>
-                        <Link to="/home" className="quiz-botao">
-                            Voltar ao início
-                        </Link>
+                        <div className="quiz-acoes quiz-acoes-centro">
+                            <button type="button" className="quiz-botao quiz-botao-sec" onClick={refazer}>
+                                Refazer quiz
+                            </button>
+                            <Link to="/home" className="quiz-botao">
+                                Voltar ao início
+                            </Link>
+                        </div>
                     </div>
                 </div>
+
+                {/* Didio comemorando, sem balão */}
+                <aside className="quiz-lateral quiz-lateral-final">
+                    <img className="didio-final" src={didioFinal} alt="Didio comemorando" />
+                </aside>
             </div>
         );
     }
@@ -112,7 +120,7 @@ function QuizJogo({ quiz, perguntas }) {
     /* Pergunta */
     const progressoBarra = ((indice + (confirmada ? 1 : 0)) / total) * 100;
 
-        return (
+    return (
         <div className="quiz-layout anim-page-enter">
             <div className={`quiz ${quiz.classe}`}>
                 {/* Topo: voltar, progresso e tema */}
@@ -196,7 +204,7 @@ function QuizJogo({ quiz, perguntas }) {
                 </div>
             </div>
 
-            {/* Didio: agora fica ao lado do card */}
+            {/* Didio: ao lado do card */}
             <aside className="quiz-lateral">
                 <DidioTutor
                     estado={estadoDidio}
