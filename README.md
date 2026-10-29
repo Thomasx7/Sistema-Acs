@@ -129,6 +129,14 @@ Além disso:
 
 3. Acesse a URL mostrada no terminal pelo Vite.
 
+## Publicação gratuita
+
+- **Vercel:** configure o diretório raiz como `frontend`, instale com `npm ci`, gere o build com `npm run build` e use `dist` como diretório de saída. Defina `VITE_API_URL` com a URL HTTPS do serviço Flask no Render.
+- **Render:** o arquivo `render.yaml` configura o serviço Flask com diretório raiz `backend`, instalação com `pip install -r requirements.txt` e inicialização com `gunicorn app:app`. Configure `DATABASE_URL`, `SECRET_KEY`, `JWT_SECRET_KEY` e `CORS_ORIGINS`.
+- **Neon:** use a connection string PostgreSQL como `DATABASE_URL` no Render e aplique as migrations com `flask --app app db upgrade` a partir do diretório `backend`.
+
+Não versione arquivos `.env` nem coloque credenciais no frontend. `frontend/.env.example` contém apenas a configuração local da URL da API; o valor de produção deve ser definido nas variáveis da Vercel.
+
 ## Conclusão
 
 O Sistema ACS já possui uma base funcional de frontend para educação digital e acompanhamento de aprendizado, além de backend com autenticação e persistência de usuários. A sincronização do progresso e a expansão da biblioteca permanecem como etapas futuras.

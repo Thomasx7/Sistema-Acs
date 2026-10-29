@@ -21,6 +21,3 @@ instance/
 # IDEs
 .vscode/
 .idea/
-
-migrations
-.migrations

@@ -52,42 +52,17 @@ Copie `.env.exemplo` para `.env` e configure:
 | `DATABASE_URL` | URL de conexão do PostgreSQL no formato `postgresql://usuario:senha@localhost:5432/sistema_acs`. |
 | `SECRET_KEY` | Chave aleatória e privada para a aplicação. Configure uma chave própria. |
 | `JWT_SECRET_KEY` | Chave aleatória e privada usada para assinar os tokens JWT. |
+| `CORS_ORIGINS` | Origens autorizadas separadas por vírgula; em produção, use o domínio HTTPS da aplicação Vercel. |
 
 O arquivo `.env` é carregado por `app/config.py` e não deve ser enviado ao repositório.
 
 ## 4. Aplicar alterações do banco de dados
 
-O projeto já possui Flask-Migrate e a pasta `migrations`. Não execute `db init`. Com o PostgreSQL configurado e a partir de `backend`, aplique migrations pendentes com:
+O projeto possui Flask-Migrate e migrations versionadas. Não execute `db init` nem gere migrations localmente para o deploy. Com o PostgreSQL configurado e a partir de `backend`, aplique as migrations pendentes com:
 
 ```bash
 flask --app app db upgrade
 ```
-
-Para bancos que ainda tenham uma estrutura antiga, cada desenvolvedor pode gerar e aplicar localmente a migration da tabela de progresso, sem versionar o arquivo no Git:
-
-```bash
-flask --app app db migrate -m "tabela progresso_quiz"
-flask --app app db upgrade
-```
-
-A pasta `migrations/versions` é ignorada pelo Git; portanto, cada desenvolvedor gera e aplica as migrations localmente. Se a migration não existir ainda, a tabela equivalente pode ser criada manualmente com:
-
-```sql
-CREATE TABLE IF NOT EXISTS progresso_quiz (
-    id_progresso SERIAL PRIMARY KEY,
-    id_usuario INTEGER NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-    id_quiz VARCHAR(50) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'andamento',
-    progresso INTEGER NOT NULL DEFAULT 0,
-    acertos INTEGER NOT NULL DEFAULT 0,
-    total_perguntas INTEGER NOT NULL DEFAULT 0,
-    atualizado_em TIMESTAMP NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
-    CONSTRAINT uq_progresso_usuario_quiz UNIQUE (id_usuario, id_quiz),
-    CONSTRAINT ck_progresso_faixa CHECK (progresso BETWEEN 0 AND 100)
-);
-```
-
-Observação: a aplicação usa `atualizado_em` em UTC e o front converte para `new Date(valor)` com o sufixo `Z`. Cada desenvolvedor deve gerar e aplicar sua própria migration localmente.
 
 ## 5. Endpoints
 
@@ -120,6 +95,12 @@ python app.py
 ```
 
 A aplicação inicia em `http://localhost:5000` (porta `5000`). O servidor escuta em todas as interfaces e o modo debug está habilitado em `app.py`; use essa configuração somente em desenvolvimento.
+
+## 7. Deploy no Render e Neon
+
+O arquivo `render.yaml` na raiz configura o serviço web com `backend` como diretório raiz. O Render instala dependências com `pip install -r requirements.txt` e inicia a API com `gunicorn app:app`.
+
+Configure no Render `DATABASE_URL` com a connection string PostgreSQL do Neon, `SECRET_KEY` e `JWT_SECRET_KEY` com valores aleatórios e independentes, e `CORS_ORIGINS` com o domínio HTTPS da aplicação Vercel. Antes de disponibilizar a API, execute `flask --app app db upgrade` no Shell do serviço para criar ou atualizar as tabelas.
 
 ## Fluxo de trabalho com o Git
 

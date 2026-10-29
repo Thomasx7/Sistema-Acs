@@ -14,9 +14,21 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    variaveis_obrigatorias = {
+        "DATABASE_URL": app.config["SQLALCHEMY_DATABASE_URI"],
+        "SECRET_KEY": app.config["SECRET_KEY"],
+        "JWT_SECRET_KEY": app.config["JWT_SECRET_KEY"],
+    }
+    ausentes = [nome for nome, valor in variaveis_obrigatorias.items() if not valor]
+    if ausentes:
+        raise RuntimeError(
+            "Configure as variáveis de ambiente obrigatórias: "
+            + ", ".join(ausentes)
+        )
+
     # Inicializando
     db.init_app(app)
-    CORS(app)
+    CORS(app, origins=app.config["CORS_ORIGINS"])
     migrate.init_app(app, db)
     jwt.init_app(app)
     

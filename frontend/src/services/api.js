@@ -1,6 +1,6 @@
 import { lerToken, removerToken } from "../utils/tokenStorage";
 
-const API_URL = "http://localhost:5000"; //TODO Mudar aqui URL backend
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // Erro padronizado: toda falha da API chega às telas neste formato.
 export class ApiError extends Error {
