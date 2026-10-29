@@ -374,6 +374,25 @@
     box-shadow: var(--sombra-card);
 }
 
+/* Tela final: só o Didio no painel */
+.quiz-lateral-final {
+    place-items: center;
+}
+
+.quiz-lateral-final .didio-final {
+    width: auto;
+    max-width: 100%;
+    height: 300px;
+    object-fit: contain;
+    animation: didio-troca 0.3s ease both;
+}
+
+@media (max-width: 1000px) {
+    .quiz-lateral-final .didio-final {
+        height: 220px;
+    }
+}
+
 /* telas menores: Didio volta para baixo */
 @media (max-width: 1000px) {
     .quiz-layout {
