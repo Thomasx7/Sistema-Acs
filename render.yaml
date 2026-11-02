@@ -6,7 +6,7 @@ services:
     branch: main
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn 'app:create_app()'
     envVars:
       - key: DATABASE_URL
         sync: false
