@@ -1,6 +1,6 @@
 import { lerToken, removerToken } from "../utils/tokenStorage";
 
-const API_URL = "http://localhost:5000"; //TODO Mudar aqui URL backend
+export const API_URL = "http://localhost:5000"; //TODO Mudar aqui URL backend
 
 // Erro padronizado: toda falha da API chega às telas neste formato.
 export class ApiError extends Error {
@@ -31,9 +31,12 @@ function lerRetryAfter(resposta, mensagem) {
 
 async function requisicao(metodo, caminho, corpo) {
     const token = lerToken();
+    const ehFormData = typeof FormData !== "undefined" && corpo instanceof FormData;
 
     const headers = { Accept: "application/json" };
-    if (corpo !== undefined) headers["Content-Type"] = "application/json";
+    if (corpo !== undefined && !ehFormData) {
+        headers["Content-Type"] = "application/json";
+    }
     if (token) headers.Authorization = `Bearer ${token}`;
 
     let resposta;
@@ -41,7 +44,11 @@ async function requisicao(metodo, caminho, corpo) {
         resposta = await fetch(`${API_URL}${caminho}`, {
             method: metodo,
             headers,
-            body: corpo !== undefined ? JSON.stringify(corpo) : undefined,
+            body: corpo === undefined
+                ? undefined
+                : ehFormData
+                    ? corpo
+                    : JSON.stringify(corpo),
         });
     } catch {
         throw new ApiError(

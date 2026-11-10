@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import CardsInicio from "../../components/cards-Inicio";
 import { quizzes } from "../../data/quizzes";
 import { perguntasPorQuiz } from "../../data/perguntas";
-import { salvarProgresso } from "../../utils/progresso";
+import { ApiError } from "../../services/api";
+import {
+    obterProgresso,
+    salvarProgresso,
+} from "../../services/progressoQuiz";
 
 import DidioTutor from "../../components/didio-tutor";
 import { falasDidio } from "../../data/didio";
@@ -17,11 +21,53 @@ const LETRAS = ["A", "B", "C", "D"];
 function QuizJogo({ quiz, perguntas }) {
     const total = perguntas.length;
 
+    const [carregandoProgresso, setCarregandoProgresso] = useState(true);
+    const [erroProgresso, setErroProgresso] = useState("");
+    const [erroSalvar, setErroSalvar] = useState("");
     const [indice, setIndice] = useState(0);            // pergunta atual
     const [selecionada, setSelecionada] = useState(null); // alternativa marcada (azul)
     const [confirmada, setConfirmada] = useState(false);  
     const [acertos, setAcertos] = useState(0);
+    const [totalResultado, setTotalResultado] = useState(total);
     const [finalizado, setFinalizado] = useState(false);
+    const filaSalvamento = useRef(Promise.resolve());
+
+    useEffect(() => {
+        let cancelado = false;
+
+        obterProgresso(quiz.idQuiz)
+            .then((progressoSalvo) => {
+                if (cancelado) return;
+
+                if (progressoSalvo.status === "em_andamento") {
+                    const respondidas = Math.round(
+                        (progressoSalvo.progresso / 100) * total
+                    );
+                    setIndice(Math.min(respondidas, total - 1));
+                    setAcertos(progressoSalvo.acertos);
+                } else if (progressoSalvo.status === "concluido") {
+                    setAcertos(progressoSalvo.acertos);
+                    setTotalResultado(progressoSalvo.total_perguntas || total);
+                    setFinalizado(true);
+                }
+            })
+            .catch((falha) => {
+                if (!cancelado) {
+                    setErroProgresso(
+                        falha instanceof ApiError
+                            ? falha.message
+                            : "Não foi possível carregar o progresso."
+                    );
+                }
+            })
+            .finally(() => {
+                if (!cancelado) setCarregandoProgresso(false);
+            });
+
+        return () => {
+            cancelado = true;
+        };
+    }, [quiz.idQuiz, total]);
 
     const pergunta = perguntas[indice];
     const ultima = indice === total - 1;
@@ -37,17 +83,33 @@ function QuizJogo({ quiz, perguntas }) {
         if (!confirmada) setSelecionada(i);
     }
 
+    function salvarSemBloquear(dados) {
+        filaSalvamento.current = filaSalvamento.current
+            .then(() => salvarProgresso(quiz.idQuiz, dados))
+            .then(() => setErroSalvar(""))
+            .catch((falha) => {
+                setErroSalvar(
+                    falha instanceof ApiError
+                        ? falha.message
+                        : "Não foi possível salvar o progresso."
+                );
+            });
+    }
+
     // Mostra verde/vermelho e registra o andamento para o histórico da Home
     function confirmar() {
         setConfirmada(true);
-        if (acertou) setAcertos(acertos + 1);
+        const novosAcertos = acertos + (acertou ? 1 : 0);
+        const novoProgresso = Math.round(((indice + 1) / total) * 100);
+        setAcertos(novosAcertos);
+        setErroSalvar("");
 
-        salvarProgresso(
-            quiz.id,
-            ultima
-                ? { status: "concluido", progresso: 100 }
-                : { status: "andamento", progresso: Math.round(((indice + 1) / total) * 100) }
-        );
+        salvarSemBloquear({
+            status: ultima ? "concluido" : "em_andamento",
+            progresso: ultima ? 100 : novoProgresso,
+            acertos: novosAcertos,
+            total_perguntas: total,
+        });
     }
 
     function continuar() {
@@ -65,12 +127,30 @@ function QuizJogo({ quiz, perguntas }) {
         setSelecionada(null);
         setConfirmada(false);
         setAcertos(0);
+        setTotalResultado(total);
         setFinalizado(false);
+        setErroSalvar("");
+        salvarSemBloquear({
+            status: "em_andamento",
+            progresso: 0,
+            acertos: 0,
+            total_perguntas: total,
+        });
+    }
+
+    if (carregandoProgresso) {
+        return (
+            <div className={`quiz ${quiz.classe} anim-page-enter`}>
+                <p role="status">Carregando progresso...</p>
+            </div>
+        );
     }
 
     /* Tela final */
     if (finalizado) {
-        const porcentagem = Math.round((acertos / total) * 100);
+        const porcentagem = totalResultado
+            ? Math.round((acertos / totalResultado) * 100)
+            : 0;
 
         let mensagem = "Continue praticando, você vai chegar lá!";
         if (porcentagem >= 75) mensagem = "Excelente! Você domina este tema.";
@@ -86,10 +166,13 @@ function QuizJogo({ quiz, perguntas }) {
                     <p className="quiz-descricao">{quiz.titulo}</p>
                     <h1>Quiz finalizado!</h1>
                     <p className="quiz-resultado-texto">
-                        Você acertou {acertos} de {total} {total === 1 ? "pergunta" : "perguntas"}.
+                        Você acertou {acertos} de {totalResultado} {totalResultado === 1 ? "pergunta" : "perguntas"}.
                         <br />
                         {mensagem}
                     </p>
+                    {(erroProgresso || erroSalvar) && (
+                        <p role="alert">{erroSalvar || erroProgresso}</p>
+                    )}
 
                     <div className="quiz-acoes quiz-acoes-centro">
                         <button type="button" className="quiz-botao quiz-botao-sec" onClick={refazer}>
@@ -110,6 +193,9 @@ function QuizJogo({ quiz, perguntas }) {
         return (
         <div className="quiz-layout anim-page-enter">
             <div className={`quiz ${quiz.classe}`}>
+                {(erroProgresso || erroSalvar) && (
+                    <p role="alert">{erroSalvar || erroProgresso}</p>
+                )}
                 {/* Topo: voltar, progresso e tema */}
                 <div className="quiz-topo">
                     <Link to="/quiz" className="quiz-voltar" aria-label="Voltar para o início">

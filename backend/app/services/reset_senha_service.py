@@ -104,8 +104,6 @@ def redefinir(token: str, nova_senha: str) -> None:
         raise TokenRedefinicaoInvalido
 
     usuario.senha = hash_password(nova_senha)
-    usuario.tentativas_falhas = 0
-    usuario.bloqueado_ate = None
     registro.usado_em = agora
     RedefinicoesSenha.query.filter(
         RedefinicoesSenha.id_usuario == usuario.id_usuario,

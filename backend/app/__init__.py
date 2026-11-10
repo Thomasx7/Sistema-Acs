@@ -42,9 +42,13 @@ def create_app():
     from app.routes.auth_routes import auth_bp
     from app.routes.admin_routes import admin_bp
     from app.routes.usuario_routes import user_bp
+    from app.routes.progresso_quiz_routes import progresso_quiz_bp
+    from app.routes.upload_routes import upload_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(user_bp, url_prefix='/usuarios')
+    app.register_blueprint(progresso_quiz_bp, url_prefix='/progresso-quiz')
+    app.register_blueprint(upload_bp, url_prefix='/uploads')
 
     return app

@@ -105,11 +105,7 @@ def login():
     try:
         usuario = autenticar(email, senha)
     except AuthError as e:
-        resposta = jsonify({"erro": e.mensagem})
-        resposta.status_code = e.status
-        if e.retry_after:
-            resposta.headers["Retry-After"] = str(e.retry_after)
-        return resposta
+        return jsonify({"erro": e.mensagem}), e.status
 
     token = create_access_token(
         identity=str(usuario.id_usuario),
@@ -124,6 +120,7 @@ def login():
             "nome": usuario.nome,
             "email": usuario.email,
             "permissao": usuario.permissao,
+            "foto_perfil": usuario.foto_perfil,
         },
     }), 200
 
@@ -142,4 +139,5 @@ def me():
         "nome": usuario.nome,
         "email": usuario.email,
         "permissao": usuario.permissao,
+        "foto_perfil": usuario.foto_perfil,
     }), 200

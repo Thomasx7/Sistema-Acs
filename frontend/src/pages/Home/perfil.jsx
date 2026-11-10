@@ -1,11 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/useTheme";
 import { quizzes } from "../../data/quizzes";
 import { api, ApiError } from "../../services/api";
-import { lerHistorico } from "../../utils/progresso";
-import { lerFoto, salvarFoto } from "../../utils/perfil";
+import { listarProgressos } from "../../services/progressoQuiz";
+import { montarUrlFoto } from "../../utils/perfil";
 import {
     SENHA_MIN,
     normalizarEmail,
@@ -38,9 +38,10 @@ function Perfil() {
     const [nome, setNome] = useState(usuario.nome);
     const [email, setEmail] = useState(usuario.email);
 
-    // A foto ainda é local
-    const [fotoSalva, setFotoSalva] = useState(() => lerFoto(usuario.id_usuario));
-    const [foto, setFoto] = useState(fotoSalva);
+    const [arquivoFoto, setArquivoFoto] = useState(null);
+    const [previewFoto, setPreviewFoto] = useState("");
+    const urlFoto = previewFoto || montarUrlFoto(usuario.foto_perfil);
+    const [fotoFalhou, setFotoFalhou] = useState("");
 
     const [senhaAtual, setSenhaAtual] = useState("");
     const [senha, setSenha] = useState("");
@@ -55,29 +56,58 @@ function Perfil() {
     const [salvando, setSalvando] = useState(false);
     const inputFotoRef = useRef(null);
 
-  
+    const [progressos, setProgressos] = useState([]);
+    const [carregandoProgresso, setCarregandoProgresso] = useState(true);
+    const [erroProgresso, setErroProgresso] = useState("");
+
+    useEffect(() => {
+        let cancelado = false;
+
+        listarProgressos()
+            .then((dados) => {
+                if (!cancelado) setProgressos(dados);
+            })
+            .catch((falha) => {
+                if (!cancelado) {
+                    setErroProgresso(
+                        falha instanceof ApiError
+                            ? falha.message
+                            : "Não foi possível carregar o progresso."
+                    );
+                }
+            })
+            .finally(() => {
+                if (!cancelado) setCarregandoProgresso(false);
+            });
+
+        return () => {
+            cancelado = true;
+        };
+    }, []);
+
     const alterado =
         nome !== usuario.nome ||
         email !== usuario.email ||
-        foto !== fotoSalva ||
+        Boolean(arquivoFoto) ||
         senha !== "" ||
         confirmacaoSenha !== "";
 
-    const historico = lerHistorico();
     const itensProgresso = quizzes.map((quiz) => {
-        const item = historico.find((registro) => registro?.id === quiz.id);
+        const item = progressos.find(
+            (registro) => registro.id_quiz === quiz.idQuiz
+        );
         const progresso = item ? Number(item.progresso) : 0;
 
         return {
-            id: quiz.id,
-            status: item ? item.status : "novo",
+            id: quiz.idQuiz,
+            status: item ? item.status : "nao_iniciado",
             progresso: Number.isFinite(progresso)
                 ? Math.min(100, Math.max(0, progresso))
                 : 0,
         };
     });
     const concluidos = itensProgresso.filter((item) => item.status === "concluido").length;
-    const emAndamento = itensProgresso.filter((item) => item.status === "andamento").length;
+    const emAndamento = itensProgresso.filter((item) => item.status === "em_andamento").length;
     const progressoGeral = itensProgresso.length
         ? Math.round(
             itensProgresso.reduce((total, item) => total + item.progresso, 0) /
@@ -118,7 +148,9 @@ function Perfil() {
                 return;
             }
 
-            setFoto(leitor.result);
+            setArquivoFoto(arquivo);
+            setPreviewFoto(leitor.result);
+            setFotoFalhou("");
             setErroFoto("");
             setFeedback(null);
         };
@@ -183,7 +215,7 @@ function Perfil() {
             corpo.senha_atual = senhaAtual;
         }
 
-        const mudouFoto = foto !== fotoSalva;
+        const arquivoParaEnviar = arquivoFoto;
         const temDadosParaEnviar = Object.keys(corpo).length > 0;
 
         setSalvando(true);
@@ -195,10 +227,13 @@ function Perfil() {
                 atualizarUsuario(resposta.usuario);
             }
 
-            let fotoOk = true;
-            if (mudouFoto) {
-                fotoOk = salvarFoto(usuario.id_usuario, foto);
-                if (fotoOk) setFotoSalva(foto);
+            if (arquivoParaEnviar) {
+                const formulario = new FormData();
+                formulario.append("foto", arquivoParaEnviar);
+                const resposta = await api.post("/usuarios/foto-perfil", formulario);
+                atualizarUsuario(resposta.usuario);
+                setArquivoFoto(null);
+                setPreviewFoto("");
             }
 
             // Mostra no formulário os valores já tratados
@@ -209,19 +244,12 @@ function Perfil() {
             setConfirmacaoSenha("");
             setErros({});
 
-            if (!fotoOk) {
-                setFeedback({
-                    tipo: "erro",
-                    mensagem: "Seus dados foram salvos, mas a foto não coube no navegador. Tente uma imagem menor.",
-                });
-            } else {
-                setFeedback({
-                    tipo: "sucesso",
-                    mensagem: senha
-                        ? "Alterações salvas. Sua senha foi atualizada."
-                        : "Alterações salvas com sucesso.",
-                });
-            }
+            setFeedback({
+                tipo: "sucesso",
+                mensagem: senha
+                    ? "Alterações salvas. Sua senha foi atualizada."
+                    : "Alterações salvas com sucesso.",
+            });
         } catch (falha) {
             setFeedback({
                 tipo: "erro",
@@ -229,6 +257,44 @@ function Perfil() {
                     falha instanceof ApiError
                         ? falha.message
                         : "Não foi possível salvar. Tente novamente.",
+            });
+        } finally {
+            setSalvando(false);
+        }
+    }
+
+    async function removerFoto() {
+        if (salvando) return;
+
+        if (!usuario.foto_perfil) {
+            setArquivoFoto(null);
+            setPreviewFoto("");
+            setErroFoto("");
+            setFeedback(null);
+            return;
+        }
+
+        setSalvando(true);
+        setFeedback(null);
+
+        try {
+            const resposta = await api.delete("/usuarios/foto-perfil");
+            atualizarUsuario(resposta.usuario);
+            setArquivoFoto(null);
+            setPreviewFoto("");
+            setErroFoto("");
+            setFotoFalhou("");
+            setFeedback({
+                tipo: "sucesso",
+                mensagem: "Foto de perfil removida com sucesso.",
+            });
+        } catch (falha) {
+            setFeedback({
+                tipo: "erro",
+                mensagem:
+                    falha instanceof ApiError
+                        ? falha.message
+                        : "Não foi possível remover a foto. Tente novamente.",
             });
         } finally {
             setSalvando(false);
@@ -252,8 +318,12 @@ function Perfil() {
                                 onClick={() => inputFotoRef.current?.click()}
                                 aria-label="Escolher foto de perfil"
                             >
-                                {foto ? (
-                                    <img src={foto} alt={`Foto de perfil de ${nome || "usuário"}`} />
+                                {urlFoto && fotoFalhou !== urlFoto ? (
+                                    <img
+                                        src={urlFoto}
+                                        alt={`Foto de perfil de ${nome || "usuário"}`}
+                                        onError={() => setFotoFalhou(urlFoto)}
+                                    />
                                 ) : (
                                     <span aria-hidden="true">{obterIniciais(nome)}</span>
                                 )}
@@ -272,6 +342,20 @@ function Perfil() {
                                 onChange={selecionarFoto}
                                 aria-label="Selecionar uma imagem de perfil"
                             />
+                            {(usuario.foto_perfil || arquivoFoto) && (
+                                <button
+                                    className="perfil-remover-foto"
+                                    type="button"
+                                    onClick={removerFoto}
+                                    disabled={salvando}
+                                >
+                                    {salvando
+                                        ? "Aguarde..."
+                                        : usuario.foto_perfil
+                                            ? "Remover foto"
+                                            : "Cancelar seleção"}
+                                </button>
+                            )}
                         </div>
 
                         <div className="perfil-identidade-texto">
@@ -449,27 +533,35 @@ function Perfil() {
                             <h2 id="perfil-progresso-titulo">Meu progresso</h2>
                         </div>
 
-                        <div className="perfil-progresso-numero">
-                            <strong>{progressoGeral}%</strong>
-                            <span>concluído</span>
-                        </div>
-                        <div
-                            className="perfil-barra"
-                            role="progressbar"
-                            aria-label="Progresso geral dos quizzes"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                            aria-valuenow={progressoGeral}
-                        >
-                            <span style={{ width: `${progressoGeral}%` }} />
-                        </div>
-                        <p className="perfil-progresso-resumo">
-                            {concluidos} de {quizzes.length} quizzes concluídos
-                        </p>
-                        <div className="perfil-progresso-detalhe">
-                            <span>Em andamento</span>
-                            <strong>{emAndamento}</strong>
-                        </div>
+                        {carregandoProgresso ? (
+                            <p role="status">Carregando progresso...</p>
+                        ) : erroProgresso ? (
+                            <p role="alert">{erroProgresso}</p>
+                        ) : (
+                            <>
+                                <div className="perfil-progresso-numero">
+                                    <strong>{progressoGeral}%</strong>
+                                    <span>concluído</span>
+                                </div>
+                                <div
+                                    className="perfil-barra"
+                                    role="progressbar"
+                                    aria-label="Progresso geral dos quizzes"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"
+                                    aria-valuenow={progressoGeral}
+                                >
+                                    <span style={{ width: `${progressoGeral}%` }} />
+                                </div>
+                                <p className="perfil-progresso-resumo">
+                                    {concluidos} de {quizzes.length} quizzes concluídos
+                                </p>
+                                <div className="perfil-progresso-detalhe">
+                                    <span>Em andamento</span>
+                                    <strong>{emAndamento}</strong>
+                                </div>
+                            </>
+                        )}
                     </section>
 
                     <section className="perfil-card perfil-tema" aria-labelledby="perfil-tema-titulo">

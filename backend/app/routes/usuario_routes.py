@@ -1,17 +1,24 @@
-from flask import Blueprint, request, jsonify, g
+from pathlib import Path
+from uuid import uuid4
+
+from flask import Blueprint, request, jsonify, g, current_app
 
 from app import db
 from app.models.models import Usuarios
 from app.utils.decorators import autenticado, apenas_adm, eh_adm
+from app.utils.foto_perfil import PASTA_FOTOS_PERFIL, excluir_foto_perfil
 from app.utils.hash import hash_password, check_password
 from app.utils.permissoes import PERMISSAO_ADM, PERMISSAO_COMUM
 from app.utils.validators import normalizar_email, validar_email, validar_senha
+from sqlalchemy.exc import SQLAlchemyError
 
 user_bp = Blueprint('user_bp', __name__)
 
 PERMISSOES = (PERMISSAO_ADM, PERMISSAO_COMUM)
 STATUS = ("Ativo", "Inativo")
 NOME_MAX = 100  
+TAMANHO_MAXIMO_FOTO = 2 * 1024 * 1024
+EXTENSOES_FOTO = {".png", ".jpg", ".jpeg", ".webp"}
 
 
 def serializar(usuario):
@@ -21,6 +28,7 @@ def serializar(usuario):
         'email': usuario.email,
         'permissao': usuario.permissao,
         'status': usuario.status,
+        'foto_perfil': usuario.foto_perfil,
         'data_cadastro': usuario.data_cadastro.strftime('%Y-%m-%d %H:%M:%S')
     }
 
@@ -32,6 +40,118 @@ def validar_nome(nome):
     if len(nome.strip()) > NOME_MAX:
         return f"O nome deve ter no máximo {NOME_MAX} caracteres"
     return None
+
+
+def detectar_formato_foto(conteudo):
+    if conteudo.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png"
+    if conteudo.startswith(b"\xff\xd8\xff"):
+        return "jpeg"
+    if (
+        len(conteudo) >= 12
+        and conteudo[:4] == b"RIFF"
+        and conteudo[8:12] == b"WEBP"
+    ):
+        return "webp"
+    return None
+
+
+@user_bp.route('/foto-perfil', methods=['POST'])
+@autenticado
+def salvar_foto_perfil():
+    arquivo = request.files.get("foto")
+    if not arquivo or not arquivo.filename:
+        return jsonify({"erro": "Envie uma imagem no campo foto"}), 400
+
+    extensao = Path(arquivo.filename).suffix.lower()
+    if extensao not in EXTENSOES_FOTO:
+        return jsonify({"erro": "Formato inválido. Use PNG, JPG, JPEG ou WEBP"}), 400
+
+    conteudo = arquivo.stream.read(TAMANHO_MAXIMO_FOTO + 1)
+    if not conteudo:
+        return jsonify({"erro": "O arquivo de imagem está vazio"}), 400
+    if len(conteudo) > TAMANHO_MAXIMO_FOTO:
+        return jsonify({"erro": "A imagem deve ter no máximo 2 MB"}), 413
+
+    formato = detectar_formato_foto(conteudo)
+    extensao_compativel = (
+        (formato == "png" and extensao == ".png")
+        or (formato == "jpeg" and extensao in {".jpg", ".jpeg"})
+        or (formato == "webp" and extensao == ".webp")
+    )
+    if not extensao_compativel:
+        return jsonify({
+            "erro": "O conteúdo não corresponde a uma imagem PNG, JPG, JPEG ou WEBP válida"
+        }), 400
+
+    usuario = g.usuario_atual
+    foto_anterior = usuario.foto_perfil
+    nome_arquivo = f"{uuid4().hex}{extensao}"
+    caminho_novo = PASTA_FOTOS_PERFIL / nome_arquivo
+    caminho_relativo = f"uploads/perfil/{nome_arquivo}"
+
+    try:
+        PASTA_FOTOS_PERFIL.mkdir(parents=True, exist_ok=True)
+        caminho_novo.write_bytes(conteudo)
+    except OSError:
+        db.session.rollback()
+        current_app.logger.exception("Não foi possível gravar a foto de perfil")
+        return jsonify({"erro": "Não foi possível salvar a foto de perfil"}), 500
+
+    usuario.foto_perfil = caminho_relativo
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        try:
+            caminho_novo.unlink()
+        except FileNotFoundError:
+            pass
+        except OSError:
+            current_app.logger.exception("Não foi possível remover a foto não confirmada")
+        current_app.logger.exception("Não foi possível atualizar a foto de perfil no banco")
+        return jsonify({"erro": "Não foi possível salvar a foto de perfil"}), 500
+
+    try:
+        excluir_foto_perfil(foto_anterior)
+    except OSError:
+        current_app.logger.exception("Não foi possível remover a foto de perfil anterior")
+        return jsonify({
+            "erro": "A foto foi atualizada, mas não foi possível remover a foto anterior"
+        }), 500
+
+    return jsonify({
+        "mensagem": "Foto de perfil atualizada com sucesso",
+        "usuario": serializar(usuario),
+    }), 200
+
+
+@user_bp.route('/foto-perfil', methods=['DELETE'])
+@autenticado
+def remover_foto_perfil():
+    usuario = g.usuario_atual
+    foto_anterior = usuario.foto_perfil
+    usuario.foto_perfil = None
+
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        current_app.logger.exception("Não foi possível remover a foto de perfil do banco")
+        return jsonify({"erro": "Não foi possível remover a foto de perfil"}), 500
+
+    try:
+        excluir_foto_perfil(foto_anterior)
+    except OSError:
+        current_app.logger.exception("Não foi possível excluir o arquivo da foto de perfil")
+        return jsonify({
+            "erro": "A foto foi removida do perfil, mas não foi possível excluir o arquivo"
+        }), 500
+
+    return jsonify({
+        "mensagem": "Foto de perfil removida com sucesso",
+        "usuario": serializar(usuario),
+    }), 200
 
 
 # TODO LISTAR TODOS OS USUÁRIOS (só administradores)

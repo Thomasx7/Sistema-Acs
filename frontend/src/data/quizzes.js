@@ -2,6 +2,8 @@
 export const quizzes = [
     {
         id: "lgpd",
+        // IDs persistidos no backend: permanentes; nunca renumerar nem reutilizar.
+        idQuiz: 1,
         classe: "card-lgpd",
         titulo: "LGPD",
         descricao:
@@ -9,6 +11,7 @@ export const quizzes = [
     },
     {
         id: "letramento-digital",
+        idQuiz: 2,
         classe: "card-letramento",
         titulo: "Letramento Digital",
         descricao:
@@ -16,6 +19,7 @@ export const quizzes = [
     },
     {
         id: "seguranca-da-informacao",
+        idQuiz: 3,
         classe: "card-seguranca",
         titulo: "Segurança da Informação",
         descricao:
@@ -23,6 +27,7 @@ export const quizzes = [
     },
     {
         id: "saude-digital",
+        idQuiz: 4,
         classe: "card-saude",
         titulo: "Saúde Digital",
         descricao:

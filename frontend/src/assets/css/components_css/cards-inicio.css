@@ -85,6 +85,46 @@
     color: var(--texto-suave);
 }
 
+.cards .card-quiz-progresso {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 6px 10px;
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+}
+
+.cards .card-quiz-barra {
+    grid-column: 1;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--borda);
+}
+
+.cards .card-quiz-barra span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--cor-card);
+    transition: width 0.2s ease;
+}
+
+.cards .card-quiz-progresso > span:last-child {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.cards .card-quiz-status,
+.cards .card-quiz-erro {
+    color: var(--texto-suave);
+    font-size: 0.82rem;
+}
+
+.cards .card-quiz-erro {
+    margin-top: 12px;
+}
+
 /* Botão no canto inferior direito */
 .cards .card-quiz-botao {
     display: inline-flex;

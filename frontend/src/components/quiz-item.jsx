@@ -11,9 +11,9 @@ function formatarData(iso) {
     });
 }
 
-function QuizItem({ quiz, status = "novo", progresso = 0, atualizadoEm }) {
+function QuizItem({ quiz, status = "nao_iniciado", progresso = 0, atualizadoEm }) {
     const concluido = status === "concluido";
-    const novo = status === "novo";
+    const novo = status === "nao_iniciado";
 
     const textoStatus = concluido ? "Concluído" : novo ? "Não iniciado" : "Em andamento";
     const classeStatus = concluido ? "status-concluido" : novo ? "status-novo" : "status-andamento";
