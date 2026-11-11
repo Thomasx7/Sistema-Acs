@@ -1,33 +1,14 @@
-# Ambiente Virtual
 .venv/
 env/
 venv/
 ENV/
-
-# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Variáveis de Ambiente e Segredos
 .env
-env
-.ENV
-ENV
-!.env.exemplo
 instance/
 .pytest_cache/
-
-# IDEs
 .vscode/
 .idea/
-
-migrations
-.migrations
+migrations/**/__pycache__/
 uploads/
-
-!migrations/
-migrations/*
-!migrations/versions/
-migrations/versions/*
-!migrations/versions/91b7e02c4a6d_criar_quizzes_perguntas_e_alternativas.py

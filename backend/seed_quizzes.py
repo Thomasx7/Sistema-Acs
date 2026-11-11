@@ -209,33 +209,31 @@ QUIZZES = (
 def seed_quizzes():
     for seed in QUIZZES:
         quiz = Quiz.query.filter_by(nome=seed["nome"]).first()
-        if quiz is None:
-            quiz = Quiz(
-                nome=seed["nome"],
-                descricao=seed["descricao"],
-                cor=seed["cor"],
-            )
-            db.session.add(quiz)
-            db.session.flush()
-        else:
-            quiz.descricao = seed["descricao"]
-            quiz.cor = seed["cor"]
+        if quiz is not None:
+            continue
 
-        if not quiz.perguntas:
-            for ordem, (enunciado, explicacao, alternativas) in enumerate(
-                seed["perguntas"],
-                start=1,
-            ):
-                pergunta = Pergunta(
-                    enunciado=enunciado,
-                    explicacao=explicacao,
-                    ordem=ordem,
-                    alternativas=[
-                        Alternativa(texto=texto, correta=correta)
-                        for texto, correta in alternativas
-                    ],
-                )
-                quiz.perguntas.append(pergunta)
+        quiz = Quiz(
+            nome=seed["nome"],
+            descricao=seed["descricao"],
+            cor=seed["cor"],
+        )
+        db.session.add(quiz)
+        db.session.flush()
+
+        for ordem, (enunciado, explicacao, alternativas) in enumerate(
+            seed["perguntas"],
+            start=1,
+        ):
+            pergunta = Pergunta(
+                enunciado=enunciado,
+                explicacao=explicacao,
+                ordem=ordem,
+                alternativas=[
+                    Alternativa(texto=texto, correta=correta)
+                    for texto, correta in alternativas
+                ],
+            )
+            quiz.perguntas.append(pergunta)
         quiz.quantidade_perguntas = len(quiz.perguntas)
 
     db.session.commit()
