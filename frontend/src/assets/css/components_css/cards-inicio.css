@@ -4,6 +4,10 @@
 }
 
 .cards .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     margin-bottom: 20px;
 }
 
@@ -125,6 +129,50 @@
     margin-top: 12px;
 }
 
+.cards .card-quiz-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.cards .card-quiz-admin-criar,
+.cards .card-quiz-admin-botao {
+    padding: 9px 13px;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    background: var(--superficie);
+    color: var(--texto-link);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cards .card-quiz-admin-criar {
+    flex-shrink: 0;
+    border-color: var(--azul-secundario);
+    background: var(--azul-secundario);
+    color: var(--texto-botao);
+}
+
+.cards .card-quiz-admin-excluir {
+    color: var(--erro);
+}
+
+.cards .card-quiz-admin-botao:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.cards .card-quiz-admin-sucesso {
+    margin-top: 12px;
+    color: var(--sucesso);
+    font-size: 0.88rem;
+}
+
 /* Botão no canto inferior direito */
 .cards .card-quiz-botao {
     display: inline-flex;
@@ -135,9 +183,12 @@
     border-radius: 12px;
     background: var(--cor-card);
     color: var(--texto-botao-acento);
+    border: 0;
+    font-family: inherit;
     font-size: 0.85rem;
     font-weight: 600;
     text-decoration: none;
+    cursor: pointer;
     box-shadow: 0 6px 14px color-mix(in srgb, var(--cor-card) 32%, transparent);
     transition: filter 0.2s ease;
 }
@@ -150,6 +201,15 @@
 
 .cards .card-quiz-botao:hover {
     filter: brightness(0.9);
+}
+
+.cards .card-quiz-botao:disabled {
+    filter: saturate(0.7);
+    cursor: wait;
+}
+
+.cards .card-quiz-botao:disabled:hover::after {
+    transform: none;
 }
 
 .cards .card-quiz-botao:hover::after {
@@ -177,11 +237,46 @@
     --cor-card: var(--cor-saude);
 }
 
+.cards .card-cor-1 {
+    --cor-card: var(--cor-paleta-1);
+}
+
+.cards .card-cor-2 {
+    --cor-card: var(--cor-paleta-2);
+}
+
+.cards .card-cor-3 {
+    --cor-card: var(--cor-paleta-3);
+}
+
+.cards .card-cor-4 {
+    --cor-card: var(--cor-paleta-4);
+}
+
+.cards .card-cor-5 {
+    --cor-card: var(--cor-paleta-5);
+}
+
+.cards .card-cor-6 {
+    --cor-card: var(--cor-paleta-6);
+}
+
 @media (prefers-reduced-motion: reduce) {
 
     .cards .card-quiz,
     .cards .card-quiz-botao,
     .cards .card-quiz-botao::after {
         transition: none;
+    }
+
+    @media (max-width: 520px) {
+        .cards .card-top {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .cards .card-quiz-acoes {
+            justify-content: flex-start;
+        }
     }
 }

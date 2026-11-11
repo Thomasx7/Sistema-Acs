@@ -340,6 +340,30 @@
     --cor-card: var(--cor-saude);
 }
 
+.quiz.card-cor-1 {
+    --cor-card: var(--cor-paleta-1);
+}
+
+.quiz.card-cor-2 {
+    --cor-card: var(--cor-paleta-2);
+}
+
+.quiz.card-cor-3 {
+    --cor-card: var(--cor-paleta-3);
+}
+
+.quiz.card-cor-4 {
+    --cor-card: var(--cor-paleta-4);
+}
+
+.quiz.card-cor-5 {
+    --cor-card: var(--cor-paleta-5);
+}
+
+.quiz.card-cor-6 {
+    --cor-card: var(--cor-paleta-6);
+}
+
 /* Quando não há tema (ex.: "Quiz não encontrado") */
 .quiz:not([class*="card-"]) {
     --cor-card: var(--azul-secundario);

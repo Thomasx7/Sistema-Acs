@@ -1,4 +1,7 @@
-import { quizzes } from "../../data/quizzes";
+import { useEffect, useState } from "react";
+
+import { ApiError } from "../../services/api";
+import { listarQuizzes } from "../../services/quizzes";
 
 import "../../assets/css/pages_css/biblioteca.css";
 
@@ -18,7 +21,7 @@ const passos = [
     },
     {
         titulo: "Acompanhe sua evolução",
-        texto: "Início e Progresso mostram o que está em andamento e concluído. Por enquanto, o progresso fica salvo neste navegador.",
+        texto: "Início e Progresso mostram o que está em andamento e concluído, sincronizados com sua conta.",
     },
 ];
 
@@ -47,6 +50,35 @@ const funcoes = [
 ];
 
 function Biblioteca() {
+    const [quizzes, setQuizzes] = useState([]);
+    const [carregandoQuizzes, setCarregandoQuizzes] = useState(true);
+    const [erroQuizzes, setErroQuizzes] = useState("");
+
+    useEffect(() => {
+        let cancelado = false;
+
+        listarQuizzes()
+            .then((dados) => {
+                if (!cancelado) setQuizzes(dados);
+            })
+            .catch((falha) => {
+                if (!cancelado) {
+                    setErroQuizzes(
+                        falha instanceof ApiError
+                            ? falha.message
+                            : "Não foi possível carregar os temas."
+                    );
+                }
+            })
+            .finally(() => {
+                if (!cancelado) setCarregandoQuizzes(false);
+            });
+
+        return () => {
+            cancelado = true;
+        };
+    }, []);
+
     return (
         <div className="biblioteca anim-page-enter">
             <div className="biblioteca-top">
@@ -70,11 +102,13 @@ function Biblioteca() {
 
                     <ul className="aviso-temas anim-stagger-fade">
                         {quizzes.map((quiz) => (
-                            <li key={quiz.id} className={quiz.classe}>
-                                {quiz.titulo}
+                            <li key={quiz.id} className={quiz.cor || ""}>
+                                {quiz.nome}
                             </li>
                         ))}
                     </ul>
+                    {carregandoQuizzes && <p role="status">Carregando temas...</p>}
+                    {erroQuizzes && <p role="alert">{erroQuizzes}</p>}
                 </div>
             </section>
 

@@ -154,9 +154,11 @@
     background: transparent;
     color: var(--cor-card);
     font-size: 0.85rem;
+    font-family: inherit;
     font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
+    cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -168,6 +170,18 @@
 .historico .historico-botao:focus-visible {
     outline: 2px solid var(--cor-card);
     outline-offset: 3px;
+}
+
+.historico .historico-botao:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.historico .historico-erro-acesso {
+    grid-column: 1 / -1;
+    color: var(--erro);
+    font-size: 0.82rem;
+    text-align: right;
 }
 
 /* ---------- Estado vazio ---------- */
@@ -198,6 +212,30 @@
 
 .historico .card-saude {
     --cor-card: var(--cor-saude);
+}
+
+.historico .card-cor-1 {
+    --cor-card: var(--cor-paleta-1);
+}
+
+.historico .card-cor-2 {
+    --cor-card: var(--cor-paleta-2);
+}
+
+.historico .card-cor-3 {
+    --cor-card: var(--cor-paleta-3);
+}
+
+.historico .card-cor-4 {
+    --cor-card: var(--cor-paleta-4);
+}
+
+.historico .card-cor-5 {
+    --cor-card: var(--cor-paleta-5);
+}
+
+.historico .card-cor-6 {
+    --cor-card: var(--cor-paleta-6);
 }
 
 @media (prefers-reduced-motion: reduce) {

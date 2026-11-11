@@ -80,20 +80,54 @@ Edite o `.env` e configure as variáveis usadas em `app/config.py`:
 
 As variáveis `MAIL_*` configuram o Flask-Mail. O arquivo `.env` é carregado por `app/config.py` e não deve ser enviado ao repositório.
 
-## 4️⃣ Executar as migrations
+## 4️⃣ Criar as tabelas e carregar os quizzes iniciais
 
-O projeto já possui Flask-Migrate e a pasta `migrations`. Com o PostgreSQL configurado e a partir de `backend`, aplique as migrations existentes com:
+O projeto já possui Flask-Migrate e a pasta `migrations`. Com o PostgreSQL
+configurado e o terminal aberto em `backend`, aplique as migrations:
 
 ```bash
-flask --app app db init
+flask --app app db upgrade
 ```
 
-Não execute `db init` para um projeto que já possui a pasta de migrations. Quando os models forem alterados, crie uma nova revisão e aplique-a:
+Isso cria as tabelas de usuários, quizzes, perguntas, alternativas e progresso,
+incluindo a coluna `perguntas_respondidas` para retomada exata. A migration de
+quizzes recria `progresso_quiz` para adicionar a chave estrangeira para
+`quizzes.id`; **o progresso já registrado nessa tabela será apagado**. Não
+execute `flask db init`, pois a pasta de migrations já existe.
+
+Depois, carregue os quatro quizzes iniciais e suas perguntas:
+
+```bash
+python seed_quizzes.py
+```
+
+O script é seguro para executar novamente: não duplica quizzes nem perguntas
+existentes e atualiza descrição e cor dos quatro quizzes de seed.
+
+Quando os models forem alterados no futuro, gere e aplique uma nova migration:
 
 ```bash
 flask --app app db migrate -m "descricao da alteracao"
 flask --app app db upgrade
 ```
+
+Revise a migration gerada antes de aplicá-la.
+
+### API de quizzes
+
+Todos os endpoints abaixo exigem login, exceto quando explicitamente indicado
+como exclusivo para ADM:
+
+- `GET /quizzes` e `GET /quizzes/<id>`: lista e consulta quizzes. A consulta
+  detalhada omite a alternativa correta para usuários comuns.
+- `POST /quizzes/<id>/responder`: recebe `id_pergunta` e `id_alternativa` e
+  retorna acerto, alternativa correta e explicação.
+- `POST /quizzes/<id>/acesso`: registra um acesso.
+- `GET /quizzes/<id>/admin`, `POST /quizzes`, `PUT /quizzes/<id>`,
+  `DELETE /quizzes/<id>`, `POST /quizzes/<id>/perguntas`,
+  `PUT /perguntas/<id>` e `DELETE /perguntas/<id>`: operações administrativas.
+- `/progresso-quiz` mantém suas rotas existentes; agora o ID informado precisa
+  corresponder a um quiz cadastrado.
 
 ## 5️⃣ Recuperação de senha
 

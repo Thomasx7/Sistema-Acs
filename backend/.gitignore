@@ -25,3 +25,9 @@ instance/
 migrations
 .migrations
 uploads/
+
+!migrations/
+migrations/*
+!migrations/versions/
+migrations/versions/*
+!migrations/versions/91b7e02c4a6d_criar_quizzes_perguntas_e_alternativas.py

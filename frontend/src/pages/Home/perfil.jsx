@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/useTheme";
-import { quizzes } from "../../data/quizzes";
 import { api, ApiError } from "../../services/api";
 import { listarProgressos } from "../../services/progressoQuiz";
+import { listarQuizzes } from "../../services/quizzes";
 import { montarUrlFoto } from "../../utils/perfil";
 import {
     SENHA_MIN,
@@ -57,15 +57,19 @@ function Perfil() {
     const inputFotoRef = useRef(null);
 
     const [progressos, setProgressos] = useState([]);
+    const [quizzes, setQuizzes] = useState([]);
     const [carregandoProgresso, setCarregandoProgresso] = useState(true);
     const [erroProgresso, setErroProgresso] = useState("");
 
     useEffect(() => {
         let cancelado = false;
 
-        listarProgressos()
-            .then((dados) => {
-                if (!cancelado) setProgressos(dados);
+        Promise.all([listarProgressos(), listarQuizzes()])
+            .then(([dadosProgresso, dadosQuizzes]) => {
+                if (!cancelado) {
+                    setProgressos(dadosProgresso);
+                    setQuizzes(dadosQuizzes);
+                }
             })
             .catch((falha) => {
                 if (!cancelado) {
@@ -94,12 +98,12 @@ function Perfil() {
 
     const itensProgresso = quizzes.map((quiz) => {
         const item = progressos.find(
-            (registro) => registro.id_quiz === quiz.idQuiz
+            (registro) => Number(registro.id_quiz) === Number(quiz.id)
         );
         const progresso = item ? Number(item.progresso) : 0;
 
         return {
-            id: quiz.idQuiz,
+            id: quiz.id,
             status: item ? item.status : "nao_iniciado",
             progresso: Number.isFinite(progresso)
                 ? Math.min(100, Math.max(0, progresso))

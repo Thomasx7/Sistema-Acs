@@ -1,6 +1,9 @@
+import { useEffect, useState } from "react";
+
 import QuizItem from "./quiz-item";
-import { quizzes } from "../data/quizzes";
 import { useAuth } from "../context/useAuth";
+import { ApiError } from "../services/api";
+import { listarQuizzes } from "../services/quizzes";
 import { ehAdm } from "../utils/permissoes";
 
 import "../assets/css/components_css/historico-quiz.css";
@@ -11,12 +14,46 @@ const LIMITE = 5;
 function HistoricoQuiz({ progressos = [], carregando, erro }) {
     const { usuario } = useAuth();
     const administrador = ehAdm(usuario);
+    const [quizzes, setQuizzes] = useState([]);
+    const [carregandoQuizzes, setCarregandoQuizzes] = useState(true);
+    const [erroQuizzes, setErroQuizzes] = useState("");
+
+    useEffect(() => {
+        let cancelado = false;
+
+        listarQuizzes()
+            .then((dados) => {
+                if (!cancelado) setQuizzes(dados);
+            })
+            .catch((falha) => {
+                if (!cancelado) {
+                    setErroQuizzes(
+                        falha instanceof ApiError
+                            ? falha.message
+                            : "Não foi possível carregar os quizzes."
+                    );
+                }
+            })
+            .finally(() => {
+                if (!cancelado) setCarregandoQuizzes(false);
+            });
+
+        return () => {
+            cancelado = true;
+        };
+    }, []);
+
     const lista = progressos
-        .map((item) => ({
-            ...item,
-            quiz: quizzes.find((quiz) => quiz.idQuiz === item.id_quiz),
-            atualizadoEm: item.atualizado,
-        }))
+        .map((item) => {
+            const quiz = quizzes.find(
+                (itemQuiz) => Number(itemQuiz.id) === Number(item.id_quiz)
+            );
+            return {
+                ...item,
+                quiz,
+                atualizadoEm: item.atualizado,
+            };
+        })
         .filter((item) => item.quiz)
         .sort(
             (a, b) =>
@@ -31,10 +68,12 @@ function HistoricoQuiz({ progressos = [], carregando, erro }) {
                 <p>Seus quizzes mais recentes aparecem aqui.</p>
             </div>
 
-            {carregando ? (
+            {carregando || carregandoQuizzes ? (
                 <p role="status">Carregando progresso...</p>
-            ) : erro ? (
-                <p className="historico-vazio" role="alert">{erro}</p>
+            ) : erro || erroQuizzes ? (
+                <p className="historico-vazio" role="alert">
+                    {erro || erroQuizzes}
+                </p>
             ) : lista.length === 0 ? (
                 <div className="historico-vazio">
                     {administrador

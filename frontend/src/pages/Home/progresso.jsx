@@ -1,23 +1,27 @@
 import { useEffect, useState } from "react";
 
 import QuizItem from "../../components/quiz-item";
-import { quizzes } from "../../data/quizzes";
 import { ApiError } from "../../services/api";
 import { listarProgressos } from "../../services/progressoQuiz";
+import { listarQuizzes } from "../../services/quizzes";
 
 import "../../assets/css/components_css/progresso.css";
 
 function Progresso() {
     const [progressos, setProgressos] = useState([]);
+    const [quizzes, setQuizzes] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
 
     useEffect(() => {
         let cancelado = false;
 
-        listarProgressos()
-            .then((dados) => {
-                if (!cancelado) setProgressos(dados);
+        Promise.all([listarProgressos(), listarQuizzes()])
+            .then(([dadosProgresso, dadosQuizzes]) => {
+                if (!cancelado) {
+                    setProgressos(dadosProgresso);
+                    setQuizzes(dadosQuizzes);
+                }
             })
             .catch((falha) => {
                 if (!cancelado) {
@@ -38,7 +42,9 @@ function Progresso() {
     }, []);
 
     const lista = quizzes.map((quiz) => {
-        const item = progressos.find((registro) => registro.id_quiz === quiz.idQuiz);
+        const item = progressos.find(
+            (registro) => Number(registro.id_quiz) === Number(quiz.id)
+        );
 
         return {
             quiz,
@@ -52,9 +58,9 @@ function Progresso() {
     const concluidos = lista.filter((i) => i.status === "concluido").length;
     const emAndamento = lista.filter((i) => i.status === "em_andamento").length;
     const naoIniciados = lista.filter((i) => i.status === "nao_iniciado").length;
-    const progressoGeral = Math.round(
-        lista.reduce((soma, i) => soma + i.progresso, 0) / total
-    );
+    const progressoGeral = total
+        ? Math.round(lista.reduce((soma, item) => soma + item.progresso, 0) / total)
+        : 0;
 
     return (
         <div className="progresso anim-page-enter">

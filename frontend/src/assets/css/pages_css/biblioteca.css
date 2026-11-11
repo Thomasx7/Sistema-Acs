@@ -241,6 +241,12 @@
 .biblioteca .card-letramento { --cor-card: var(--cor-letramento); }
 .biblioteca .card-seguranca  { --cor-card: var(--cor-seguranca); }
 .biblioteca .card-saude      { --cor-card: var(--cor-saude); }
+.biblioteca .card-cor-1      { --cor-card: var(--cor-paleta-1); }
+.biblioteca .card-cor-2      { --cor-card: var(--cor-paleta-2); }
+.biblioteca .card-cor-3      { --cor-card: var(--cor-paleta-3); }
+.biblioteca .card-cor-4      { --cor-card: var(--cor-paleta-4); }
+.biblioteca .card-cor-5      { --cor-card: var(--cor-paleta-5); }
+.biblioteca .card-cor-6      { --cor-card: var(--cor-paleta-6); }
 
 
 @media (max-width: 600px) {

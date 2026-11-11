@@ -4,7 +4,7 @@
 
 Este repositório contém a implementação atual de um frontend em React para a plataforma ACS. O sistema foi desenvolvido para oferecer uma experiência de aprendizagem em temas como LGPD, letramento digital, segurança da informação e saúde digital.
 
-A análise do código indica que o projeto está em desenvolvimento e que a maior parte da implementação atual está concentrada em interface, navegação e lógica local de quiz. Não há confirmação de API/backend integrada, autenticação real, banco de dados ou persistência centralizada.
+O frontend React consome a API Flask autenticada para quizzes, perguntas e progresso. O catálogo e as respostas corretas são armazenados no PostgreSQL; o jogo valida respostas no backend.
 
 ## 2. Estado atual do projeto
 
@@ -13,16 +13,16 @@ A análise do código indica que o projeto está em desenvolvimento e que a maio
 | Interface principal | Implementado | Estrutura visual em React + CSS |
 | Navegação | Implementado | Rotas definidas com react-router-dom |
 | Login | Parcial | Tela visual e lógica local de formulário; sem autenticação real |
-| Quiz interativo | Implementado | Perguntas e respostas locais em arquivos JS |
-| Progresso do usuário | Implementado | Salvo em localStorage |
+| Quiz interativo | Implementado | Perguntas e validação de respostas pela API |
+| Progresso do usuário | Implementado | Salvo no backend com posição exata de retomada |
 | Biblioteca | Parcial | Página informativa e de orientação; conteúdo não estruturado como repositório funcional |
 | Perfil do usuário | Parcial | Perfil e foto salvos localmente; o tema vale durante a sessão e não há integração de atualização com a API |
 | Cadastro | Pendente | Existem referências visuais, mas sem fluxo funcional |
 | Recuperação de senha | Pendente | Link presente sem rota correspondente |
 | Reset de senha | Pendente | Não identificado no código |
-| API/backend | Pendente | Não há integração implementada |
-| Banco de dados | Pendente | Não há persistência remota |
-| Autenticação | Pendente | Não há contexto, token, sessão ou guardas de rota |
+| API/backend | Implementado | Cliente autenticado em `src/services/api.js` |
+| Banco de dados | Implementado | Quizzes, perguntas, alternativas e progresso no PostgreSQL |
+| Autenticação | Implementado | Contexto de autenticação, token e rotas protegidas |
 
 ## 3. Stack tecnológica
 
@@ -43,36 +43,25 @@ A análise do código indica que o projeto está em desenvolvimento e que a maio
 - React Router DOM: navegação entre páginas e layouts.
 - JavaScript: lógica da aplicação, manipulação de estados e dados.
 - CSS: estilização visual do sistema.
-- LocalStorage: persistência local do histórico dos quizzes.
+- LocalStorage: preferências e dados locais não sensíveis; o progresso dos quizzes é remoto.
 
 ### 3.3 Observações sobre a stack
 
-Não foi identificado uso de bibliotecas de UI, formulários, validação de formulário, state management global, animação ou backend. O projeto depende fortemente de dados estáticos em arquivos JavaScript.
+Não há biblioteca de UI nem state management externo. Os serviços em `src/services` centralizam o acesso à API; os dados de quizzes não são mais mocks no frontend.
 
 ## 4. Arquitetura atual
 
-### 4.1 Arquitetura real do código atual
+### 4.1 Arquitetura atual
 
 ```mermaid
 flowchart LR
     U[Usuário] --> F[Frontend React]
     F --> C[Componentes e páginas]
-    C --> E[Estados locais do React]
-    E --> L[localStorage]
-    C --> D[Dados estáticos em src/data]
+    C --> S[Serviços da API]
+    S --> A[API Flask]
+    A --> DB[(PostgreSQL)]
+    C --> L[Preferências locais]
 ```
-
-### 4.2 Arquitetura futura planejada
-
-```mermaid
-flowchart LR
-    U[Usuário] --> F[Frontend React]
-    F --> S[API Client / Serviços]
-    S --> B[Backend / API]
-    B --> DB[(Banco de dados)]
-```
-
-> A segunda arquitetura representa o futuro planejado do sistema, não a implementação atual.
 
 ## 5. Estrutura de diretórios
 
@@ -93,9 +82,6 @@ src/
     historico-quiz.jsx
     quiz-item.jsx
     sidebar.jsx
-  data/
-    perguntas.js
-    quizzes.js
   layouts/
     PainelLayout.jsx
   pages/
@@ -221,14 +207,16 @@ Responsabilidade:
 - mostrar o status do quiz para o usuário.
 
 Dados:
-- `quizzes` importado de `src/data/quizzes.js`.
-- `lerHistorico` importado de `src/utils/progresso.js`.
+- quizzes carregados pela API em `GET /quizzes`;
+- progresso carregado pela API em `/progresso-quiz`;
+- quizzes e perguntas administrados pelos endpoints do service `src/services/quizzes.js`.
 
 Estados:
-- `historico`: lido uma vez quando o componente abre.
+- carregamento e erros de quizzes, progresso e registro de acesso.
 
 Função relevante:
-- `textoDoBotao(id)`: decide se o botão diz "Iniciar Quiz" ou "Quiz em andamento" ou "Quiz concluído".
+- o status da API define os rótulos "Iniciar Quiz", "Continuar Quiz" e "Refazer Quiz";
+- usuários ADM podem criar, editar e excluir quizzes e perguntas nessa página.
 
 ### 7.7 HistoricoQuiz
 
@@ -238,9 +226,9 @@ Responsabilidade:
 - listar os quizzes mais recentes salvos no histórico.
 
 Fluxo:
-- lê o histórico do navegador;
-- transforma cada item em objeto com dados do quiz;
-- filtra itens válidos;
+- carrega os quizzes e o progresso da API;
+- associa os registros por `id_quiz`;
+- filtra os quizzes com progresso;
 - ordena pela data mais recente;
 - exibe apenas os últimos cinco.
 
@@ -265,11 +253,10 @@ Funções:
 Arquivo: `src/pages/Home/quiz.jsx`
 
 Responsabilidade:
-- controlar a seleção de tema;
+- carregar quiz e perguntas pela API;
 - renderizar a pergunta atual;
-- registrar a resposta do usuário;
-- calcular o resultado final;
-- salvar progresso no navegador.
+- validar a resposta pela API e exibir o retorno;
+- salvar progresso e posição exata de retomada na API.
 
 Componentes internos:
 - `QuizJogo`: lógica da sessão do quiz.
@@ -282,12 +269,11 @@ Estados principais:
 - `finalizado`
 
 Fluxo real:
-1. O usuário clica em uma alternativa.
-2. `escolher(i)` altera o estado `selecionada` quando ainda não confirmou.
-3. Quando clica em "Confirmar resposta", `confirmar()` marca `confirmada` como true.
-4. Se a resposta estiver correta, `acertos` é incrementado.
-5. `salvarProgresso` salva o estado do quiz em localStorage.
-6. Se a questão for a última, `finalizado` vira true e a página mostra o resultado final.
+1. A página carrega `GET /quizzes/<id>` e o progresso do usuário.
+2. O usuário seleciona uma alternativa e envia a resposta a `POST /quizzes/<id>/responder`.
+3. O retorno do backend informa acerto, alternativa correta e explicação.
+4. O progresso, incluindo `perguntas_respondidas`, é salvo em `/progresso-quiz/<id>`.
+5. A posição exata salva permite continuar na pergunta seguinte.
 
 ### 7.10 Biblioteca
 
@@ -309,13 +295,12 @@ Responsabilidade:
 - calcular o resumo geral por quiz e mostrar o percentual de andamento.
 
 Dados:
-- `quizzes` da base estática.
-- `lerHistorico` do localStorage.
+- quizzes e progresso carregados pela API autenticada.
 
 Implementação:
-- `lista` combina cada quiz com status e progresso do histórico.
+- `lista` associa cada quiz ao progresso usando `id_quiz`.
 - `concluidos`, `emAndamento` e `naoIniciados` são calculados com `filter`.
-- `progressoGeral` usa `reduce` e `Math.round`.
+- `progressoGeral` usa `reduce` e `Math.round`; quizzes sem registro aparecem com 0%.
 
 ### 7.12 Perfil
 
@@ -336,25 +321,7 @@ Persistência:
 
 Arquivo: `src/pages/Auth/login.jsx`
 
-### 8.1 Funcionamento atual
-
-- Há campos de e-mail e senha.
-- Há botão para mostrar/ocultar senha.
-- `handleSubmit` impede o recarregamento da página, coleta os valores e faz `console.log` no navegador.
-
-### 8.2 Estado atual da autenticação
-
-Não há:
-- `useContext` para autenticação;
-- `localStorage` de sessão;
-- token;
-- verificação de credenciais;
-- proteção de rotas;
-- backend;
-- contexto global de usuário.
-
-Conclusão:
-- o login atual é uma interface visual, não uma autenticação real.
+O `AuthProvider` em `src/context/AuthContext.jsx` autentica via `/auth/login`, mantém o usuário e valida a sessão em `/auth/me`. O cliente `src/services/api.js` envia o token Bearer e limpa a sessão quando recebe 401 com token. `ProtectedRoute` protege o painel e restringe a área de usuários a ADM; o backend também verifica as permissões.
 
 ## 9. Cadastro, recuperação e reset de senha
 
@@ -387,40 +354,12 @@ Conclusão:
 
 ## 10. Dados e armazenamento
 
-### 10.1 Dados estáticos
+### 10.1 Quizzes e progresso
 
-Arquivos:
-- `src/data/quizzes.js`
-- `src/data/perguntas.js`
-
-Responsabilidade:
-- armazenar o catálogo de temas e as perguntas do quiz.
-
-Observações:
-- os comentários dentro do arquivo indicam que, quando houver backend, estes dados podem ser trocados por chamadas à API.
-- no estado atual, os dados são estáticos e mockados.
-
-### 10.2 Progresso salvo localmente
-
-Arquivo: `src/utils/progresso.js`
-
-Funções:
-
-#### `lerHistorico()`
-
-- lê `localStorage` usando a chave `acs-historico-quiz`;
-- retorna um array se estiver válido;
-- retorna `[]` se não houver dados ou se houver falha.
-
-#### `salvarProgresso(id, { status, progresso })`
-
-- remove o item antigo do mesmo quiz;
-- cria um novo objeto com `id`, `status`, `progresso`, `atualizadoEm`;
-- salva em `localStorage`.
-
-Observações:
-- o progresso é local ao navegador.
-- não há sincronização com servidor.
+- o catálogo de quizzes e suas perguntas são mantidos no PostgreSQL e servidos pela API;
+- os antigos mocks `src/data/quizzes.js` e `src/data/perguntas.js` foram removidos por não terem mais consumidores;
+- o frontend usa `src/services/progressoQuiz.js` para ler e gravar o progresso autenticado;
+- `perguntas_respondidas` registra a posição precisa de retomada, enquanto o percentual é recalculado com base no total atual de perguntas.
 
 ### 10.3 Perfil e preferência de tema
 
@@ -449,45 +388,13 @@ Comportamento:
 
 ## 11. Funções principais e responsabilidades
 
-### `lerHistorico()`
+### Serviços de quizzes e progresso
 
-Arquivo: `src/utils/progresso.js`
-
-Responsabilidade:
-- carregar o histórico salvo do usuário no navegador.
-
-Entrada:
-- nenhuma.
-
-Processamento:
-- lê JSON do localStorage.
-
-Saída:
-- array de registros ou `[]`.
-
-### `salvarProgresso()`
-
-Arquivo: `src/utils/progresso.js`
+Arquivos: `src/services/quizzes.js` e `src/services/progressoQuiz.js`.
 
 Responsabilidade:
-- persistir o estado atual do quiz.
-
-Entrada:
-- `id`, `status`, `progresso`.
-
-Processamento:
-- remove o registro anterior do mesmo quiz;
-- insere registro novo com timestamp.
-
-Saída:
-- atualização do localStorage.
-
-### `textoDoBotao(id)`
-
-Arquivo: `src/components/cards-Inicio.jsx`
-
-Responsabilidade:
-- definir o texto final do botão por tema.
+- consumir os endpoints autenticados de quizzes, perguntas, respostas e progresso;
+- manter a posição de retomada por `perguntas_respondidas`.
 
 ### `handleSubmit(event)`
 
@@ -584,13 +491,13 @@ Usuário abre o app
       ↓
 Home renderiza CardsInicio
       ↓
-cards-Inicio lê histórico do localStorage
+CardsInicio carrega quizzes e progresso pela API
       ↓
-Usuário clica em um quiz
+Usuário inicia, continua ou refaz um quiz
       ↓
-Link navega para /quiz/:id
+POST /quizzes/:id/acesso e navegação para /quiz/:id
       ↓
-Quiz monta perguntas e inicia a rodada
+Quiz carrega perguntas pela API
 ```
 
 ### 15.2 Fluxo de pergunta
@@ -602,11 +509,11 @@ Estado selecionada é atualizado
       ↓
 Usuário clica em Confirmar resposta
       ↓
-confirmar() valida resposta
+POST /quizzes/:id/responder valida resposta
       ↓
-acertos pode sofrer incremento
+backend retorna resultado e explicação
       ↓
-progresso é salvo em localStorage
+progresso e perguntas_respondidas são salvos na API
       ↓
 interface mostra feedback visual
 ```
@@ -616,22 +523,17 @@ interface mostra feedback visual
 ```text
 Usuário conclui ou avança no quiz
       ↓
-Progresso é salvo em localStorage
+Progresso é salvo no backend
       ↓
-Página de progresso lê os dados do histórico
+Página de progresso combina quizzes e progresso pela API
       ↓
 React renderiza estatísticas e status por tema
 ```
 
 ## 16. Limitações e pendências
 
-- Não há autenticação real.
-- Não há backend nem integração de servidor.
-- O login apenas simula a ação de entrada.
-- Cadastro e recuperação de senha são pendentes.
-- O menu e links de perfil e recuperação de senha apontam para rotas inexistentes.
 - Biblioteca ainda é informacional.
-- Dados de perguntas e quizzes são estáticos e mockados.
+- A URL da API está definida diretamente em `src/services/api.js` e deve ser configurada para cada ambiente antes da publicação.
 - Não há suíte de testes com Jest, Vitest ou Testing Library identificada.
 
 ## 17. Instalação e execução
@@ -682,14 +584,9 @@ VITE_API_URL=https://api.exemplo.com
 
 ## 19. Próximas etapas sugeridas
 
-1. Definir a autenticação real e a regra de sessão/usuário.
-2. Criar backend e endpoints mínimos.
-3. Implementar cadastro, login, recuperação e reset de senha.
-4. Criar camada de serviços para comunicação com a API.
-5. Migrar os dados de `src/data` para persistência dinâmica.
-6. Ajustar rotas e links inconsistentes.
-7. Expandir a biblioteca e o conteúdo de apoio.
-8. Adicionar testes automatizados.
+1. Expandir os materiais da Biblioteca.
+2. Adicionar testes automatizados para os fluxos de interface e API.
+3. Configurar a URL da API por ambiente antes da publicação.
 
 ## 20. Glossário técnico
 
@@ -703,6 +600,4 @@ VITE_API_URL=https://api.exemplo.com
 
 ## 21. Conclusão
 
-O projeto ACS já demonstra uma interface funcional e bem estruturada para estudo e avaliação de conhecimento em temas relevantes à segurança digital e saúde. No entanto, a sua implementação atual é principalmente frontend e não deve ser interpretada como um sistema completo de autenticação, autorização ou persistência em produção.
-
-A documentação deste repositório deve ser usada como referência do estado real do código atualmente disponível e como guia para evolução futura da arquitetura e do backend.
+O projeto ACS reúne frontend React autenticado, API Flask e persistência PostgreSQL para quizzes e progresso. A interface e os serviços descritos nesta documentação refletem a integração atual; a configuração de produção deve ainda considerar a URL da API e a infraestrutura do ambiente.
