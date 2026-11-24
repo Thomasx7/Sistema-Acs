@@ -9,4 +9,5 @@ done
 flask --app app db upgrade
 python seed_quizzes.py
 python seed_admin.py
+python seed_library.py
 exec python app.py

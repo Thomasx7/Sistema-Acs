@@ -45,6 +45,7 @@ def create_app():
     from app.routes.progresso_quiz_routes import progresso_quiz_bp
     from app.routes.quiz_routes import pergunta_bp, quiz_bp
     from app.routes.upload_routes import upload_bp
+    from app.routes.library_routes import library_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -53,5 +54,6 @@ def create_app():
     app.register_blueprint(quiz_bp, url_prefix='/quizzes')
     app.register_blueprint(pergunta_bp)
     app.register_blueprint(upload_bp, url_prefix='/uploads')
+    app.register_blueprint(library_bp, url_prefix='/library')
 
     return app

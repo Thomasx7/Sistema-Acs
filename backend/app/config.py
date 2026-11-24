@@ -20,4 +20,10 @@ class Config:
 
     FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
     RESET_SENHA_EXPIRA_MINUTOS = int(os.getenv("RESET_SENHA_EXPIRA_MINUTOS", 30))
+
+    LIBRARY_UPLOAD_DIR = os.getenv("LIBRARY_UPLOAD_DIR", "/app/uploads/library")
+    LIBRARY_MAX_FILE_SIZE = int(os.getenv("LIBRARY_MAX_FILE_SIZE", 50 * 1024 * 1024))
+    LIBRARY_MAX_VIDEO_SIZE = int(
+        os.getenv("LIBRARY_MAX_VIDEO_SIZE", 500 * 1024 * 1024)
+    )
     

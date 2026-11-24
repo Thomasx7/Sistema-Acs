@@ -88,6 +88,7 @@ async function requisicao(metodo, caminho, corpo) {
 export const api = {
     get: (caminho) => requisicao("GET", caminho),
     post: (caminho, corpo) => requisicao("POST", caminho, corpo ?? {}),
+    patch: (caminho, corpo) => requisicao("PATCH", caminho, corpo ?? {}),
     put: (caminho, corpo) => requisicao("PUT", caminho, corpo ?? {}),
     delete: (caminho) => requisicao("DELETE", caminho),
 };

@@ -8,6 +8,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import Home from "./pages/Home/home";
 import Quiz from "./pages/Home/quiz";
 import Biblioteca from "./pages/Home/biblioteca";
+import BibliotecaCategoria from "./pages/Home/biblioteca-categoria";
 import Progresso from "./pages/Home/progresso";
 import Perfil from "./pages/Home/perfil";
 import EsqueciSenha from "./pages/Auth/esqueci-senha";
@@ -38,6 +39,7 @@ function App() {
           <Route path="quiz" element={<Quiz />} />
           <Route path="quiz/:id" element={<Quiz />} />
           <Route path="biblioteca" element={<Biblioteca />} />
+          <Route path="biblioteca/:slug" element={<BibliotecaCategoria />} />
           <Route path="progresso" element={<Progresso />} />
           <Route path="perfil" element={<Perfil />} />
           <Route element={<ProtectedRoute permissao={PERMISSAO_ADM} />}>

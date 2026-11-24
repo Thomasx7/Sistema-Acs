@@ -166,3 +166,82 @@ class Alternativa(db.Model):
     )
 
     pergunta = db.relationship("Pergunta", back_populates="alternativas")
+
+
+class LibraryCategory(db.Model):
+    __tablename__ = "library_categories"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False, unique=True)
+    slug = db.Column(db.String(160), nullable=False, unique=True)
+    description = db.Column(db.Text, nullable=True)
+    icon = db.Column(db.String(50), nullable=True)
+    color = db.Column(db.String(50), nullable=True)
+    position = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+    is_active = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
+    created_by = db.Column(
+        db.Integer,
+        db.ForeignKey("usuarios.id_usuario", ondelete="SET NULL"),
+        nullable=True,
+    )
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+
+    materials = db.relationship(
+        "LibraryMaterial",
+        back_populates="category",
+        cascade="none",
+        passive_deletes=True,
+        order_by="LibraryMaterial.position",
+    )
+
+
+class LibraryMaterial(db.Model):
+    __tablename__ = "library_materials"
+    __table_args__ = (
+        db.CheckConstraint(
+            "(url IS NOT NULL AND file_path IS NULL) OR "
+            "(url IS NULL AND file_path IS NOT NULL)",
+            name="ck_library_material_url_or_file",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(
+        db.Integer,
+        db.ForeignKey("library_categories.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    type = db.Column(db.String(20), nullable=False, index=True)
+    url = db.Column(db.String(1000), nullable=True)
+    file_path = db.Column(db.String(500), nullable=True)
+    original_filename = db.Column(db.String(255), nullable=True)
+    mime_type = db.Column(db.String(150), nullable=True)
+    size_bytes = db.Column(db.Integer, nullable=True)
+    checksum = db.Column(db.String(64), nullable=True)
+    thumbnail_path = db.Column(db.String(500), nullable=True)
+    tags = db.Column(db.Text, nullable=True)
+    position = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+    is_published = db.Column(db.Boolean, nullable=False, default=True, index=True, server_default=db.true())
+    uploaded_by = db.Column(
+        db.Integer,
+        db.ForeignKey("usuarios.id_usuario", ondelete="SET NULL"),
+        nullable=True,
+    )
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+
+    category = db.relationship("LibraryCategory", back_populates="materials")
