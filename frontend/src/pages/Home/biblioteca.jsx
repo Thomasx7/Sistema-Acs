@@ -294,15 +294,16 @@ function Biblioteca() {
     }
 
     return (
-        <div className="biblioteca anim-page-enter">
+        <div className="biblioteca biblioteca-acervo anim-page-enter">
             <div className="biblioteca-top biblioteca-top-acoes">
                 <div>
+                    <span className="biblioteca-sobretitulo">Explore e aprenda</span>
                     <h1>Biblioteca</h1>
-                    <p>Materiais de apoio para os seus estudos.</p>
+                    <p>Conhecimento para consultar, descobrir e levar para a prática.</p>
                 </div>
                 {administrador && (
                     <button type="button" className="biblioteca-botao-principal" onClick={abrirCriacao}>
-                        Nova categoria
+                        <span aria-hidden="true">+</span> Nova categoria
                     </button>
                 )}
             </div>
@@ -341,9 +342,6 @@ function Biblioteca() {
                     {categorias.map((categoria, indice) => {
                         const cor = categoria.color || "";
                         const variante = CORES_VARIANTE[cor] || VARIANTES_PADRAO[indice % VARIANTES_PADRAO.length];
-                        const palavras = categoria.name.trim().split(/\s+/);
-                        const tituloPrimario = palavras.shift() || categoria.name;
-                        const tituloSecundario = palavras.join(" ");
                         const quantidade = Number(categoria.material_count) || 0;
 
                         return (
@@ -357,23 +355,20 @@ function Biblioteca() {
                                     aria-label={`${categoria.name}, ${contarMateriais(quantidade)}. Ver materiais.`}
                                 >
                                     <div className="biblioteca-categoria-conteudo">
-                                        <h2>
-                                            <span>{tituloPrimario}</span>
-                                            {tituloSecundario && <span className="biblioteca-titulo-suave">{tituloSecundario}</span>}
-                                        </h2>
+                                        <h2>{categoria.name}</h2>
                                         {categoria.description && (
                                             <p className="biblioteca-categoria-descricao">{categoria.description}</p>
                                         )}
-                                        <span className="biblioteca-badge biblioteca-categoria-contagem">
-                                            {contarMateriais(quantidade)}
-                                        </span>
                                         <span className="biblioteca-ver-materiais">
                                             <span className="biblioteca-seta" aria-hidden="true">↗</span>
-                                            <span>Ver materiais</span>
+                                            <span>Explorar materiais</span>
                                         </span>
                                     </div>
-                                    <span className="biblioteca-ilustracao">
+                                    <span className="biblioteca-ilustracao" aria-hidden="true">
                                         <IlustracaoBiblioteca tipo={escolherIlustracao(categoria)} />
+                                    </span>
+                                    <span className="biblioteca-categoria-contagem">
+                                        {contarMateriais(quantidade)}
                                     </span>
                                 </Link>
                                 {administrador && (
