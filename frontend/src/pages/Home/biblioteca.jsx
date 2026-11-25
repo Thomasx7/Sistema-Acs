@@ -11,6 +11,7 @@ import {
     excluirCategoria,
     listarCategorias,
 } from "../../services/library";
+import "../../assets/css/pages_css/home.css";
 import "../../assets/css/pages_css/biblioteca.css";
 
 const CORES = Object.keys(PALETA_CATEGORIA);
@@ -113,9 +114,8 @@ function Biblioteca() {
 
     return (
         <div className="biblioteca biblioteca-acervo anim-page-enter">
-            <div className="biblioteca-top biblioteca-top-acoes">
-                <div>
-                    <span className="biblioteca-sobretitulo">Explore e aprenda</span>
+            <div className="biblioteca-cabecalho">
+                <div className="boas-vindas">
                     <h1>Biblioteca</h1>
                     <p>Conhecimento para consultar, descobrir e levar para a prática.</p>
                 </div>

@@ -450,41 +450,20 @@ body:has(.biblioteca-acervo) {
   gap: 2rem;
 }
 
-.biblioteca-acervo .biblioteca-top {
-  align-items: center;
-  flex-wrap: wrap;
+.biblioteca-cabecalho {
+  display: flex;
+  flex-direction: column;
   gap: var(--acervo-espaco);
 }
 
-.biblioteca-sobretitulo {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--texto-link);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.biblioteca-acervo .biblioteca-top h1 {
-  font-size: clamp(2rem, 3vw, 2.5rem);
-  line-height: 1.2;
-  letter-spacing: -0.03em;
-}
-
-.biblioteca-acervo .biblioteca-top p {
-  margin-top: 0.75rem;
-  max-width: 52ch;
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-.biblioteca-acervo .biblioteca-top > .biblioteca-botao-principal {
-  flex-shrink: 0;
+.biblioteca-cabecalho > .biblioteca-botao-principal {
+  align-self: flex-start;
   gap: 0.5rem;
   min-height: 44px;
   border-radius: 12px;
 }
 
-.biblioteca-acervo .biblioteca-top > .biblioteca-botao-principal:hover {
+.biblioteca-cabecalho > .biblioteca-botao-principal:hover {
   background: var(--login-botao-hover);
 }
 
@@ -1035,9 +1014,6 @@ body:has(.biblioteca-acervo) {
     padding-block: 0.5rem;
   }
 
-  .biblioteca-acervo .biblioteca-top {
-    align-items: flex-start;
-  }
 }
 
 @media (hover: none) {
