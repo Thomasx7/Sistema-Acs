@@ -1,8 +1,9 @@
-# Orientações para executar o backend
+# Orientações para executar o ambiente de desenvolvimento
 
 Este guia descreve o ambiente local de desenvolvimento com Docker Compose.
-Cada pessoa executa seu próprio PostgreSQL e backend na própria máquina; os
-containers e bancos não são compartilhados entre os integrantes.
+Cada pessoa executa frontend, backend e PostgreSQL na própria máquina, cada
+um no seu container; os containers e bancos não são compartilhados entre os
+integrantes. Não é necessário instalar Node na máquina para usar o Compose.
 
 ## Pré-requisitos e configuração inicial
 
@@ -10,7 +11,8 @@ containers e bancos não são compartilhados entre os integrantes.
 - Git instalado.
 - Clone atualizado do repositório.
 
-Na raiz do projeto, crie seu arquivo local de ambiente:
+Na raiz do projeto, crie seu arquivo local de ambiente **somente se ainda não
+existir** (preserve a configuração atual de quem já usa o sistema):
 
 ```powershell
 Copy-Item .env.example .env
@@ -29,8 +31,11 @@ docker compose up --build
 ```
 
 O Compose inicia o PostgreSQL, aguarda o banco ficar saudável, aplica as
-migrations, roda o seed dos quizzes e tenta criar o administrador padrão antes
-de iniciar o Flask. O backend fica disponível em `http://localhost:5000`.
+migrations e executa os seeds de quizzes, administrador (se habilitado) e
+biblioteca antes de iniciar o Flask. O backend fica em `http://localhost:5000`.
+O frontend inicia em outro container com Node 24 e Vite, disponível em
+`http://localhost:5173`. Aguarde a instalação das dependências e a mensagem de
+inicialização do Vite; não é necessário abrir outro terminal para o frontend.
 
 ## Dia a dia
 
@@ -41,26 +46,27 @@ git pull
 docker compose up
 ```
 
-Use `docker compose up --build` quando houver alterações em
-`backend/requirements.txt` ou `backend/Dockerfile`. As migrations pendentes
+Use `docker compose up --build` quando houver alterações nos Dockerfiles ou
+nas dependências (`backend/requirements.txt`, `frontend/package.json` ou
+`frontend/package-lock.json`). As migrations pendentes
 são aplicadas automaticamente a cada inicialização do backend.
 
 Para encerrar sem apagar os dados, use `Ctrl+C` e, se necessário,
 `docker compose down`. Os volumes mantêm o banco e os uploads.
 
-## Recomeçar do zero
+## Preservar os dados existentes
 
-Na raiz:
+Ao atualizar, continue usando o mesmo diretório e nome de projeto Compose.
+Os volumes `postgres_data` e `uploads_data` mantêm sua configuração e
+identidade; adicionar o frontend não exige recriar o banco nem seus dados.
+Não use `docker compose down -v`: ele apaga os volumes do banco e dos uploads.
+Não remova volumes nem altere o nome de projeto com `-p`/`COMPOSE_PROJECT_NAME`
+para atualizar o ambiente existente.
 
-```bash
-docker compose down -v
-docker compose up
-```
-
-O comando `down -v` apaga os volumes nomeados, incluindo o banco PostgreSQL e
-as fotos de perfil. Na inicialização seguinte, as migrations criam o schema e
-os seeds inserem os quatro quizzes padrão e o administrador, se habilitado.
-Esse comando apaga também os dados e contas criados localmente.
+O novo volume `frontend_node_modules` armazena apenas dependências Linux do
+frontend, separadas do `node_modules` do Windows. O serviço executa `npm ci`
+a cada início para sincronizá-las com o lock; precisa de acesso ao registro
+npm e pode demorar na primeira execução.
 
 ## Usuário administrador de desenvolvimento
 
@@ -137,12 +143,30 @@ apaga os registros de progresso existentes nela. A migration já enviada não
 deve ser editada. Em um banco que já possua esses dados, avalie o impacto antes
 de atualizar.
 
-## Frontend
+## Frontend e recarga automática
 
-Em outro terminal, inicie o Vite na pasta `frontend`:
+O Vite escuta em `0.0.0.0:5173` dentro do container, com porta fixa e
+`strictPort`. O diretório `frontend` é montado para desenvolvimento e
+`CHOKIDAR_USEPOLLING=true` permite detectar edições no Docker Desktop/Windows.
+Os arquivos locais `.env` não são copiados para a imagem, e o serviço frontend
+não recebe o `.env` do backend.
+
+As chamadas à API partem do **navegador**, que usa `http://localhost:5000`.
+Não substitua essa URL por `http://backend:5000`: esse hostname só existe na
+rede interna do Docker. Este fluxo é para desenvolvimento na própria máquina.
+
+### Alternativa sem container para o frontend
+
+Na raiz, inicie apenas os serviços necessários:
 
 ```bash
-npm install
+docker compose up --build db backend
+```
+
+Em outro terminal, dentro de `frontend` (com Node compatível instalado):
+
+```bash
+npm ci
 npm run dev
 ```
 
@@ -164,3 +188,8 @@ padrão, em `http://localhost:5173`, origem aceita pelo backend.
   execute `docker compose up --build`.
 - **A porta 5000 está ocupada:** encerre o processo que a utiliza antes de
   iniciar o backend; o frontend está configurado para acessar essa porta.
+- **A porta 5173 está ocupada:** encerre o Vite que estava rodando no terminal
+  antes de subir o frontend do Compose. O container não troca de porta sozinho.
+- **Frontend ainda instalando ou falhou:** confira `docker compose logs frontend`.
+  Para lint/build no container, use `docker compose exec frontend npm run lint`
+  e `docker compose exec frontend npm run build`.

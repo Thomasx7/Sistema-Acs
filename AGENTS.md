@@ -27,7 +27,7 @@ Plataforma de educação para profissionais da saúde e comunidade, com temas de
 | Autenticação/e-mail | Flask-JWT-Extended `4.7.4`, Werkzeug `3.1.8`, Flask-Mail `0.10.0`, python-dotenv `1.2.2` |
 | UI | CSS próprio e SVG/PNG/WebP; sem biblioteca de componentes, Tailwind ou TypeScript |
 
-As versões Python estão em `backend/requirements.txt`. Embora Flask-Bcrypt/bcrypt estejam instalados, o hash efetivamente usado está em `app/utils/hash.py` e usa Werkzeug. Não há versão Node fixada pelo projeto: confira `engines` do lock; Vite exige `^20.19.0 || >=22.12.0` e o ESLint resolvido exige `^20.19.0 || ^22.13.0 || >=24`.
+As versões Python estão em `backend/requirements.txt`. Embora Flask-Bcrypt/bcrypt estejam instalados, o hash efetivamente usado está em `app/utils/hash.py` e usa Werkzeug. O Dockerfile do frontend usa Node 24; na execução sem Docker, confira `engines` do lock: Vite exige `^20.19.0 || >=22.12.0` e o ESLint resolvido exige `^20.19.0 || ^22.13.0 || >=24`.
 
 ## Estrutura e destino de código novo
 
@@ -57,7 +57,9 @@ Copy-Item .env.example .env
 docker compose up --build
 ```
 
-O Compose inicia banco e backend; o frontend roda em outro terminal:
+O Compose inicia frontend, backend e PostgreSQL, cada um no próprio container. Acesse `http://localhost:5173`; a API continua em `http://localhost:5000`. O frontend monta o código local com polling para recarga no Docker Desktop e executa `npm ci` a cada início, mantendo dependências Linux no volume `frontend_node_modules`. Os volumes `postgres_data` e `uploads_data` são preservados; mantenha o mesmo diretório/projeto Compose para reutilizá-los.
+
+Opcionalmente, para rodar o frontend fora do Docker, inicie apenas banco/backend com `docker compose up --build db backend` e, em outro terminal:
 
 ```powershell
 cd frontend
@@ -127,7 +129,7 @@ As três variáveis `LIBRARY_*` existem em `app/config.py`, mas não nos `.env.e
 
 ## Pontos em aberto e inconsistências
 
-1. **Documentação:** `frontend/README_TECNICO.md` mistura estados antigos e atuais de login, cadastro, reset, perfil e biblioteca. `docs/orientacoes_rotas.md` não inclui `/library`; o guia Docker omite o seed da biblioteca. Decidir a revisão desses documentos.
+1. **Documentação:** `frontend/README_TECNICO.md` mistura estados antigos e atuais de login, cadastro, reset, perfil e biblioteca. `docs/orientacoes_rotas.md` não inclui `/library`. Decidir a revisão desses documentos.
 2. **Privacidade:** `src/data/documentosLegais.js` contém responsável/DPO por preencher e descreve progresso/foto em localStorage, enquanto o código usa PostgreSQL e uploads. Também menciona bloqueio de login sem implementação correspondente na API. Definir textos e responsáveis reais.
 3. **Produção:** API fixa em localhost, domínio ngrok em `vite.config.js`, `CORS(app, ...)` sem restrição explícita de origens, servidor Flask em debug e seeds de desenvolvimento. Definir configuração de implantação, origens, chaves e execução de produção; o repositório não fornece esse fluxo.
 4. **Testes:** não há suíte automatizada, runner backend ou CI. Definir abordagem antes de documentar comandos como obrigatórios.

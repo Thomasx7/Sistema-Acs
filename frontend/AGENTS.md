@@ -10,6 +10,10 @@ Leia primeiro [../AGENTS.md](../AGENTS.md). Estas orientações valem para `fron
 - Serviços por domínio ficam em `src/services`; validações e permissões em `src/utils`; textos legais/falas em `src/data`.
 - Preserve a grafia dos arquivos, inclusive `cards-Inicio.jsx`, `Auth_css` e `Home`; não normalizar nomes em massa. Imports são relativos, sem alias configurado.
 
+Na raiz, `docker compose up --build` inicia os três serviços de desenvolvimento; o frontend usa Node 24 e fica em `http://localhost:5173`. O código é montado em `/app` e as dependências Linux ficam no volume separado `frontend_node_modules`; `npm ci` sincroniza o lock a cada início. `CHOKIDAR_USEPOLLING=true` no Compose permite recarga de arquivos no Docker Desktop. A API é acessada pelo navegador em `http://localhost:5000`, não pelo hostname interno `backend`.
+
+Para executar somente o frontend fora do Docker, use os comandos abaixo dentro de `frontend/` e mantenha banco/backend ativos (`docker compose up --build db backend` na raiz):
+
 ```powershell
 npm ci
 npm run dev

@@ -557,10 +557,22 @@ O projeto usa as dependências presentes em `package.json`:
 }
 ```
 
-### Execução local
+### Execução com Docker (desenvolvimento)
+
+Na raiz do repositório, com Docker Desktop ativo e o `.env` já configurado,
+execute `docker compose up --build`. Frontend, backend e PostgreSQL rodam em
+containers separados; acesse `http://localhost:5173`. O frontend usa Node 24,
+sincroniza dependências com `npm ci` a cada início e recarrega edições locais.
+Consulte [o guia de execução](../docs/orientacoes_backend.md) para configuração
+inicial e preservação dos volumes existentes.
+
+### Execução local sem container para o frontend
+
+Na raiz, execute `docker compose up --build db backend`. Em outro terminal,
+dentro de `frontend`:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -572,15 +584,11 @@ npm run build
 
 ## 18. Variáveis de ambiente
 
-Não foi encontrado um arquivo `.env` ou configuração de variáveis de ambiente no repositório. O projeto atual não depende de variáveis de ambiente para funcionar localmente.
-
-Se a solução futuramente consumir API, o mais provável é que seja criado um padrão como:
-
-```env
-VITE_API_URL=https://api.exemplo.com
-```
-
-> Este exemplo é fictício e não representa implementação real no projeto.
+O Compose lê o `.env` da raiz para configurar backend e banco; ele não é
+injetado no serviço frontend. O frontend acessa a API pelo endereço fixo
+`http://localhost:5000` em `src/services/api.js`; `VITE_API_URL` não está
+implementada. No container, o Compose define `CHOKIDAR_USEPOLLING=true` para
+detecção de mudanças nos arquivos montados pelo Docker Desktop.
 
 ## 19. Próximas etapas sugeridas
 

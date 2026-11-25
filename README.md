@@ -24,12 +24,24 @@ progresso e autenticação.
 
 ## Executar
 
-Para executar o ambiente completo de desenvolvimento com Docker, consulte
-[docs/orientacoes_backend.md](docs/orientacoes_backend.md). A documentação
-também explica como executar o frontend separadamente.
+Com Docker Desktop em execução e o `.env` da raiz configurado (copie de
+`.env.example` apenas se ainda não existir), execute na raiz:
+
+```powershell
+docker compose up --build
+```
+
+Esse comando inicia frontend, backend e PostgreSQL em containers separados.
+Acesse `http://localhost:5173`; a API fica em `http://localhost:5000`.
+O código local do frontend tem recarga automática. Banco e uploads continuam
+nos volumes existentes; não use `docker compose down -v` para atualizar.
+
+Consulte [docs/orientacoes_backend.md](docs/orientacoes_backend.md) para
+configuração, preservação dos dados e execução do frontend separadamente.
 
 Para entender a estrutura da API, autenticação, dados e rotas disponíveis,
 consulte [docs/orientacoes_rotas.md](docs/orientacoes_rotas.md).
 
-O frontend também pode ser iniciado na pasta `frontend` com `npm install` e
-`npm run dev`. Ele usa a API em `http://localhost:5000`.
+Como alternativa, inicie apenas banco/backend com
+`docker compose up --build db backend` e execute `npm ci` e `npm run dev` na
+pasta `frontend`, em outro terminal. Ele usa a API em `http://localhost:5000`.
