@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import RecorteFotoModal from "../../components/RecorteFotoModal";
 
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/useTheme";
@@ -39,6 +40,7 @@ function Perfil() {
     const [email, setEmail] = useState(usuario.email);
 
     const [arquivoFoto, setArquivoFoto] = useState(null);
+    const [arquivoRecorte, setArquivoRecorte] = useState(null);
     const [previewFoto, setPreviewFoto] = useState("");
     const urlFoto = previewFoto || montarUrlFoto(usuario.foto_perfil);
     const [fotoFalhou, setFotoFalhou] = useState("");
@@ -55,6 +57,15 @@ function Perfil() {
     const [feedback, setFeedback] = useState(null);
     const [salvando, setSalvando] = useState(false);
     const inputFotoRef = useRef(null);
+    const botaoFotoRef = useRef(null);
+
+    useEffect(() => () => {
+        if (previewFoto) URL.revokeObjectURL(previewFoto);
+    }, [previewFoto]);
+
+    useEffect(() => () => {
+        if (arquivoRecorte) URL.revokeObjectURL(arquivoRecorte.url);
+    }, [arquivoRecorte]);
 
     const [progressos, setProgressos] = useState([]);
     const [quizzes, setQuizzes] = useState([]);
@@ -145,23 +156,22 @@ function Perfil() {
             return;
         }
 
-        const leitor = new FileReader();
-        leitor.onload = () => {
-            if (typeof leitor.result !== "string") {
-                setErroFoto("Não foi possível carregar essa imagem. Tente outro arquivo.");
-                return;
-            }
+        setErroFoto("");
+        setArquivoRecorte({ url: URL.createObjectURL(arquivo) });
+    }
 
-            setArquivoFoto(arquivo);
-            setPreviewFoto(leitor.result);
-            setFotoFalhou("");
-            setErroFoto("");
-            setFeedback(null);
-        };
-        leitor.onerror = () => {
-            setErroFoto("Não foi possível carregar essa imagem. Tente outro arquivo.");
-        };
-        leitor.readAsDataURL(arquivo);
+    function aplicarRecorte(arquivo) {
+        if (arquivo.size > TAMANHO_MAXIMO_FOTO) {
+            setErroFoto("A foto recortada deve ter no máximo 2 MB.");
+            setArquivoRecorte(null);
+            return;
+        }
+        setArquivoFoto(arquivo);
+        setPreviewFoto(URL.createObjectURL(arquivo));
+        setFotoFalhou("");
+        setErroFoto("");
+        setFeedback(null);
+        setArquivoRecorte(null);
     }
 
     function validarFormulario() {
@@ -318,6 +328,8 @@ function Perfil() {
                         <div className="perfil-avatar-area">
                             <button
                                 className="perfil-avatar-botao"
+                                ref={botaoFotoRef}
+                                disabled={salvando}
                                 type="button"
                                 onClick={() => inputFotoRef.current?.click()}
                                 aria-label="Escolher foto de perfil"
@@ -344,6 +356,7 @@ function Perfil() {
                                 type="file"
                                 accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                                 onChange={selecionarFoto}
+                                disabled={salvando}
                                 aria-label="Selecionar uma imagem de perfil"
                             />
                             {(usuario.foto_perfil || arquivoFoto) && (
@@ -591,6 +604,10 @@ function Perfil() {
                     </section>
                 </aside>
             </div>
+            {arquivoRecorte && (
+                <RecorteFotoModal origem={arquivoRecorte.url} focoRetornoRef={botaoFotoRef}
+                    aoCancelar={() => setArquivoRecorte(null)} aoConfirmar={aplicarRecorte} />
+            )}
         </div>
     );
 }
