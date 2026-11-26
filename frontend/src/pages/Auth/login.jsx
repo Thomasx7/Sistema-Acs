@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../../assets/css/Auth_css/login.css";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 import { ApiError } from "../../services/api";
 import PasswordField from "../../components/PasswordField";
@@ -33,13 +33,20 @@ function validarCadastro(nome, email, senha, aceitouTermos) {
 
 function Login() {
   const { autenticado, carregando, login, cadastrar } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Dados do login
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [erroLogin, setErroLogin] = useState("");
   const [enviandoLogin, setEnviandoLogin] = useState(false);
-  const [sucesso, setSucesso] = useState("");
+  // Segundos que faltam para o bloqueio (5 tentativas erradas) acabar.
+  const [segundosBloqueio, setSegundosBloqueio] = useState(0);
+  // Aviso de sucesso mostrado no login depois de cadastrar.
+  const [sucesso, setSucesso] = useState(
+    () => location.state?.mensagem || ""
+  );
 
   // false = mostra o login | true = mostra o cadastro
   const [isSignup, setIsSignup] = useState(false);
@@ -52,6 +59,24 @@ function Login() {
   const [erroCadastro, setErroCadastro] = useState("");
   const [enviandoCadastro, setEnviandoCadastro] = useState(false);
 
+  // Contagem regressiva do bloqueio: a cada segundo, diminui 1.
+  // Quando chega em 0, o efeito para sozinho e o botão volta.
+  useEffect(() => {
+    if (segundosBloqueio <= 0) return;
+
+    const timer = setTimeout(() => {
+      setSegundosBloqueio((segundos) => segundos - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [segundosBloqueio]);
+
+  useEffect(() => {
+    if (location.state?.mensagem) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
+
   // Alterna entre login e cadastro limpando os avisos da tela anterior.
   function trocarFormulario(mostrarCadastro) {
     setIsSignup(mostrarCadastro);
@@ -62,7 +87,7 @@ function Login() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if (enviandoLogin) return;
+    if (enviandoLogin || segundosBloqueio > 0) return;
 
     setSucesso("");
 
@@ -83,7 +108,13 @@ function Login() {
       // Deu certo: o usuário agora está logado e o <Navigate> lá embaixo
       // leva para /home sozinho.
     } catch (falha) {
-      setErroLogin(mensagemDeErro(falha));
+      if (falha instanceof ApiError && falha.status === 429) {
+        // Bloqueado por tentativas: inicia a contagem regressiva.
+        setSegundosBloqueio(falha.retryAfter ?? 60);
+        setErroLogin("");
+      } else {
+        setErroLogin(mensagemDeErro(falha));
+      }
     } finally {
       setEnviandoLogin(false);
     }
@@ -134,6 +165,8 @@ function Login() {
 
   // Já logado (ou acabou de logar): não faz sentido ficar no login.
   if (autenticado) return <Navigate to="/home" replace />;
+
+  const bloqueado = segundosBloqueio > 0;
 
   return (
     <div className="login-page">
@@ -271,6 +304,9 @@ function Login() {
                 onChange={(event) => setPassword(event.target.value)}
               />
 
+              <Link to="/esqueci-senha" className="forgot-password">
+                Esqueceu sua senha?
+              </Link>
             </div>
 
             {sucesso && (
@@ -279,7 +315,14 @@ function Login() {
               </p>
             )}
 
-            {erroLogin && (
+            {bloqueado && (
+              <p className="form-erro">
+                Muitas tentativas de login. Tente novamente em{" "}
+                {segundosBloqueio}s.
+              </p>
+            )}
+
+            {erroLogin && !bloqueado && (
               <p className="form-erro" role="alert">
                 {erroLogin}
               </p>
@@ -288,9 +331,13 @@ function Login() {
             <button
               type="submit"
               className="login-button"
-              disabled={enviandoLogin}
+              disabled={enviandoLogin || bloqueado}
             >
-              {enviandoLogin ? "Entrando..." : "Entrar"}
+              {bloqueado
+                ? `Aguarde ${segundosBloqueio}s`
+                : enviandoLogin
+                  ? "Entrando..."
+                  : "Entrar"}
             </button>
 
             <p className="switch-text">

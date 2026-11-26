@@ -6,11 +6,6 @@ function PasswordField({
   onChange,
   autoComplete,
   placeholder = "Digite sua senha",
-  required = true,
-  ariaDescribedby,
-  ariaInvalid,
-  disabled = false,
-  inputRef,
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -23,11 +18,7 @@ function PasswordField({
         value={value}
         onChange={onChange}
         autoComplete={autoComplete}
-        required={required}
-        aria-describedby={ariaDescribedby}
-        aria-invalid={ariaInvalid}
-        disabled={disabled}
-        ref={inputRef}
+        required
       />
       <button
         type="button"

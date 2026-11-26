@@ -1,11 +1,12 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import RecorteFotoModal from "../../components/RecorteFotoModal";
 
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/useTheme";
-import { quizzes } from "../../data/quizzes";
-import { useProgresso } from "../../hooks/useProgresso";
 import { api, ApiError } from "../../services/api";
-import { lerFoto, salvarFoto } from "../../utils/perfil";
+import { listarProgressos } from "../../services/progressoQuiz";
+import { listarQuizzes } from "../../services/quizzes";
+import { montarUrlFoto } from "../../utils/perfil";
 import {
     SENHA_MIN,
     normalizarEmail,
@@ -33,15 +34,16 @@ function obterIniciais(nome) {
 function Perfil() {
     const { usuario, atualizarUsuario } = useAuth();
     const { theme, setTheme } = useTheme();
-    const { historico, carregando, erro, recarregar } = useProgresso();
 
     // Nome e e-mail começam com o que veio do banco 
     const [nome, setNome] = useState(usuario.nome);
     const [email, setEmail] = useState(usuario.email);
 
-    // A foto ainda é local
-    const [fotoSalva, setFotoSalva] = useState(() => lerFoto(usuario.id_usuario));
-    const [foto, setFoto] = useState(fotoSalva);
+    const [arquivoFoto, setArquivoFoto] = useState(null);
+    const [arquivoRecorte, setArquivoRecorte] = useState(null);
+    const [previewFoto, setPreviewFoto] = useState("");
+    const urlFoto = previewFoto || montarUrlFoto(usuario.foto_perfil);
+    const [fotoFalhou, setFotoFalhou] = useState("");
 
     const [senhaAtual, setSenhaAtual] = useState("");
     const [senha, setSenha] = useState("");
@@ -55,29 +57,72 @@ function Perfil() {
     const [feedback, setFeedback] = useState(null);
     const [salvando, setSalvando] = useState(false);
     const inputFotoRef = useRef(null);
+    const botaoFotoRef = useRef(null);
 
-  
+    useEffect(() => () => {
+        if (previewFoto) URL.revokeObjectURL(previewFoto);
+    }, [previewFoto]);
+
+    useEffect(() => () => {
+        if (arquivoRecorte) URL.revokeObjectURL(arquivoRecorte.url);
+    }, [arquivoRecorte]);
+
+    const [progressos, setProgressos] = useState([]);
+    const [quizzes, setQuizzes] = useState([]);
+    const [carregandoProgresso, setCarregandoProgresso] = useState(true);
+    const [erroProgresso, setErroProgresso] = useState("");
+
+    useEffect(() => {
+        let cancelado = false;
+
+        Promise.all([listarProgressos(), listarQuizzes()])
+            .then(([dadosProgresso, dadosQuizzes]) => {
+                if (!cancelado) {
+                    setProgressos(dadosProgresso);
+                    setQuizzes(dadosQuizzes);
+                }
+            })
+            .catch((falha) => {
+                if (!cancelado) {
+                    setErroProgresso(
+                        falha instanceof ApiError
+                            ? falha.message
+                            : "Não foi possível carregar o progresso."
+                    );
+                }
+            })
+            .finally(() => {
+                if (!cancelado) setCarregandoProgresso(false);
+            });
+
+        return () => {
+            cancelado = true;
+        };
+    }, []);
+
     const alterado =
         nome !== usuario.nome ||
         email !== usuario.email ||
-        foto !== fotoSalva ||
+        Boolean(arquivoFoto) ||
         senha !== "" ||
         confirmacaoSenha !== "";
 
     const itensProgresso = quizzes.map((quiz) => {
-        const item = historico.find((registro) => registro?.id === quiz.id);
+        const item = progressos.find(
+            (registro) => Number(registro.id_quiz) === Number(quiz.id)
+        );
         const progresso = item ? Number(item.progresso) : 0;
 
         return {
             id: quiz.id,
-            status: item ? item.status : "novo",
+            status: item ? item.status : "nao_iniciado",
             progresso: Number.isFinite(progresso)
                 ? Math.min(100, Math.max(0, progresso))
                 : 0,
         };
     });
     const concluidos = itensProgresso.filter((item) => item.status === "concluido").length;
-    const emAndamento = itensProgresso.filter((item) => item.status === "andamento").length;
+    const emAndamento = itensProgresso.filter((item) => item.status === "em_andamento").length;
     const progressoGeral = itensProgresso.length
         ? Math.round(
             itensProgresso.reduce((total, item) => total + item.progresso, 0) /
@@ -111,21 +156,22 @@ function Perfil() {
             return;
         }
 
-        const leitor = new FileReader();
-        leitor.onload = () => {
-            if (typeof leitor.result !== "string") {
-                setErroFoto("Não foi possível carregar essa imagem. Tente outro arquivo.");
-                return;
-            }
+        setErroFoto("");
+        setArquivoRecorte({ url: URL.createObjectURL(arquivo) });
+    }
 
-            setFoto(leitor.result);
-            setErroFoto("");
-            setFeedback(null);
-        };
-        leitor.onerror = () => {
-            setErroFoto("Não foi possível carregar essa imagem. Tente outro arquivo.");
-        };
-        leitor.readAsDataURL(arquivo);
+    function aplicarRecorte(arquivo) {
+        if (arquivo.size > TAMANHO_MAXIMO_FOTO) {
+            setErroFoto("A foto recortada deve ter no máximo 2 MB.");
+            setArquivoRecorte(null);
+            return;
+        }
+        setArquivoFoto(arquivo);
+        setPreviewFoto(URL.createObjectURL(arquivo));
+        setFotoFalhou("");
+        setErroFoto("");
+        setFeedback(null);
+        setArquivoRecorte(null);
     }
 
     function validarFormulario() {
@@ -183,7 +229,7 @@ function Perfil() {
             corpo.senha_atual = senhaAtual;
         }
 
-        const mudouFoto = foto !== fotoSalva;
+        const arquivoParaEnviar = arquivoFoto;
         const temDadosParaEnviar = Object.keys(corpo).length > 0;
 
         setSalvando(true);
@@ -195,10 +241,13 @@ function Perfil() {
                 atualizarUsuario(resposta.usuario);
             }
 
-            let fotoOk = true;
-            if (mudouFoto) {
-                fotoOk = salvarFoto(usuario.id_usuario, foto);
-                if (fotoOk) setFotoSalva(foto);
+            if (arquivoParaEnviar) {
+                const formulario = new FormData();
+                formulario.append("foto", arquivoParaEnviar);
+                const resposta = await api.post("/usuarios/foto-perfil", formulario);
+                atualizarUsuario(resposta.usuario);
+                setArquivoFoto(null);
+                setPreviewFoto("");
             }
 
             // Mostra no formulário os valores já tratados
@@ -209,19 +258,12 @@ function Perfil() {
             setConfirmacaoSenha("");
             setErros({});
 
-            if (!fotoOk) {
-                setFeedback({
-                    tipo: "erro",
-                    mensagem: "Seus dados foram salvos, mas a foto não coube no navegador. Tente uma imagem menor.",
-                });
-            } else {
-                setFeedback({
-                    tipo: "sucesso",
-                    mensagem: senha
-                        ? "Alterações salvas. Sua senha foi atualizada."
-                        : "Alterações salvas com sucesso.",
-                });
-            }
+            setFeedback({
+                tipo: "sucesso",
+                mensagem: senha
+                    ? "Alterações salvas. Sua senha foi atualizada."
+                    : "Alterações salvas com sucesso.",
+            });
         } catch (falha) {
             setFeedback({
                 tipo: "erro",
@@ -229,6 +271,44 @@ function Perfil() {
                     falha instanceof ApiError
                         ? falha.message
                         : "Não foi possível salvar. Tente novamente.",
+            });
+        } finally {
+            setSalvando(false);
+        }
+    }
+
+    async function removerFoto() {
+        if (salvando) return;
+
+        if (!usuario.foto_perfil) {
+            setArquivoFoto(null);
+            setPreviewFoto("");
+            setErroFoto("");
+            setFeedback(null);
+            return;
+        }
+
+        setSalvando(true);
+        setFeedback(null);
+
+        try {
+            const resposta = await api.delete("/usuarios/foto-perfil");
+            atualizarUsuario(resposta.usuario);
+            setArquivoFoto(null);
+            setPreviewFoto("");
+            setErroFoto("");
+            setFotoFalhou("");
+            setFeedback({
+                tipo: "sucesso",
+                mensagem: "Foto de perfil removida com sucesso.",
+            });
+        } catch (falha) {
+            setFeedback({
+                tipo: "erro",
+                mensagem:
+                    falha instanceof ApiError
+                        ? falha.message
+                        : "Não foi possível remover a foto. Tente novamente.",
             });
         } finally {
             setSalvando(false);
@@ -248,12 +328,18 @@ function Perfil() {
                         <div className="perfil-avatar-area">
                             <button
                                 className="perfil-avatar-botao"
+                                ref={botaoFotoRef}
+                                disabled={salvando}
                                 type="button"
                                 onClick={() => inputFotoRef.current?.click()}
                                 aria-label="Escolher foto de perfil"
                             >
-                                {foto ? (
-                                    <img src={foto} alt={`Foto de perfil de ${nome || "usuário"}`} />
+                                {urlFoto && fotoFalhou !== urlFoto ? (
+                                    <img
+                                        src={urlFoto}
+                                        alt={`Foto de perfil de ${nome || "usuário"}`}
+                                        onError={() => setFotoFalhou(urlFoto)}
+                                    />
                                 ) : (
                                     <span aria-hidden="true">{obterIniciais(nome)}</span>
                                 )}
@@ -270,8 +356,23 @@ function Perfil() {
                                 type="file"
                                 accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                                 onChange={selecionarFoto}
+                                disabled={salvando}
                                 aria-label="Selecionar uma imagem de perfil"
                             />
+                            {(usuario.foto_perfil || arquivoFoto) && (
+                                <button
+                                    className="perfil-remover-foto"
+                                    type="button"
+                                    onClick={removerFoto}
+                                    disabled={salvando}
+                                >
+                                    {salvando
+                                        ? "Aguarde..."
+                                        : usuario.foto_perfil
+                                            ? "Remover foto"
+                                            : "Cancelar seleção"}
+                                </button>
+                            )}
                         </div>
 
                         <div className="perfil-identidade-texto">
@@ -449,13 +550,10 @@ function Perfil() {
                             <h2 id="perfil-progresso-titulo">Meu progresso</h2>
                         </div>
 
-                        {carregando ? (
-                            <div role="status">Carregando seu progresso...</div>
-                        ) : erro ? (
-                            <div role="alert">
-                                Não foi possível carregar seu progresso.
-                                <button type="button" onClick={recarregar}>Tentar novamente</button>
-                            </div>
+                        {carregandoProgresso ? (
+                            <p role="status">Carregando progresso...</p>
+                        ) : erroProgresso ? (
+                            <p role="alert">{erroProgresso}</p>
                         ) : (
                             <>
                                 <div className="perfil-progresso-numero">
@@ -506,6 +604,10 @@ function Perfil() {
                     </section>
                 </aside>
             </div>
+            {arquivoRecorte && (
+                <RecorteFotoModal origem={arquivoRecorte.url} focoRetornoRef={botaoFotoRef}
+                    aoCancelar={() => setArquivoRecorte(null)} aoConfirmar={aplicarRecorte} />
+            )}
         </div>
     );
 }

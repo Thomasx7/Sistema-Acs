@@ -1,13 +1,14 @@
 import { lerToken, removerToken } from "../utils/tokenStorage";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+export const API_URL = "http://localhost:5000"; //TODO Mudar aqui URL backend
 
 // Erro padronizado: toda falha da API chega às telas neste formato.
 export class ApiError extends Error {
-    constructor(mensagem, status) {
+    constructor(mensagem, status, retryAfter = null) {
         super(mensagem);
         this.name = "ApiError";
-        this.status = status;
+        this.status = status;         // 400, 401, 429...
+        this.retryAfter = retryAfter; // segundos de espera (bloqueio do login)
     }
 }
 
@@ -18,11 +19,24 @@ export function definirAoExpirarSessao(funcao) {
     aoExpirarSessao = funcao;
 }
 
-async function requisicao(metodo, caminho, corpo, options = {}) {
+// Extrai os segundos de espera: do header Retry-After ou, se o
+// navegador não deixar ler, da mensagem ("tente novamente em 40s").
+function lerRetryAfter(resposta, mensagem) {
+    const header = Number(resposta.headers.get("Retry-After"));
+    if (Number.isFinite(header) && header > 0) return header;
+
+    const achado = /(\d+)\s*s\b/.exec(mensagem || "");
+    return achado ? Number(achado[1]) : null;
+}
+
+async function requisicao(metodo, caminho, corpo) {
     const token = lerToken();
+    const ehFormData = typeof FormData !== "undefined" && corpo instanceof FormData;
 
     const headers = { Accept: "application/json" };
-    if (corpo !== undefined) headers["Content-Type"] = "application/json";
+    if (corpo !== undefined && !ehFormData) {
+        headers["Content-Type"] = "application/json";
+    }
     if (token) headers.Authorization = `Bearer ${token}`;
 
     let resposta;
@@ -30,11 +44,13 @@ async function requisicao(metodo, caminho, corpo, options = {}) {
         resposta = await fetch(`${API_URL}${caminho}`, {
             method: metodo,
             headers,
-            body: corpo !== undefined ? JSON.stringify(corpo) : undefined,
-            signal: options.signal,
+            body: corpo === undefined
+                ? undefined
+                : ehFormData
+                    ? corpo
+                    : JSON.stringify(corpo),
         });
-    } catch (erro) {
-        if (erro.name === "AbortError") throw erro;
+    } catch {
         throw new ApiError(
             "Não foi possível conectar ao servidor. Tente novamente.",
             0
@@ -59,15 +75,20 @@ async function requisicao(metodo, caminho, corpo, options = {}) {
             if (aoExpirarSessao) aoExpirarSessao();
         }
 
-        throw new ApiError(mensagem, resposta.status);
+        throw new ApiError(
+            mensagem,
+            resposta.status,
+            resposta.status === 429 ? lerRetryAfter(resposta, mensagem) : null
+        );
     }
 
     return dados;
 }
 
 export const api = {
-    get: (caminho, options) => requisicao("GET", caminho, undefined, options),
+    get: (caminho) => requisicao("GET", caminho),
     post: (caminho, corpo) => requisicao("POST", caminho, corpo ?? {}),
+    patch: (caminho, corpo) => requisicao("PATCH", caminho, corpo ?? {}),
     put: (caminho, corpo) => requisicao("PUT", caminho, corpo ?? {}),
     delete: (caminho) => requisicao("DELETE", caminho),
 };

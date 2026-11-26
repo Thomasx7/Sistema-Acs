@@ -4,7 +4,7 @@
 
 Este repositório contém a implementação atual de um frontend em React para a plataforma ACS. O sistema foi desenvolvido para oferecer uma experiência de aprendizagem em temas como LGPD, letramento digital, segurança da informação e saúde digital.
 
-A análise do código indica que o projeto está em desenvolvimento, com quizzes e progresso locais e login/cadastro integrados à API Flask, autenticados por JWT e persistidos no PostgreSQL.
+O frontend React consome a API Flask autenticada para quizzes, perguntas e progresso. O catálogo e as respostas corretas são armazenados no PostgreSQL; o jogo valida respostas no backend.
 
 ## 2. Estado atual do projeto
 
@@ -12,16 +12,17 @@ A análise do código indica que o projeto está em desenvolvimento, com quizzes
 |---|---|---|
 | Interface principal | Implementado | Estrutura visual em React + CSS |
 | Navegação | Implementado | Rotas definidas com react-router-dom |
-| Login | Implementado | Autenticação na API por JWT |
-| Quiz interativo | Implementado | Perguntas e respostas locais em arquivos JS |
-| Progresso do usuário | Implementado | Salvo em localStorage |
+| Login | Parcial | Tela visual e lógica local de formulário; sem autenticação real |
+| Quiz interativo | Implementado | Perguntas e validação de respostas pela API |
+| Progresso do usuário | Implementado | Salvo no backend com posição exata de retomada |
 | Biblioteca | Parcial | Página informativa e de orientação; conteúdo não estruturado como repositório funcional |
 | Perfil do usuário | Parcial | Perfil e foto salvos localmente; o tema vale durante a sessão e não há integração de atualização com a API |
-| Cadastro | Implementado | Criação de conta pela API |
-| Recuperação de senha | Não disponível | O fluxo de recuperação por e-mail foi removido |
-| API/backend | Implementado | Cliente HTTP integrado à API Flask |
-| Banco de dados | Implementado no backend | Usuários persistidos em PostgreSQL; progresso permanece local |
-| Autenticação | Implementado | Contexto de autenticação, token JWT e rotas protegidas |
+| Cadastro | Pendente | Existem referências visuais, mas sem fluxo funcional |
+| Recuperação de senha | Pendente | Link presente sem rota correspondente |
+| Reset de senha | Pendente | Não identificado no código |
+| API/backend | Implementado | Cliente autenticado em `src/services/api.js` |
+| Banco de dados | Implementado | Quizzes, perguntas, alternativas e progresso no PostgreSQL |
+| Autenticação | Implementado | Contexto de autenticação, token e rotas protegidas |
 
 ## 3. Stack tecnológica
 
@@ -42,37 +43,25 @@ A análise do código indica que o projeto está em desenvolvimento, com quizzes
 - React Router DOM: navegação entre páginas e layouts.
 - JavaScript: lógica da aplicação, manipulação de estados e dados.
 - CSS: estilização visual do sistema.
-- LocalStorage: persistência local do histórico dos quizzes.
+- LocalStorage: preferências e dados locais não sensíveis; o progresso dos quizzes é remoto.
 
 ### 3.3 Observações sobre a stack
 
-Não foram identificadas bibliotecas de UI, formulários ou gerenciamento de estado global. A autenticação usa `AuthContext`, há comunicação com a API Flask e os dados de quizzes permanecem estáticos em arquivos JavaScript.
+Não há biblioteca de UI nem state management externo. Os serviços em `src/services` centralizam o acesso à API; os dados de quizzes não são mais mocks no frontend.
 
 ## 4. Arquitetura atual
 
-### 4.1 Arquitetura real do código atual
+### 4.1 Arquitetura atual
 
 ```mermaid
 flowchart LR
     U[Usuário] --> F[Frontend React]
-    F --> A[Serviços e contexto de autenticação]
-    A --> B[Backend Flask / API]
-    B --> DB[(PostgreSQL: usuários)]
-    F --> Q[Quizzes e progresso local]
-    Q --> L[localStorage]
+    F --> C[Componentes e páginas]
+    C --> S[Serviços da API]
+    S --> A[API Flask]
+    A --> DB[(PostgreSQL)]
+    C --> L[Preferências locais]
 ```
-
-### 4.2 Evolução planejada
-
-```mermaid
-flowchart LR
-    U[Usuário] --> F[Frontend React]
-    F --> S[Sincronização de quizzes e progresso]
-    S --> B[Backend Flask / API]
-    B --> DB[(PostgreSQL)]
-```
-
-> A segunda arquitetura representa a sincronização de quizzes e progresso ainda planejada.
 
 ## 5. Estrutura de diretórios
 
@@ -93,9 +82,6 @@ src/
     historico-quiz.jsx
     quiz-item.jsx
     sidebar.jsx
-  data/
-    perguntas.js
-    quizzes.js
   layouts/
     PainelLayout.jsx
   pages/
@@ -130,7 +116,7 @@ src/
 - O sistema usa `BrowserRouter` em `src/main.jsx`.
 - O layout principal é definido em `src/layouts/PainelLayout.jsx`.
 - O menu do usuário no Header leva a `/perfil`; a página usa `PainelLayout`.
-- Endereços desconhecidos, incluindo antigos endereços de redefinição de senha, redirecionam para `/login`.
+- O link `/esqueci-senha` ainda não tem rota correspondente.
 - O menu lateral tem `NavLink` para `/painel`, mas a configuração real do `Routes` usa `/` como base do painel. Isso indica que o sistema de navegação ainda precisa refinamento.
 
 ## 7. Páginas e componentes principais
@@ -142,7 +128,7 @@ Arquivo: `src/App.jsx`
 Responsabilidade:
 - registrar as rotas da aplicação;
 - renderizar o layout do painel para páginas internas;
-- redirecionar rotas desconhecidas para `/login`.
+- redirecionar rotas desconhecidas para `/`.
 
 Fluxo:
 - `/login` renderiza Login.
@@ -195,9 +181,10 @@ Hooks:
 - `useEffect`: escuta cliques fora do menu e tecla `Escape` para fechar.
 
 Ações:
-- `handleSair()`: encerra a sessão, remove o token e redireciona para `/login`.
+- `handleSair()`: fecha o menu e redireciona para `/login` usando `window.location.href`.
 
 Observações:
+- não há autenticação verdadeira; o sair apenas troca a URL.
 - o link "Perfil" aponta para `/perfil`, mas essa rota não existe.
 
 ### 7.5 Home
@@ -220,14 +207,16 @@ Responsabilidade:
 - mostrar o status do quiz para o usuário.
 
 Dados:
-- `quizzes` importado de `src/data/quizzes.js`.
-- `lerHistorico` importado de `src/utils/progresso.js`.
+- quizzes carregados pela API em `GET /quizzes`;
+- progresso carregado pela API em `/progresso-quiz`;
+- quizzes e perguntas administrados pelos endpoints do service `src/services/quizzes.js`.
 
 Estados:
-- `historico`: lido uma vez quando o componente abre.
+- carregamento e erros de quizzes, progresso e registro de acesso.
 
 Função relevante:
-- `textoDoBotao(id)`: decide se o botão diz "Iniciar Quiz" ou "Quiz em andamento" ou "Quiz concluído".
+- o status da API define os rótulos "Iniciar Quiz", "Continuar Quiz" e "Refazer Quiz";
+- usuários ADM podem criar, editar e excluir quizzes e perguntas nessa página.
 
 ### 7.7 HistoricoQuiz
 
@@ -237,9 +226,9 @@ Responsabilidade:
 - listar os quizzes mais recentes salvos no histórico.
 
 Fluxo:
-- lê o histórico do navegador;
-- transforma cada item em objeto com dados do quiz;
-- filtra itens válidos;
+- carrega os quizzes e o progresso da API;
+- associa os registros por `id_quiz`;
+- filtra os quizzes com progresso;
 - ordena pela data mais recente;
 - exibe apenas os últimos cinco.
 
@@ -264,11 +253,10 @@ Funções:
 Arquivo: `src/pages/Home/quiz.jsx`
 
 Responsabilidade:
-- controlar a seleção de tema;
+- carregar quiz e perguntas pela API;
 - renderizar a pergunta atual;
-- registrar a resposta do usuário;
-- calcular o resultado final;
-- salvar progresso no navegador.
+- validar a resposta pela API e exibir o retorno;
+- salvar progresso e posição exata de retomada na API.
 
 Componentes internos:
 - `QuizJogo`: lógica da sessão do quiz.
@@ -281,12 +269,11 @@ Estados principais:
 - `finalizado`
 
 Fluxo real:
-1. O usuário clica em uma alternativa.
-2. `escolher(i)` altera o estado `selecionada` quando ainda não confirmou.
-3. Quando clica em "Confirmar resposta", `confirmar()` marca `confirmada` como true.
-4. Se a resposta estiver correta, `acertos` é incrementado.
-5. `salvarProgresso` salva o estado do quiz em localStorage.
-6. Se a questão for a última, `finalizado` vira true e a página mostra o resultado final.
+1. A página carrega `GET /quizzes/<id>` e o progresso do usuário.
+2. O usuário seleciona uma alternativa e envia a resposta a `POST /quizzes/<id>/responder`.
+3. O retorno do backend informa acerto, alternativa correta e explicação.
+4. O progresso, incluindo `perguntas_respondidas`, é salvo em `/progresso-quiz/<id>`.
+5. A posição exata salva permite continuar na pergunta seguinte.
 
 ### 7.10 Biblioteca
 
@@ -308,13 +295,12 @@ Responsabilidade:
 - calcular o resumo geral por quiz e mostrar o percentual de andamento.
 
 Dados:
-- `quizzes` da base estática.
-- `lerHistorico` do localStorage.
+- quizzes e progresso carregados pela API autenticada.
 
 Implementação:
-- `lista` combina cada quiz com status e progresso do histórico.
+- `lista` associa cada quiz ao progresso usando `id_quiz`.
 - `concluidos`, `emAndamento` e `naoIniciados` são calculados com `filter`.
-- `progressoGeral` usa `reduce` e `Math.round`.
+- `progressoGeral` usa `reduce` e `Math.round`; quizzes sem registro aparecem com 0%.
 
 ### 7.12 Perfil
 
@@ -335,57 +321,45 @@ Persistência:
 
 Arquivo: `src/pages/Auth/login.jsx`
 
-### 8.1 Funcionamento atual
+O `AuthProvider` em `src/context/AuthContext.jsx` autentica via `/auth/login`, mantém o usuário e valida a sessão em `/auth/me`. O cliente `src/services/api.js` envia o token Bearer e limpa a sessão quando recebe 401 com token. `ProtectedRoute` protege o painel e restringe a área de usuários a ADM; o backend também verifica as permissões.
 
-- Há campos de e-mail e senha.
-- Há botão para mostrar/ocultar senha.
-- `handleSubmit` valida os dados e autentica por meio do serviço de API.
-
-### 8.2 Estado atual da autenticação
-
-O `AuthContext` gerencia a autenticação e o usuário atual; o token JWT é armazenado no `sessionStorage` e as rotas do painel são protegidas. O backend valida credenciais e status da conta.
-
-## 9. Cadastro
+## 9. Cadastro, recuperação e reset de senha
 
 ### 9.1 Cadastro
 
-O cadastro é realizado pelo formulário da tela de login e enviado à API. O sistema não oferece recuperação ou redefinição de senha por e-mail; endereços desconhecidos redirecionam para `/login`.
+Estado identificado:
+- não há página de cadastro no `Routes`.
+- não há `form` de cadastro.
+- não há persistência ou API.
+
+Conclusão:
+- funcionalidade pendente.
+
+### 9.2 Recuperação de senha
+
+Identificado:
+- existe um link `Link to="/esqueci-senha"` no formulário de login.
+- não existe rota correspondente em `App.jsx`.
+
+Conclusão:
+- interface de referência presente, mas sem implementação real.
+
+### 9.3 Reset de senha
+
+Identificado:
+- não foi encontrada rota, componente ou fluxo de reset.
+
+Conclusão:
+- pendente e não implementado.
 
 ## 10. Dados e armazenamento
 
-### 10.1 Dados estáticos
+### 10.1 Quizzes e progresso
 
-Arquivos:
-- `src/data/quizzes.js`
-- `src/data/perguntas.js`
-
-Responsabilidade:
-- armazenar o catálogo de temas e as perguntas do quiz.
-
-Observações:
-- os quizzes e perguntas ainda são estáticos e mockados; sua integração com a API pode ser feita futuramente.
-
-### 10.2 Progresso salvo localmente
-
-Arquivo: `src/utils/progresso.js`
-
-Funções:
-
-#### `lerHistorico()`
-
-- lê `localStorage` usando a chave `acs-historico-quiz`;
-- retorna um array se estiver válido;
-- retorna `[]` se não houver dados ou se houver falha.
-
-#### `salvarProgresso(id, { status, progresso })`
-
-- remove o item antigo do mesmo quiz;
-- cria um novo objeto com `id`, `status`, `progresso`, `atualizadoEm`;
-- salva em `localStorage`.
-
-Observações:
-- o progresso é local ao navegador.
-- não há sincronização com servidor.
+- o catálogo de quizzes e suas perguntas são mantidos no PostgreSQL e servidos pela API;
+- os antigos mocks `src/data/quizzes.js` e `src/data/perguntas.js` foram removidos por não terem mais consumidores;
+- o frontend usa `src/services/progressoQuiz.js` para ler e gravar o progresso autenticado;
+- `perguntas_respondidas` registra a posição precisa de retomada, enquanto o percentual é recalculado com base no total atual de perguntas.
 
 ### 10.3 Perfil e preferência de tema
 
@@ -414,45 +388,13 @@ Comportamento:
 
 ## 11. Funções principais e responsabilidades
 
-### `lerHistorico()`
+### Serviços de quizzes e progresso
 
-Arquivo: `src/utils/progresso.js`
-
-Responsabilidade:
-- carregar o histórico salvo do usuário no navegador.
-
-Entrada:
-- nenhuma.
-
-Processamento:
-- lê JSON do localStorage.
-
-Saída:
-- array de registros ou `[]`.
-
-### `salvarProgresso()`
-
-Arquivo: `src/utils/progresso.js`
+Arquivos: `src/services/quizzes.js` e `src/services/progressoQuiz.js`.
 
 Responsabilidade:
-- persistir o estado atual do quiz.
-
-Entrada:
-- `id`, `status`, `progresso`.
-
-Processamento:
-- remove o registro anterior do mesmo quiz;
-- insere registro novo com timestamp.
-
-Saída:
-- atualização do localStorage.
-
-### `textoDoBotao(id)`
-
-Arquivo: `src/components/cards-Inicio.jsx`
-
-Responsabilidade:
-- definir o texto final do botão por tema.
+- consumir os endpoints autenticados de quizzes, perguntas, respostas e progresso;
+- manter a posição de retomada por `perguntas_respondidas`.
 
 ### `handleSubmit(event)`
 
@@ -462,7 +404,7 @@ Responsabilidade:
 - bloquear submit padrão e registrar os valores no console do navegador.
 
 Observação:
-- login e cadastro comunicam-se com a API backend.
+- não há autenticação real nem integração com API.
 
 ### `confirmar()`
 
@@ -490,8 +432,8 @@ Responsabilidade:
 
 ### Observações
 
-- O `AuthContext` usa contexto React para compartilhar a sessão.
-- Há hooks personalizados para autenticação e tema.
+- Não há `useContext`.
+- Não há hooks personalizados criados no projeto.
 - Não há reducers, stores globais ou gerenciamento centralizado de estado.
 
 ## 13. Formulários e validação
@@ -518,15 +460,27 @@ Eventos:
 - `onSubmit` dispara `handleSubmit`
 
 Comportamento atual:
-- valida os dados e envia as credenciais à API;
-- após autenticação bem-sucedida, navega para o painel;
-- exibe as mensagens retornadas pelo backend.
+- coleta os dados e imprime no console
+- não navega para painel após login
+- não valida credenciais no servidor
 
 ## 14. API e backend
 
 ### Situação atual
 
-O cliente em `src/services/api.js` usa `fetch` para chamar o backend Flask. O login e o cadastro são integrados; o contexto de autenticação mantém a sessão JWT e o backend persiste os usuários em PostgreSQL. O progresso dos quizzes permanece salvo localmente no navegador.
+O código atual não possui qualquer módulo dedicado à comunicação com API. Não existem endpoints, clientes HTTP, interceptadores, contexto de autenticação ou serviços no padrão de `fetch`, `axios` ou equivalentes.
+
+### Evolução prevista
+
+A arquitetura pretendida deve incluir:
+
+- camada de serviços para acesso à API;
+- autenticação via backend;
+- gestão de usuários e progresso;
+- persistência em banco de dados;
+- endpoints para login, cadastro e recuperação de senha.
+
+> Nenhuma dessas camadas foi implementada no código disponível.
 
 ## 15. Fluxos principais documentados
 
@@ -537,13 +491,13 @@ Usuário abre o app
       ↓
 Home renderiza CardsInicio
       ↓
-cards-Inicio lê histórico do localStorage
+CardsInicio carrega quizzes e progresso pela API
       ↓
-Usuário clica em um quiz
+Usuário inicia, continua ou refaz um quiz
       ↓
-Link navega para /quiz/:id
+POST /quizzes/:id/acesso e navegação para /quiz/:id
       ↓
-Quiz monta perguntas e inicia a rodada
+Quiz carrega perguntas pela API
 ```
 
 ### 15.2 Fluxo de pergunta
@@ -555,11 +509,11 @@ Estado selecionada é atualizado
       ↓
 Usuário clica em Confirmar resposta
       ↓
-confirmar() valida resposta
+POST /quizzes/:id/responder valida resposta
       ↓
-acertos pode sofrer incremento
+backend retorna resultado e explicação
       ↓
-progresso é salvo em localStorage
+progresso e perguntas_respondidas são salvos na API
       ↓
 interface mostra feedback visual
 ```
@@ -569,20 +523,17 @@ interface mostra feedback visual
 ```text
 Usuário conclui ou avança no quiz
       ↓
-Progresso é salvo em localStorage
+Progresso é salvo no backend
       ↓
-Página de progresso lê os dados do histórico
+Página de progresso combina quizzes e progresso pela API
       ↓
 React renderiza estatísticas e status por tema
 ```
 
 ## 16. Limitações e pendências
 
-- Não há recuperação ou redefinição de senha por e-mail.
-- Perfil, histórico e progresso dos quizzes não são sincronizados com o backend.
-- Endereços desconhecidos redirecionam para `/login`.
 - Biblioteca ainda é informacional.
-- Dados de perguntas e quizzes são estáticos e mockados.
+- A URL da API está definida diretamente em `src/services/api.js` e deve ser configurada para cada ambiente antes da publicação.
 - Não há suíte de testes com Jest, Vitest ou Testing Library identificada.
 
 ## 17. Instalação e execução
@@ -606,10 +557,22 @@ O projeto usa as dependências presentes em `package.json`:
 }
 ```
 
-### Execução local
+### Execução com Docker (desenvolvimento)
+
+Na raiz do repositório, com Docker Desktop ativo e o `.env` já configurado,
+execute `docker compose up --build`. Frontend, backend e PostgreSQL rodam em
+containers separados; acesse `http://localhost:5173`. O frontend usa Node 24,
+sincroniza dependências com `npm ci` a cada início e recarrega edições locais.
+Consulte [o guia de execução](../docs/orientacoes_backend.md) para configuração
+inicial e preservação dos volumes existentes.
+
+### Execução local sem container para o frontend
+
+Na raiz, execute `docker compose up --build db backend`. Em outro terminal,
+dentro de `frontend`:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -619,23 +582,19 @@ npm run dev
 npm run build
 ```
 
-## 18. Configuração da API
+## 18. Variáveis de ambiente
 
-O cliente usa atualmente a URL `http://localhost:5000` definida em `src/services/api.js`. Não há configuração de variáveis de ambiente no frontend.
-
-```env
-VITE_API_URL=https://api.exemplo.com
-```
-
-O exemplo indica uma possível configuração futura para ambientes diferentes.
+O Compose lê o `.env` da raiz para configurar backend e banco; ele não é
+injetado no serviço frontend. O frontend acessa a API pelo endereço fixo
+`http://localhost:5000` em `src/services/api.js`; `VITE_API_URL` não está
+implementada. No container, o Compose define `CHOKIDAR_USEPOLLING=true` para
+detecção de mudanças nos arquivos montados pelo Docker Desktop.
 
 ## 19. Próximas etapas sugeridas
 
-1. Sincronizar quizzes e progresso com a API.
-2. Migrar os dados de `src/data` para persistência dinâmica.
-3. Ajustar rotas e links inconsistentes.
-4. Expandir a biblioteca e o conteúdo de apoio.
-5. Adicionar testes automatizados.
+1. Expandir os materiais da Biblioteca.
+2. Adicionar testes automatizados para os fluxos de interface e API.
+3. Configurar a URL da API por ambiente antes da publicação.
 
 ## 20. Glossário técnico
 
@@ -649,6 +608,4 @@ O exemplo indica uma possível configuração futura para ambientes diferentes.
 
 ## 21. Conclusão
 
-O projeto ACS já demonstra uma interface funcional e bem estruturada para estudo e avaliação de conhecimento em temas relevantes à segurança digital e saúde. No entanto, a sua implementação atual é principalmente frontend e não deve ser interpretada como um sistema completo de autenticação, autorização ou persistência em produção.
-
-A documentação deste repositório deve ser usada como referência do estado real do código atualmente disponível e como guia para evolução futura da arquitetura e do backend.
+O projeto ACS reúne frontend React autenticado, API Flask e persistência PostgreSQL para quizzes e progresso. A interface e os serviços descritos nesta documentação refletem a integração atual; a configuração de produção deve ainda considerar a URL da API e a infraestrutura do ambiente.

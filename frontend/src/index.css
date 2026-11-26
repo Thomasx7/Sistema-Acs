@@ -21,6 +21,12 @@
   --cor-letramento: #0A8579;  /* verde-água */
   --cor-seguranca: #B45F06;  /* âmbar escuro */
   --cor-saude: #D6336C;       /* rosa */
+  --cor-paleta-1: #2463A6;
+  --cor-paleta-2: #467A3C;
+  --cor-paleta-3: #8A4F8D;
+  --cor-paleta-4: #A34F35;
+  --cor-paleta-5: #267A83;
+  --cor-paleta-6: #6D6B24;
   --texto-botao-acento: #FFFFFF;
 
   /* Superfícies e texto */
@@ -118,6 +124,12 @@
   --cor-letramento: #69D1BF;
   --cor-seguranca: #F2B66D;
   --cor-saude: #FF91B1;
+  --cor-paleta-1: #8BBEFF;
+  --cor-paleta-2: #9BD58C;
+  --cor-paleta-3: #D7A0E2;
+  --cor-paleta-4: #F0A18B;
+  --cor-paleta-5: #83D3DA;
+  --cor-paleta-6: #D2CE7A;
   --texto-botao-acento: #111B2B;
 
   --fundo: #111B2B;

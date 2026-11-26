@@ -1,0 +1,214 @@
+.card-pasta {
+  /* Geometria própria da pasta; espaçamento e raios vêm do acervo. */
+  --pasta-aba: 12%;
+  --pasta-inicio-capa: 28%;
+  --pasta-tinta: color-mix(in srgb, var(--pasta-cor) var(--pasta-intensidade, 72%), var(--azul-profundo));
+  --pasta-tinta-escura: color-mix(in srgb, var(--pasta-tinta) 80%, var(--azul-profundo));
+  position: relative;
+  display: block;
+  height: var(--acervo-altura);
+  isolation: isolate;
+  perspective: 900px;
+  color: var(--pasta-texto, var(--branco));
+  text-decoration: none;
+  border-radius: var(--acervo-raio);
+}
+
+.card-pasta:focus-visible {
+  outline: 3px solid var(--foco-contorno);
+  outline-offset: 3px;
+}
+
+:root[data-theme="dark"] .card-pasta {
+  --pasta-tinta: color-mix(in srgb, var(--pasta-cor) var(--pasta-intensidade, 45%), var(--azul-profundo));
+}
+
+.card-pasta-fundo {
+  position: absolute;
+  inset: var(--pasta-aba) 0 0;
+  border-radius: 0 var(--acervo-raio) var(--acervo-raio) var(--acervo-raio);
+  background: linear-gradient(135deg, var(--pasta-tinta), var(--pasta-tinta-escura));
+  box-shadow: var(--sombra-card);
+}
+
+.card-pasta-fundo::before {
+  position: absolute;
+  bottom: calc(100% - 1px);
+  width: 42%;
+  height: calc(var(--acervo-altura) * .12);
+  border-radius: var(--acervo-raio) var(--acervo-raio) 0 0;
+  background: var(--pasta-tinta);
+  clip-path: polygon(0 0, 75% 0, 100% 100%, 0 100%);
+  content: "";
+}
+
+.card-pasta-folha {
+  position: absolute;
+  inset: 20% var(--acervo-espaco) var(--acervo-espaco);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--texto);
+  box-shadow: var(--sombra-card);
+  transition: transform 350ms ease-out;
+}
+
+.card-pasta-folha-extra {
+  transform: translateY(-0.5rem) rotate(-2deg);
+  background: var(--branco-gelo);
+}
+
+.card-pasta-previa {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.75rem;
+  overflow: hidden;
+  bottom: auto;
+  height: 60%;
+}
+
+.card-pasta-previa-topo,
+.card-pasta-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.card-pasta-cabecalho {
+  transform-origin: top;
+  transition: transform 350ms ease-out;
+}
+
+.card-pasta-icone {
+  display: grid;
+  flex: 0 0 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: var(--superficie);
+  color: var(--texto-link);
+}
+
+.card-pasta svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.card-pasta-tipo {
+  max-width: 75%;
+  color: var(--texto-link);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.card-pasta-previa-titulo,
+.card-pasta-previa-descricao {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.card-pasta-previa-descricao,
+.card-pasta-previa-info {
+  color: var(--texto-suave);
+  font-size: 0.75rem;
+}
+
+.card-pasta-previa-descricao { -webkit-line-clamp: 3; flex-shrink: 1; }
+
+.card-pasta-previa-info {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--borda);
+}
+
+.card-pasta-capa {
+  position: absolute;
+  inset: var(--pasta-inicio-capa) 0 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: var(--acervo-espaco);
+  border: 1px solid color-mix(in srgb, var(--branco) 25%, var(--pasta-tinta));
+  border-radius: var(--acervo-raio);
+  background: linear-gradient(150deg, var(--pasta-tinta), var(--pasta-tinta-escura));
+  box-shadow: var(--sombra-card);
+  transform-origin: bottom;
+  transition: transform 350ms ease-out, opacity 350ms ease-out;
+}
+
+.card-pasta-cabecalho > span { min-width: 0; }
+.card-pasta-nome {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: var(--acervo-titulo);
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.card-pasta-quantidade { display: block; margin-top: 0.5rem; font-size: 0.875rem; }
+.card-pasta-simbolo { flex-shrink: 0; }
+.card-pasta-convite {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  transition: opacity 350ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-pasta:hover .card-pasta-capa {
+    transform: rotateX(-55deg) scaleY(.7);
+  }
+  .card-pasta:hover .card-pasta-previa { transform: translateY(-15%); }
+  .card-pasta:hover .card-pasta-cabecalho { transform: scaleY(1.6); }
+  .card-pasta:hover .card-pasta-convite { opacity: 0; }
+}
+
+.card-pasta:focus-visible .card-pasta-capa { transform: rotateX(-55deg) scaleY(.7); }
+.card-pasta:focus-visible .card-pasta-previa { transform: translateY(-15%); }
+.card-pasta:focus-visible .card-pasta-cabecalho { transform: scaleY(1.6); }
+.card-pasta:focus-visible .card-pasta-convite { opacity: 0; }
+
+@media (hover: none), (pointer: coarse) {
+  .card-pasta { --pasta-inicio-capa: 65%; }
+  .card-pasta-previa {
+    top: 15%;
+    height: 48%;
+    gap: 0.25rem;
+    padding: 0.75rem;
+  }
+  .card-pasta-icone { flex-basis: 1.5rem; height: 1.5rem; }
+  .card-pasta-previa-info { padding-top: 0.25rem; }
+  .card-pasta-previa-descricao { -webkit-line-clamp: 2; }
+  .card-pasta-previa-titulo, .card-pasta-convite { display: none; }
+  .card-pasta-capa { gap: 0.5rem; padding-block: 0.5rem; }
+  .card-pasta-nome { font-size: 1.25rem; }
+  .card-pasta-quantidade { margin-top: 0; }
+  .card-pasta:focus-visible .card-pasta-capa,
+  .card-pasta:focus-visible .card-pasta-previa,
+  .card-pasta:focus-visible .card-pasta-cabecalho { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-pasta-folha, .card-pasta-capa,
+  .card-pasta-cabecalho, .card-pasta-convite { transition: none; }
+  .card-pasta:is(:hover, :focus-visible) .card-pasta-capa { transform: none; opacity: 0; }
+  .card-pasta:is(:hover, :focus-visible) .card-pasta-previa { transform: none; }
+  .card-pasta:is(:hover, :focus-visible) .card-pasta-cabecalho { transform: none; }
+}

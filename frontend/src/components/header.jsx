@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/useAuth";
+import { montarUrlFoto } from "../utils/perfil";
 import "../assets/css/components_css/header.css";
 
 function Header() {
@@ -15,6 +16,8 @@ function Header() {
 
     // Primeira letra do nome, em maiúscula (aparece dentro da bolinha)
     const inicial = nomeCompleto.trim().charAt(0).toUpperCase();
+    const urlFoto = montarUrlFoto(usuario?.foto_perfil);
+    const [fotoFalhou, setFotoFalhou] = useState("");
 
     const [aberto, setAberto] = useState(false);
     const perfilRef = useRef(null);
@@ -56,7 +59,6 @@ function Header() {
             </div>
 
             <div className="header-perfil" ref={perfilRef}>
-                {/* Bolinha com a inicial */}
                 <button
                 type="button"
                 className="header-avatar"
@@ -65,7 +67,13 @@ function Header() {
                 aria-haspopup="menu"
                 aria-expanded={aberto}
                 >
-                {inicial}
+                {urlFoto && fotoFalhou !== urlFoto ? (
+                    <img
+                        src={urlFoto}
+                        alt=""
+                        onError={() => setFotoFalhou(urlFoto)}
+                    />
+                ) : inicial}
                 </button>
         
                 {aberto && (

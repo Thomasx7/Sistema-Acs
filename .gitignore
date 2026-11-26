@@ -1,14 +1,5 @@
 .env
-.env.*
-!.env.example
-!.env.exemplo
-
-node_modules/
-dist/
-
 __pycache__/
-*.py[cod]
 .venv/
-venv/
-ENV/
-
+node_modules/
+uploads/

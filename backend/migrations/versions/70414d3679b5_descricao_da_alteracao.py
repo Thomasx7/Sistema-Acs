@@ -1,8 +1,8 @@
-"""atualização
+"""descricao da alteracao
 
-Revision ID: 7684e62eb049
+Revision ID: 70414d3679b5
 Revises: 
-Create Date: 2026-10-26 18:19:07.347325
+Create Date: 2026-11-09 20:47:39.355816
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '7684e62eb049'
+revision = '70414d3679b5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,11 +26,27 @@ def upgrade():
     sa.Column('data_cadastro', sa.DateTime(), nullable=True),
     sa.Column('permissao', sa.String(length=20), nullable=True),
     sa.Column('status', sa.String(length=20), nullable=True),
-    sa.Column('tentativas_falhas', sa.Integer(), server_default='0', nullable=False),
-    sa.Column('bloqueado_ate', sa.DateTime(), nullable=True),
+    sa.Column('foto_perfil', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id_usuario'),
     sa.UniqueConstraint('email')
     )
+    op.create_table('progresso_quiz',
+    sa.Column('id_progresso', sa.Integer(), nullable=False),
+    sa.Column('id_usuario', sa.Integer(), nullable=False),
+    sa.Column('id_quiz', sa.Integer(), nullable=False),
+    sa.Column('status', sa.String(length=20), nullable=True),
+    sa.Column('progresso', sa.Integer(), nullable=True),
+    sa.Column('acertos', sa.Integer(), nullable=True),
+    sa.Column('total_perguntas', sa.Integer(), nullable=True),
+    sa.Column('atualizado', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['id_usuario'], ['usuarios.id_usuario'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id_progresso'),
+    sa.UniqueConstraint('id_usuario', 'id_quiz', name='uq_progresso_usuario_quiz')
+    )
+    with op.batch_alter_table('progresso_quiz', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_progresso_quiz_id_quiz'), ['id_quiz'], unique=False)
+        batch_op.create_index(batch_op.f('ix_progresso_quiz_id_usuario'), ['id_usuario'], unique=False)
+
     op.create_table('redefinicoes_senha',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('id_usuario', sa.Integer(), nullable=False),
@@ -54,5 +70,10 @@ def downgrade():
         batch_op.drop_index(batch_op.f('ix_redefinicoes_senha_id_usuario'))
 
     op.drop_table('redefinicoes_senha')
+    with op.batch_alter_table('progresso_quiz', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_progresso_quiz_id_usuario'))
+        batch_op.drop_index(batch_op.f('ix_progresso_quiz_id_quiz'))
+
+    op.drop_table('progresso_quiz')
     op.drop_table('usuarios')
     # ### end Alembic commands ###

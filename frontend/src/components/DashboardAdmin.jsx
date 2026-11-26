@@ -1,17 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { perguntasPorQuiz } from "../data/perguntas";
-import { quizzes } from "../data/quizzes";
 import { buscarDashboard } from "../services/admin";
 import { ApiError } from "../services/api";
+import { listarQuizzes } from "../services/quizzes";
 
 import "../assets/css/components_css/dashboard-admin.css";
-
-const totalPerguntas = Object.values(perguntasPorQuiz).reduce(
-    (total, perguntas) => total + perguntas.length,
-    0
-);
 
 function mensagemDoErro(erro) {
     if (erro instanceof ApiError) {
@@ -26,6 +20,9 @@ function mensagemDoErro(erro) {
 
 function DashboardAdmin() {
     const [indicadores, setIndicadores] = useState(null);
+    const [quizzes, setQuizzes] = useState([]);
+    const [carregandoQuizzes, setCarregandoQuizzes] = useState(true);
+    const [erroQuizzes, setErroQuizzes] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
     const [tentativa, setTentativa] = useState(0);
@@ -44,6 +41,20 @@ function DashboardAdmin() {
                 if (!cancelado) setCarregando(false);
             });
 
+        listarQuizzes()
+            .then((dados) => {
+                if (!cancelado) {
+                    setQuizzes(dados);
+                    setErroQuizzes("");
+                }
+            })
+            .catch((erroDaApi) => {
+                if (!cancelado) setErroQuizzes(mensagemDoErro(erroDaApi));
+            })
+            .finally(() => {
+                if (!cancelado) setCarregandoQuizzes(false);
+            });
+
         return () => {
             cancelado = true;
         };
@@ -51,9 +62,16 @@ function DashboardAdmin() {
 
     function tentarNovamente() {
         setCarregando(true);
+        setCarregandoQuizzes(true);
         setErro("");
+        setErroQuizzes("");
         setTentativa((atual) => atual + 1);
     }
+
+    const totalPerguntas = quizzes.reduce(
+        (total, quiz) => total + (quiz.quantidade_perguntas || 0),
+        0
+    );
 
     return (
         <section className="dashboard-admin" aria-labelledby="dashboard-admin-titulo">
@@ -103,14 +121,22 @@ function DashboardAdmin() {
 
                     <article className="dashboard-admin-card resumo-ok">
                         <span>Total de quizzes</span>
-                        <strong>{quizzes.length}</strong>
-                        <small>Conteúdos disponíveis</small>
+                        <strong>
+                            {carregandoQuizzes ? "..." : erroQuizzes ? "—" : quizzes.length}
+                        </strong>
+                        <small>
+                            {erroQuizzes || (carregandoQuizzes ? "Carregando conteúdos" : "Conteúdos disponíveis")}
+                        </small>
                     </article>
 
                     <article className="dashboard-admin-card resumo-andamento">
                         <span>Total de perguntas</span>
-                        <strong>{totalPerguntas}</strong>
-                        <small>Somadas em todos os quizzes</small>
+                        <strong>
+                            {carregandoQuizzes ? "..." : erroQuizzes ? "—" : totalPerguntas}
+                        </strong>
+                        <small>
+                            {erroQuizzes || (carregandoQuizzes ? "Carregando perguntas" : "Somadas em todos os quizzes")}
+                        </small>
                     </article>
 
                     <article className="dashboard-admin-card resumo-novo">
@@ -120,7 +146,6 @@ function DashboardAdmin() {
                     </article>
                 </div>
             )}
-            {/* TODO: virá do backend quando os quizzes forem para o banco. */}
         </section>
     );
 }

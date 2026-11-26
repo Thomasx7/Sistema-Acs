@@ -12,7 +12,7 @@ class AuthError(Exception):
 
 
 def autenticar(email: str, senha: str) -> Usuarios:
-    """Valida as credenciais e retorna o usuário autenticado.
+    """Valida credenciais e retorna o usuário se tudo der certo.
 
     Levanta AuthError em qualquer falha. Retorna o usuário se tudo der certo.
     """
@@ -22,9 +22,11 @@ def autenticar(email: str, senha: str) -> Usuarios:
     if not usuario:
         raise AuthError(MSG_CREDENCIAIS_INVALIDAS, 401)
 
+    # Confere a senha
     if not check_password(senha, usuario.senha):
         raise AuthError(MSG_CREDENCIAIS_INVALIDAS, 401)
 
+    # Conta inativa
     if usuario.status != "Ativo":
         raise AuthError("Usuário inativo", 403)
 

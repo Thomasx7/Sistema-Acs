@@ -1,12 +1,14 @@
 # Inicializa o projeto
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
 from .config import Config
 from flask_cors import CORS
 from flask_migrate import Migrate 
 from flask_jwt_extended import JWTManager
 
 db = SQLAlchemy()
+mail = Mail()
 migrate = Migrate()
 jwt = JWTManager()
 
@@ -14,21 +16,10 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    variaveis_obrigatorias = {
-        "DATABASE_URL": app.config["SQLALCHEMY_DATABASE_URI"],
-        "SECRET_KEY": app.config["SECRET_KEY"],
-        "JWT_SECRET_KEY": app.config["JWT_SECRET_KEY"],
-    }
-    ausentes = [nome for nome, valor in variaveis_obrigatorias.items() if not valor]
-    if ausentes:
-        raise RuntimeError(
-            "Configure as variáveis de ambiente obrigatórias: "
-            + ", ".join(ausentes)
-        )
-
     # Inicializando
     db.init_app(app)
-    CORS(app, origins=app.config["CORS_ORIGINS"])
+    mail.init_app(app)
+    CORS(app, expose_headers=["Retry-After"])
     migrate.init_app(app, db)
     jwt.init_app(app)
     
@@ -45,17 +36,24 @@ def create_app():
     def token_expirado(jwt_header, jwt_payload):
         return jsonify({"erro": "Sessão expirada. Faça login novamente"}), 401
 
-    from app.models.models import Usuarios, ProgressoQuiz
+    from app.models.models import Usuarios  
 
     # Importando as Rotas
     from app.routes.auth_routes import auth_bp
     from app.routes.admin_routes import admin_bp
     from app.routes.usuario_routes import user_bp
-    from app.routes.progresso_routes import progresso_bp
-
+    from app.routes.progresso_quiz_routes import progresso_quiz_bp
+    from app.routes.quiz_routes import pergunta_bp, quiz_bp
+    from app.routes.upload_routes import upload_bp
+    from app.routes.library_routes import library_bp
+    
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(user_bp, url_prefix='/usuarios')
-    app.register_blueprint(progresso_bp, url_prefix='/progresso')
+    app.register_blueprint(progresso_quiz_bp, url_prefix='/progresso-quiz')
+    app.register_blueprint(quiz_bp, url_prefix='/quizzes')
+    app.register_blueprint(pergunta_bp)
+    app.register_blueprint(upload_bp, url_prefix='/uploads')
+    app.register_blueprint(library_bp, url_prefix='/library')
 
     return app

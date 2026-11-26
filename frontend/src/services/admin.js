@@ -8,18 +8,14 @@ export function listarUsuarios() {
     return api.get("/usuarios/");
 }
 
-export function buscarUsuario(id, options) {
-    return api.get(`/usuarios/${id}`, options);
-}
-
 export function criarUsuario(dados) {
-    return api.post("/admin/usuarios", dados);
+    return api.post("/usuarios/admin", dados);
 }
 
-export function atualizarUsuario(id, dados) {
-    return api.put(`/usuarios/${id}`, dados);
+export function atualizarUsuario(idUsuario, dados) {
+    return api.put(`/usuarios/admin/${idUsuario}`, dados);
 }
 
-export function excluirUsuario(id) {
-    return api.delete(`/usuarios/${id}`);
+export function excluirUsuario(idUsuario) {
+    return api.delete(`/usuarios/${idUsuario}`);
 }
