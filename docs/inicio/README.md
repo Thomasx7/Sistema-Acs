@@ -74,3 +74,4 @@ Referências: [execução técnica](../orientacoes_backend.md),
 [rotas da API](../orientacoes_rotas.md) e [catálogo](../catalogo_sistema.md).
 
 Por fim, consulte os [comandos rápidos de Git e o fluxo de trabalho](git.md).
+
