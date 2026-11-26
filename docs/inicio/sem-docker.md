@@ -132,8 +132,9 @@ npm run dev
 
 `npm ci` instala as versões do lock existente. Abra
 [http://localhost:5173](http://localhost:5173) e mantenha os dois terminais
-abertos. A API está fixa em `http://localhost:5000` em
-`frontend/src/services/api.js`; `VITE_API_URL` não está implementada.
+abertos. Em desenvolvimento, a API usa `http://localhost:5000` por padrão.
+Para mudar esse endereço, configure `VITE_API_URL` em `frontend/.env.local`.
+Para publicar, siga o [guia de deploy](../deploy.md).
 
 ## Próximas execuções
 

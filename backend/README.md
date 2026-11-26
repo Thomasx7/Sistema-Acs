@@ -8,6 +8,8 @@ solução de problemas estão em
 As rotas, permissões, autenticação, tabelas e exemplos de uso estão em
 [docs/orientacoes_rotas.md](../docs/orientacoes_rotas.md).
 
+Para produção com Render e Neon, consulte o [guia de deploy](../docs/deploy.md).
+
 ## Execução sem Docker
 
 O arquivo `backend/.env` é usado somente para execução local sem Docker.

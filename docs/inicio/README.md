@@ -68,7 +68,10 @@ npm run build
 Esses comandos verificam o código com ESLint e geram a compilação em `dist/`.
 `npm run preview` permite conferir a compilação no endereço mostrado no
 terminal; os recursos do sistema ainda dependem da API.
-Não há comando `npm test` nem suíte de testes configurada no repositório.
+Não há comando `npm test` nem suíte de testes frontend configurada.
+O backend tem testes iniciais com unittest: dentro de `backend/`, execute
+`.\.venv\Scripts\python.exe -m unittest discover -s tests -v`.
+Esses testes não acessam o banco PostgreSQL nem validam todos os fluxos do sistema.
 
 Referências: [execução técnica](../orientacoes_backend.md),
 [rotas da API](../orientacoes_rotas.md) e [catálogo](../catalogo_sistema.md).

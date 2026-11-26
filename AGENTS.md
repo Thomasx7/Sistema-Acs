@@ -46,7 +46,7 @@ As versões Python estão em `backend/requirements.txt`. Embora Flask-Bcrypt/bcr
 | `frontend/src/styles/responsive/` | Complementos responsivos importados por último em `main.jsx` |
 | `docs/` | Guias compartilhados e referências detalhadas |
 
-`node_modules/`, `dist/`, `.venv/`, `__pycache__/`, `.env` e uploads são dependências, saídas ou dados locais; não são fontes de convenções nem devem ser versionados. Não há diretório de testes ou pipeline de CI versionado.
+`node_modules/`, `dist/`, `.venv/`, `__pycache__/`, `.env` e uploads são dependências, saídas ou dados locais; não são fontes de convenções nem devem ser versionados. `backend/tests/` usa unittest para deploy, CORS, saúde e uploads com S3 simulado; não há pipeline de CI versionado.
 
 ## Instalar, executar e verificar
 
@@ -70,7 +70,7 @@ npm run build
 npm run preview
 ```
 
-`npm ci` instala o lock existente; `npm install` também é documentado no projeto. `dev` executa `vite --host`; frontend padrão em `http://localhost:5173`, API em `http://localhost:5000`. Não há script `npm test` nem runner de testes configurado. O backend não tem lint ou comando de testes definidos; não declare essas verificações como existentes.
+`npm ci` instala o lock existente; `npm install` também é documentado no projeto. `dev` executa `vite --host`; frontend padrão em `http://localhost:5173`, API em `http://localhost:5000`. Não há script `npm test` nem runner frontend configurado. No backend, execute `python -m unittest discover -s tests -v` dentro de `backend/`, com as dependências instaladas. Não há lint Python configurado.
 
 O entrypoint aguarda PostgreSQL, executa `flask --app app db upgrade`, `seed_quizzes.py`, `seed_admin.py`, `seed_library.py` e inicia `app.py`. Veja execução sem Docker e migrations em `backend/AGENTS.md`.
 
@@ -100,7 +100,12 @@ O Compose lê `.env` da raiz e injeta `DATABASE_URL` com host `db:5432`; a execu
 | `LIBRARY_MAX_FILE_SIZE` | `52428800` bytes (50 MiB) |
 | `LIBRARY_MAX_VIDEO_SIZE` | `524288000` bytes (500 MiB), para MP4/WebM |
 
-As três variáveis `LIBRARY_*` existem em `app/config.py`, mas não nos `.env.example`. O frontend usa `API_URL` fixa em `src/services/api.js`; `VITE_API_URL` não está implementada.
+`LIBRARY_UPLOAD_DIR` também aparece em `backend/.env.example`; os limites `LIBRARY_MAX_*` mantêm os padrões do código. O frontend usa `VITE_API_URL`, com fallback local em desenvolvimento e URL pública em `frontend/.env.production`. `CORS_ORIGINS` define as origens aceitas pela API. Produção usa Gunicorn, valida chaves/origens e oferece `/health`; veja [deploy](docs/deploy.md).
+
+`UPLOAD_STORAGE` aceita `local` (padrão) ou `s3`. Em S3, configure `S3_BUCKET`,
+`AWS_ENDPOINT_URL_S3`, `AWS_REGION`, `AWS_ACCESS_KEY_ID` e
+`AWS_SECRET_ACCESS_KEY` somente no backend. `boto3` acessa o bucket privado;
+arquivos passam pela API e não são migrados automaticamente ao trocar o modo.
 
 ## Convenções e segurança comuns
 
@@ -131,11 +136,11 @@ As três variáveis `LIBRARY_*` existem em `app/config.py`, mas não nos `.env.e
 
 1. **Documentação:** `frontend/README_TECNICO.md` mistura estados antigos e atuais de login, cadastro, reset, perfil e biblioteca. `docs/orientacoes_rotas.md` não inclui `/library`. Decidir a revisão desses documentos.
 2. **Privacidade:** `src/data/documentosLegais.js` contém responsável/DPO por preencher e descreve progresso/foto em localStorage, enquanto o código usa PostgreSQL e uploads. Também menciona bloqueio de login sem implementação correspondente na API. Definir textos e responsáveis reais.
-3. **Produção:** API fixa em localhost, domínio ngrok em `vite.config.js`, `CORS(app, ...)` sem restrição explícita de origens, servidor Flask em debug e seeds de desenvolvimento. Definir configuração de implantação, origens, chaves e execução de produção; o repositório não fornece esse fluxo.
-4. **Testes:** não há suíte automatizada, runner backend ou CI. Definir abordagem antes de documentar comandos como obrigatórios.
+3. **Produção:** o fluxo Vercel/Render/Neon está em `docs/deploy.md`, separado do Docker local. Ainda dependem de configuração e validação nos serviços o banco existente, SMTP e armazenamento externo dos uploads. O domínio ngrok continua limitado à configuração local do Vite.
+4. **Testes:** há cobertura inicial com unittest para deploy, CORS e saúde, sem CI. Fluxos completos de autenticação, quizzes, PostgreSQL, SMTP e uploads ainda exigem validação funcional.
 5. **Design:** não há escala global de espaçamento, raios ou tipografia; há valores literais, sobreposições CSS e estilos antigos da biblioteca. `--azul-fundo` é usado sem definição encontrada e Poppins é declarada sem carregamento de fonte encontrado. Decidir padronização visual e evitar ampliar a dívida em mudanças novas.
 6. **Validação e erros:** algumas rotas usam `.get()`/`.strip()`/`int()` sem validar todos os tipos; duplicidade de e-mail retorna 400 ou 409 conforme a rota; datas têm formatos distintos. Definir contrato uniforme sem presumir que já exista.
-7. **Biblioteca:** listagens retornam apenas categorias ativas/materiais publicados, inclusive para ADM; acesso direto por categoria/download não aplica os mesmos filtros. Definir política para inativos e rascunhos. Na atualização, arquivos antigos podem ser apagados antes do commit; decidir recuperação/consistência entre banco e disco.
+7. **Biblioteca:** listagens retornam apenas categorias ativas/materiais publicados, inclusive para ADM; acesso direto por categoria/download não aplica os mesmos filtros. Definir política para inativos e rascunhos. A troca de arquivo agora remove o anterior após commit, mas banco e armazenamento não são atômicos: falhas de limpeza ainda podem deixar objetos órfãos.
 8. **Progresso:** `responder` valida a resposta, mas o endpoint de progresso recebe contagens do cliente; não há histórico individual de respostas/tentativas nem validação completa entre acertos e perguntas respondidas. Definir o nível de integridade esperado.
 9. **Acessibilidade:** há ARIA, foco e atalhos, mas não há contenção/restauração uniforme de foco dos modais nem verificação automatizada de contraste. Não declarar conformidade completa.
 10. **Ambiente:** Python do Docker é 3.12, sem versão mínima local formal; biblioteca usa caminho absoluto de container por padrão. Definir política local e incluir variáveis faltantes nos exemplos.

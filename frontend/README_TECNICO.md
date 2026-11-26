@@ -585,9 +585,10 @@ npm run build
 ## 18. Variáveis de ambiente
 
 O Compose lê o `.env` da raiz para configurar backend e banco; ele não é
-injetado no serviço frontend. O frontend acessa a API pelo endereço fixo
-`http://localhost:5000` em `src/services/api.js`; `VITE_API_URL` não está
-implementada. No container, o Compose define `CHOKIDAR_USEPOLLING=true` para
+injetado no serviço frontend. O frontend usa `VITE_API_URL`, com fallback
+`http://localhost:5000` em desenvolvimento. A URL pública está em
+`.env.production`; uma variável configurada no painel da Vercel tem prioridade.
+Veja o [guia de deploy](../docs/deploy.md). No container, o Compose define `CHOKIDAR_USEPOLLING=true` para
 detecção de mudanças nos arquivos montados pelo Docker Desktop.
 
 ## 19. Próximas etapas sugeridas

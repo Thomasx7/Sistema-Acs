@@ -20,7 +20,7 @@ e a configuração do projeto. Escolha como executar:
 
 Depois de iniciar os serviços, acesse [http://localhost:5173](http://localhost:5173).
 A API atende em `http://localhost:5000`. Os guias descrevem desenvolvimento
-local; a implantação em produção não faz parte deste fluxo.
+local. Para publicar, siga o [guia de deploy na Vercel, Render e Neon](docs/deploy.md).
 
 ## Organização e referências
 

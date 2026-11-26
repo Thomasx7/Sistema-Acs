@@ -6,7 +6,7 @@ from flask import Blueprint, request, jsonify, g, current_app
 from app import db
 from app.models.models import Usuarios
 from app.utils.decorators import autenticado, apenas_adm, eh_adm
-from app.utils.foto_perfil import PASTA_FOTOS_PERFIL, excluir_foto_perfil
+from app.utils.foto_perfil import excluir_foto_perfil, gravar_foto_perfil
 from app.utils.hash import hash_password, check_password
 from app.utils.permissoes import PERMISSAO_ADM, PERMISSAO_COMUM
 from app.utils.validators import normalizar_email, validar_email, validar_senha
@@ -87,12 +87,10 @@ def salvar_foto_perfil():
     usuario = g.usuario_atual
     foto_anterior = usuario.foto_perfil
     nome_arquivo = f"{uuid4().hex}{extensao}"
-    caminho_novo = PASTA_FOTOS_PERFIL / nome_arquivo
     caminho_relativo = f"uploads/perfil/{nome_arquivo}"
 
     try:
-        PASTA_FOTOS_PERFIL.mkdir(parents=True, exist_ok=True)
-        caminho_novo.write_bytes(conteudo)
+        gravar_foto_perfil(caminho_relativo, conteudo, formato)
     except OSError:
         db.session.rollback()
         current_app.logger.exception("Não foi possível gravar a foto de perfil")
@@ -104,7 +102,7 @@ def salvar_foto_perfil():
     except SQLAlchemyError:
         db.session.rollback()
         try:
-            caminho_novo.unlink()
+            excluir_foto_perfil(caminho_relativo)
         except FileNotFoundError:
             pass
         except OSError:

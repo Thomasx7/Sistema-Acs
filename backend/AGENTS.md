@@ -86,10 +86,24 @@ Cada pergunta precisa de ao menos duas alternativas e uma única `correta=true`.
 ## Reset e arquivos
 
 - Reset: resposta genérica para evitar enumerar e-mails; token aleatório `secrets.token_urlsafe(32)`, apenas hash no banco, limite de geração de 60 segundos por usuário, validade configurável e uso único com bloqueio de linha. Envio de e-mail em thread; sem SMTP e com debug, o código atual registra link local no log. Não reproduza esse comportamento em produção.
-- Foto: campo multipart `foto`, PNG/JPG/JPEG/WebP, até 2 MiB, valida extensão e assinatura. Grava em `backend/uploads/perfil/<uuid>.<ext>` e persiste caminho relativo. Reutilize `foto_perfil.py` para resolver/excluir com contenção de diretório.
+- Foto: campo multipart `foto`, PNG/JPG/JPEG/WebP, até 2 MiB, valida extensão e assinatura. Em modo local, grava em `backend/uploads/perfil/<uuid>.<ext>`; em S3, usa a chave `uploads/perfil/<uuid>.<ext>`. Persiste o mesmo caminho relativo. Reutilize `foto_perfil.py` para resolver/gravar/excluir com contenção de diretório.
 - Biblioteca: multipart `file` mais metadados, ou JSON para `LINK`/`YOUTUBE`. `library_storage.py` controla extensão, assinatura, limite e MIME; o tipo de arquivo é inferido pela extensão. Arquivos recebem UUID sob `<LIBRARY_UPLOAD_DIR>/<category_id>/`; checksum SHA-256. `serializar_material` omite `file_path` e checksum. Downloads passam pelo backend autenticado e usam attachment.
 - URLs aceitam HTTP/HTTPS; YouTube é validado/normalizado pelo backend. Não confiar apenas no preview do frontend. Formatos completos no catálogo; a checagem SVG atual é parcial, não uma garantia de sanitização completa.
 
+`UPLOAD_STORAGE=local` mantém arquivos locais; `s3` usa `object_storage.py`,
+bucket privado e credenciais `AWS_*` somente no backend. Materiais usam chaves
+`library/<category_id>/<uuid>.<ext>` e mantêm `file_path` relativo no banco.
+Downloads são transmitidos pela API, sem tornar o bucket público. A troca de
+material remove o arquivo anterior somente após commit; falhas de limpeza
+podem deixar objetos órfãos. Alterar o modo não migra arquivos existentes.
+Consulte [deploy](../docs/deploy.md) antes de configurar um ambiente real.
+
 ## Verificação
+
+Execute `python -m unittest discover -s tests -v` dentro de `backend/`, usando
+o Python do ambiente virtual. A cobertura inicial verifica inicialização de
+produção, CORS e `/health`, com SQLite em memória e falhas simuladas, sem
+acessar PostgreSQL ou aplicar migrations. O fluxo de produção e suas variáveis
+estão em [docs/deploy.md](../docs/deploy.md).
 
 Não existe configuração de pytest, lint Python ou CI. Confira sintaxe e exercite os endpoints afetados com PostgreSQL de desenvolvimento, incluindo erros, usuário comum, ADM e recurso de outro usuário. Mudanças em models exigem revisar migration e integridade; mudanças em uploads exigem conferir banco e disco em falhas. Informe claramente quando ambiente integrado/SMTP não puder ser testado.

@@ -1,11 +1,14 @@
 import os
 import re
-import shutil
+import hashlib
 import uuid
 from pathlib import Path
 
 from flask import current_app
 from werkzeug.utils import secure_filename
+from flask import abort, send_from_directory
+
+from app.services.object_storage import enviar_objeto, remover_objeto, salvar_objeto, usar_s3
 
 
 ALLOWED_EXTENSIONS = {
@@ -154,16 +157,38 @@ def raiz_armazenamento():
 
 
 def salvar_arquivo(arquivo, categoria_id, validacao):
+    nome = f"{uuid.uuid4().hex}.{validacao['extensao']}"
+    relativo = f"{categoria_id}/{nome}"
+    if usar_s3():
+        salvar_objeto(f"library/{relativo}", arquivo.stream, validacao["mime"])
+        return relativo
     pasta = raiz_armazenamento() / str(categoria_id)
     pasta.mkdir(parents=True, exist_ok=True)
-    nome = f"{uuid.uuid4().hex}.{validacao['extensao']}"
     destino = pasta / nome
     arquivo.save(destino)
-    return str((Path(str(categoria_id)) / nome).as_posix())
+    return relativo
+
+
+def calcular_checksum(arquivo):
+    arquivo.stream.seek(0)
+    checksum = hashlib.sha256()
+    for bloco in iter(lambda: arquivo.stream.read(1024 * 1024), b""):
+        checksum.update(bloco)
+    arquivo.stream.seek(0)
+    return checksum.hexdigest()
+
+
+def caminho_valido(file_path):
+    return isinstance(file_path, str) and re.fullmatch(
+        r"[1-9][0-9]*/[0-9a-f]{32}\.[a-z0-9]+", file_path
+    ) is not None
 
 
 def remover_arquivo(file_path):
-    if not file_path:
+    if not caminho_valido(file_path):
+        return
+    if usar_s3():
+        remover_objeto(f"library/{file_path}")
         return
     relativo = Path(file_path)
     if relativo.is_absolute() or ".." in relativo.parts:
@@ -171,3 +196,14 @@ def remover_arquivo(file_path):
     destino = raiz_armazenamento() / relativo
     if destino.is_file():
         destino.unlink()
+
+
+def enviar_arquivo(file_path, nome, mime):
+    if not caminho_valido(file_path):
+        abort(404, description="Arquivo não encontrado.")
+    if usar_s3():
+        return enviar_objeto(f"library/{file_path}", nome, mime, anexo=True)
+    return send_from_directory(
+        raiz_armazenamento(), file_path, as_attachment=True,
+        download_name=nome, mimetype=mime,
+    )

@@ -1,9 +1,8 @@
-import hashlib
 import re
 from datetime import datetime
 from urllib.parse import urlparse
 
-from flask import Blueprint, g, jsonify, request, send_from_directory
+from flask import Blueprint, current_app, g, jsonify, request
 from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
@@ -11,7 +10,8 @@ from app import db
 from app.models.models import LibraryCategory, LibraryMaterial
 from app.services.library_storage import (
     remover_arquivo,
-    raiz_armazenamento,
+    calcular_checksum,
+    enviar_arquivo,
     salvar_arquivo,
     validar_arquivo,
 )
@@ -311,12 +311,11 @@ def criar_material():
         if erro:
             return jsonify({"erro": erro}), 400
         material.type = validacao["tipo"]
+        material.checksum = calcular_checksum(arquivo)
         material.file_path = salvar_arquivo(arquivo, categoria.id, validacao)
         material.original_filename = arquivo.filename
         material.mime_type = validacao["mime"]
         material.size_bytes = validacao["tamanho"]
-        with open(raiz_armazenamento() / material.file_path, "rb") as stream:
-            material.checksum = hashlib.sha256(stream.read()).hexdigest()
 
     db.session.add(material)
     erro = commit_ou_erro("Não foi possível cadastrar o material.")
@@ -332,6 +331,8 @@ def atualizar_material(material_id):
     material = LibraryMaterial.query.get(material_id)
     if not material:
         return jsonify({"erro": "Material não encontrado."}), 404
+    caminho_antigo = material.file_path
+    caminho_novo = None
     dados = dados_do_corpo()
 
     if "category_id" in dados:
@@ -365,7 +366,6 @@ def atualizar_material(material_id):
         url, erro = validar_url(dados.get("url") or material.url, youtube=(tipo_informado == "YOUTUBE"))
         if erro:
             return jsonify({"erro": erro}), 400
-        remover_arquivo(material.file_path)
         material.url = url
         material.file_path = None
         material.original_filename = None
@@ -376,23 +376,27 @@ def atualizar_material(material_id):
         validacao, erro = validar_arquivo(arquivo)
         if erro:
             return jsonify({"erro": erro}), 400
-        caminho_antigo = material.file_path
         material.type = validacao["tipo"]
+        material.checksum = calcular_checksum(arquivo)
         material.file_path = salvar_arquivo(arquivo, material.category_id, validacao)
+        caminho_novo = material.file_path
         material.original_filename = arquivo.filename
         material.mime_type = validacao["mime"]
         material.size_bytes = validacao["tamanho"]
         material.url = None
-        with open(raiz_armazenamento() / material.file_path, "rb") as stream:
-            material.checksum = hashlib.sha256(stream.read()).hexdigest()
-        remover_arquivo(caminho_antigo)
     else:
         if not material.file_path:
             return jsonify({"erro": "Selecione um arquivo para este material."}), 400
 
     erro = commit_ou_erro("Não foi possível atualizar o material.")
     if erro:
+        remover_arquivo(caminho_novo)
         return erro
+    if caminho_antigo != material.file_path:
+        try:
+            remover_arquivo(caminho_antigo)
+        except OSError:
+            current_app.logger.warning("Material atualizado; limpeza do arquivo anterior pendente.")
     return jsonify(serializar_material(material)), 200
 
 
@@ -419,14 +423,8 @@ def baixar_material(material_id):
         return jsonify({"erro": "Material não encontrado."}), 404
     if not material.file_path:
         return jsonify({"erro": "Este material é um link e não possui arquivo para baixar."}), 400
-    raiz = raiz_armazenamento()
-    caminho = raiz / material.file_path
-    if not caminho.is_file():
-        return jsonify({"erro": "Arquivo não encontrado no servidor."}), 404
-    return send_from_directory(
-        raiz,
+    return enviar_arquivo(
         material.file_path,
-        as_attachment=True,
-        download_name=material.original_filename or f"material-{material.id}",
-        mimetype=material.mime_type,
+        material.original_filename or f"material-{material.id}",
+        material.mime_type,
     )
